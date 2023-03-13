@@ -1,6 +1,5 @@
 {% load static %}
 
-<header class="Header">
         <div class="ControlPanel">
             <div class="wrap">
                 <div class="row ControlPanel-row">
@@ -22,8 +21,8 @@
                     </div>
                     <nav class="row-block">
                         <div class="row ControlPanel-rowSplit">
-                            <div class="row-block"><a class="ControlPanel-title" href="login.html">Вход</a>
-                                <a class="ControlPanel-title" href="registr.html">Регистрация</a>
+                            <div class="row-block">{% if not request.user.is_auth %}<a class="ControlPanel-title" href="login.html">Вход</a>
+                                <a class="ControlPanel-title" href="registr.html">Регистрация</a>{% endif %}
                             </div>
                         </div>
                     </nav>
@@ -58,7 +57,7 @@
                 </nav>
                 <div class="row-block">
 
-                    <div class="CartBlock">
+                    <div class="CartBlock">{% if request.user.is_auth %}
                         <div class="dropdown">
                             <button class="dropbtn"><img class="CartBlock-img" src="{% static 'assets/img/icons/loon-icon.svg'%}" alt="loon-icon.svg" /></button>
                             <div class="dropdown-content">
@@ -66,7 +65,7 @@
                                 <a class="dropdown-content-a" href="account.html">Административный раздел</a>
                                 <a class="dropdown-content-a" href="account.html">Выход</a>
                             </div>
-                        </div>
+                        </div>{% endif %}
                         <a class="CartBlock-block" href="cart.html"><img class="CartBlock-img" src="{% static 'assets/img/icons/cart.svg'%}" alt="cart.svg" /><span class="CartBlock-amount">0</span></a>
                         <div class="CartBlock-block"><span class="CartBlock-price">0.00$</span>
 
@@ -187,4 +186,3 @@
                 </div>
             </div>
         </div>
-</header>
