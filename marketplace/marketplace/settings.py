@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'app_merch',
     'app_users',
     'app_basket',
+    'mptt',
+    'django_mptt_admin',
 ]
 
 MIDDLEWARE = [
