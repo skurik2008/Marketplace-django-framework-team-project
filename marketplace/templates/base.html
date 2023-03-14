@@ -32,6 +32,8 @@
             {% cache settings.time_to_cache header %}
                 {% include 'includes/header.html' %}
             {% endcache %}
+        {% else %}
+            {% include 'includes/header.html' %}
         {% endif %}
     </header>
     <main>
