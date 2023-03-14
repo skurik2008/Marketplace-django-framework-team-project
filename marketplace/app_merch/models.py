@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from mptt.models import TreeForeignKey, MPTTModel
+from app_users.models import Saller
 
 
 class Image(models.Model):
@@ -50,3 +51,115 @@ class Category(MPTTModel):
 
     def get_absolute_url(self):
         return reverse('categories_detail', kwargs={'slug': self.slug})
+
+
+class Tag(models.Model):
+    """
+    Модель тэгов.
+    """
+    title = models.CharField(max_length=100, verbose_name='название')
+
+    class Meta:
+        verbose_name = 'Тэг'
+        verbose_name_plural = 'Тэги'
+
+    def __str__(self):
+        return self.title
+
+
+class Product(models.Model):
+    """
+    Модель продуктов.
+    """
+    title = models.CharField(max_length=150, verbose_name='название')
+    description = models.TextField(max_length=1000, verbose_name='описание')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='дата создания')
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.PROTECT,
+        related_name='products',
+        db_index=True,
+        verbose_name='категория'
+    )
+    tags = models.ManyToManyField(
+        Tag,
+        related_name='products',
+        db_index=True,
+        verbose_name='тэги'
+    )
+    icon = models.ForeignKey(
+        Image,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        verbose_name='изображение продукта'
+    )
+    media = models.ManyToManyField(
+        Image,
+        verbose_name='медиафайлы продукта'
+    )
+    characters = models.JSONField(verbose_name='характеристики')
+
+    class Meta:
+        verbose_name = 'Продукт'
+        verbose_name_plural = 'Продукты'
+
+    def __str__(self):
+        return self.title
+
+
+class Offer(models.Model):
+    """
+    Модель предложений.
+    """
+    saller = models.ForeignKey(
+        Saller,
+        on_delete=models.PROTECT,
+        related_name='offers',
+        db_index=True,
+        verbose_name='продавец'
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,
+        related_name='offers',
+        db_index=True,
+        verbose_name='продукт'
+    )
+    price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='цена')
+    quantity = models.PositiveIntegerField(default=0, verbose_name='количество')
+    is_active = models.BooleanField(default=True, verbose_name='актуальность')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='дата создания')
+
+    class Meta:
+        verbose_name = 'Предложение'
+        verbose_name_plural = 'Предложения'
+
+    def __str__(self):
+        return f"{self.product} from {self.saller}"
+
+
+class Discount(models.Model):
+    """
+    Модель скидок.
+    """
+    offer = models.OneToOneField(
+        Offer,
+        on_delete=models.PROTECT,
+        related_name='discounts',
+        db_index=True,
+        verbose_name='предложение'
+    )
+    is_percent = models.BooleanField(verbose_name='в процентах')
+    size = models.PositiveIntegerField(verbose_name='размер')
+    start_date = models.DateTimeField(verbose_name='дата начала')
+    end_date = models.DateTimeField(verbose_name='дата окончания')
+    description = models.TextField(max_length=1000, verbose_name='описание')
+    is_active = models.BooleanField(default=True, verbose_name='актуальность')
+
+    class Meta:
+        verbose_name = 'Скидка'
+        verbose_name_plural = 'Скидки'
+
+    def __str__(self):
+        return f"Discount for {self.offer}"
