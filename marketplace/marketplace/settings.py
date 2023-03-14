@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'app_merch',
     'app_users',
     'app_basket',
+    'app_settings',
     'mptt',
     'django_mptt_admin',
 ]
@@ -67,6 +68,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'app_settings.context_processors.settings',
             ],
         },
     },

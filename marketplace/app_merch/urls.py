@@ -1,10 +1,9 @@
-from django.contrib import admin
-from django.urls import path
-from app_merch.views import TestView
-
 from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import path
+
+from .views import CategoryView
 
 urlpatterns = [
-    path('', TestView),
+    path('', CategoryView.as_view(), name='category-page'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
