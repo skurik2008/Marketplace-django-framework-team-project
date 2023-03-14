@@ -1,6 +1,13 @@
-from django.shortcuts import render
-from django.views import View
+from django.views.generic import ListView
+from .models import Category
 
 
-def TestView(request):
-    return render(request, 'test.html')
+class MainPageView(ListView):
+    """ Вью класс получения активных категорий товаров. """
+    template_name = 'base.html'
+    context_object_name = 'categories'
+
+    def get_queryset(self):
+        queryset = Category.objects.filter(is_active=True)
+        return queryset
+
