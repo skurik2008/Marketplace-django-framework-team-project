@@ -2,7 +2,7 @@ from django.views.generic import ListView
 from .models import Category
 
 
-class MainPageView(ListView):
+class CategoryView(ListView):
     """ Вью класс получения активных категорий товаров. """
     template_name = 'base.html'
     context_object_name = 'categories'
