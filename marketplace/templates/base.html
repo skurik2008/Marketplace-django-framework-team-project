@@ -1,5 +1,4 @@
 {% load static %}
-{% load cache %}
 <!--END-->
 <!--END-->
 <!DOCTYPE html>
@@ -28,13 +27,7 @@
 </head>
 <body class="Site">
     <header class="Header">
-        {% if settings.time_to_cache %}
-            {% cache settings.time_to_cache header %}
-                {% include 'includes/header.html' %}
-            {% endcache %}
-        {% else %}
-            {% include 'includes/header.html' %}
-        {% endif %}
+        {% include 'includes/header.html' %}
     </header>
     <main>
         {% block main %}
