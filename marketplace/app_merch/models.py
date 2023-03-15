@@ -77,19 +77,19 @@ class Product(models.Model):
     category = models.ForeignKey(
         Category,
         on_delete=models.PROTECT,
-        related_name='c_products',
+        related_name='products',
         db_index=True,
         verbose_name='категория'
     )
     tags = models.ManyToManyField(
         Tag,
-        related_name='t_products',
+        related_name='products',
         db_index=True,
         verbose_name='тэги'
     )
     icon = models.ForeignKey(
         Image,
-        related_name='i_products',
+        related_name='products',
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -97,7 +97,6 @@ class Product(models.Model):
     )
     media = models.ManyToManyField(
         Image,
-        related_name='m_products',
         verbose_name='медиафайлы продукта'
     )
     characters = models.JSONField(verbose_name='характеристики')
