@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from app_merch.models import Image
 
 
 class Profile(models.Model):
@@ -12,7 +11,7 @@ class Profile(models.Model):
     full_name = models.CharField(max_length=150, verbose_name='полное имя')
     phone_number = models.CharField(max_length=50, verbose_name='номер телефона')
     address = models.CharField(max_length=255, verbose_name='адрес')
-    avatar = models.ForeignKey(Image, on_delete=models.SET_NULL, related_name='profile',
+    avatar = models.ForeignKey('app_merch.Image', on_delete=models.SET_NULL, related_name='profile',
                                blank=True, null=True, verbose_name='аватар')
 
     class Meta:

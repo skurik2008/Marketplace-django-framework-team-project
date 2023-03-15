@@ -1,11 +1,14 @@
 from django.contrib import admin
+from django.template.defaultfilters import truncatechars
+
 from .models import (
     Image,
     Category,
     Tag,
     Product,
     Offer,
-    Discount
+    Discount,
+    Banner
 )
 from django_mptt_admin.admin import DjangoMpttAdmin
 
@@ -51,3 +54,14 @@ class DiscountAdmin(admin.ModelAdmin):
         if len(obj.description) > 20:
             return f'{obj.description[:20]}...'
         return obj.description
+
+
+@admin.register(Banner)
+class BannerAdmin(admin.ModelAdmin):
+    """ Регистрация модели баннера в админ-панели. """
+    list_display = ['title', 'short_description', 'is_active', 'link']
+    list_filter = ['is_active']
+    search_fields = ['title', 'description']
+
+    def short_description(self, obj):
+        return truncatechars(obj.description, 50)

@@ -77,18 +77,19 @@ class Product(models.Model):
     category = models.ForeignKey(
         Category,
         on_delete=models.PROTECT,
-        related_name='products',
+        related_name='c_products',
         db_index=True,
         verbose_name='категория'
     )
     tags = models.ManyToManyField(
         Tag,
-        related_name='products',
+        related_name='t_products',
         db_index=True,
         verbose_name='тэги'
     )
     icon = models.ForeignKey(
         Image,
+        related_name='i_products',
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -96,6 +97,7 @@ class Product(models.Model):
     )
     media = models.ManyToManyField(
         Image,
+        related_name='m_products',
         verbose_name='медиафайлы продукта'
     )
     characters = models.JSONField(verbose_name='характеристики')
@@ -163,3 +165,19 @@ class Discount(models.Model):
 
     def __str__(self):
         return f"Discount for {self.offer}"
+
+
+class Banner(models.Model):
+    """ Модель баннеров. """
+    title = models.CharField(max_length=30, verbose_name='наименование')
+    description = models.TextField(max_length=250, verbose_name='описание')
+    file = models.ForeignKey(Image, on_delete=models.CASCADE, verbose_name='медиа файл')
+    is_active = models.BooleanField(default=True, verbose_name='активность')
+    link = models.URLField(verbose_name='ссылка')
+
+    class Meta:
+        verbose_name = 'Баннер'
+        verbose_name_plural = 'Баннеры'
+
+    def __str__(self):
+        return self.title
