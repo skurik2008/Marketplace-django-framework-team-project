@@ -89,6 +89,7 @@ class Product(models.Model):
     )
     icon = models.ForeignKey(
         Image,
+        related_name='products',
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -163,3 +164,19 @@ class Discount(models.Model):
 
     def __str__(self):
         return f"Discount for {self.offer}"
+
+
+class Banner(models.Model):
+    """ Модель баннеров. """
+    title = models.CharField(max_length=30, verbose_name='наименование')
+    description = models.TextField(max_length=250, verbose_name='описание')
+    file = models.ForeignKey(Image, on_delete=models.CASCADE, verbose_name='медиа файл')
+    is_active = models.BooleanField(default=True, verbose_name='активность')
+    link = models.URLField(verbose_name='ссылка')
+
+    class Meta:
+        verbose_name = 'Баннер'
+        verbose_name_plural = 'Баннеры'
+
+    def __str__(self):
+        return self.title
