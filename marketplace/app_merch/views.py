@@ -23,7 +23,9 @@ class IndexView(ListView):
             time_to_cache * 60 * 60
         )
 
-        context['banners'] = Banner.objects.order_by('?')[:3]
+        context['banners'] = Banner.objects.filter(
+            is_active=True
+        ).order_by('?')[:3]
 
         return context
 
