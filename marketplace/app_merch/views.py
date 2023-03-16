@@ -20,7 +20,7 @@ class IndexView(ListView):
         context['categories'] = cache.get_or_set(
             'Categories',
             Category.objects.filter(is_active=True),
-            time_to_cache * 60 * 60
+            time_to_cache * 60 * 60 * 24
         )
 
         context['banners'] = Banner.objects.filter(
