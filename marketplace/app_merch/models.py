@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse
 from mptt.models import TreeForeignKey, MPTTModel
 from app_users.models import Saller
+from django.core.cache import cache
 
 
 class Image(models.Model):
@@ -51,6 +52,18 @@ class Category(MPTTModel):
 
     def get_absolute_url(self):
         return reverse('categories_detail', kwargs={'slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        """ Сброс кеша после изменения или добавления категории. """
+        if cache.get('Categories'):
+            cache.delete('Categories')
+        super().save()
+
+    def delete(self, *args, **kwargs):
+        """ Сброс кеша после удаления категории. """
+        if cache.get('Categories'):
+            cache.delete('Categories')
+        super().delete()
 
 
 class Tag(models.Model):
@@ -180,3 +193,16 @@ class Banner(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        """ Сброс кеша при изменении или добавлении баннера. """
+        if cache.get('Banners'):
+            cache.delete('Banners')
+        super().save()
+
+    def delete(self, using=None, keep_parents=False):
+        """ Сброс кеша при удалении баннера. """
+        if cache.get('Banners'):
+            cache.delete('Banners')
+        super().delete()
