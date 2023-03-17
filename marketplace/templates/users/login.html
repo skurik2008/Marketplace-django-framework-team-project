@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Вход в систему</h2>
+{% if form.errors %}
+    <p>Пожалуйста, исправьте следующие ошибки:</p>
+    <ul>
+        {% for error in form.errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Войти</button>
+</form>
+<p>Еще не зарегистрированы? <a href="{% url 'register' %}">Зарегистрируйтесь</a></p>
+{% endblock %}

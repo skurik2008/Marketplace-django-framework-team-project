@@ -1,7 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from mptt.models import TreeForeignKey, MPTTModel
-from app_users.models import Saller
+from app_users.models import Seller
 from django.core.cache import cache
 
 
@@ -127,7 +127,7 @@ class Offer(models.Model):
     Модель предложений.
     """
     saller = models.ForeignKey(
-        Saller,
+        Seller,
         on_delete=models.PROTECT,
         related_name='offers',
         db_index=True,

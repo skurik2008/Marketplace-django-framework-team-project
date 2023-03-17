@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from app_merch.models import Product
 
 
 class Profile(models.Model):
@@ -22,11 +23,11 @@ class Profile(models.Model):
         return self.full_name
 
 
-class Saller(models.Model):
+class Seller(models.Model):
     """
     Модель продавца.
     """
-    profile = models.OneToOneField(Profile, on_delete=models.PROTECT, related_name='saller',
+    profile = models.OneToOneField(Profile, on_delete=models.PROTECT, related_name='seller',
                                    db_index=True, verbose_name='профиль')
     title = models.CharField(max_length=100, verbose_name='название')
     description = models.TextField(max_length=1000, verbose_name='описание')
@@ -37,3 +38,19 @@ class Saller(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Buyer(models.Model):
+    """
+    Модель покупателя.
+    """
+    buyer = models.OneToOneField(Profile, on_delete=models.PROTECT, related_name='buyer',
+                                   db_index=True, verbose_name='покупатель')
+    views = models.ManyToManyField(Product, on_delete=models.CASCADE, verbose_name='история просмотров')
+
+    class Meta:
+        verbose_name = 'Покупатель'
+        verbose_name_plural = 'Покупатели'
+
+    def __str__(self):
+        return self.buyer
