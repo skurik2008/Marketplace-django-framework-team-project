@@ -182,6 +182,7 @@ class Discount(models.Model):
 class Banner(models.Model):
     """ Модель баннеров. """
     title = models.CharField(max_length=30, verbose_name='наименование')
+    primary_text = models.CharField(max_length=10, null=True, blank=True, verbose_name='главное')
     description = models.TextField(max_length=250, verbose_name='описание')
     file = models.ForeignKey(Image, on_delete=models.CASCADE, verbose_name='медиа файл')
     is_active = models.BooleanField(default=True, verbose_name='активность')

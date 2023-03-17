@@ -59,7 +59,7 @@ class DiscountAdmin(admin.ModelAdmin):
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):
     """ Регистрация модели баннера в админ-панели. """
-    list_display = ['title', 'short_description', 'is_active', 'link']
+    list_display = ['title', 'primary_text', 'short_description', 'is_active', 'link']
     list_filter = ['is_active']
     search_fields = ['title', 'description']
 
