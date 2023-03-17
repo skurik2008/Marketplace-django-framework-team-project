@@ -2,8 +2,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 
-from .views import CategoryView
+from .views import CategoryView, IndexView
 
 urlpatterns = [
-    path('', CategoryView.as_view(), name='category-page'),
+    path('', IndexView.as_view(), name='index-page'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
