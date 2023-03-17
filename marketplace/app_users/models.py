@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from app_merch.models import Product
+# from app_merch.models import Product
 
 
 class Profile(models.Model):
@@ -46,7 +46,10 @@ class Buyer(models.Model):
     """
     buyer = models.OneToOneField(Profile, on_delete=models.PROTECT, related_name='buyer',
                                    db_index=True, verbose_name='покупатель')
-    views = models.ManyToManyField(Product, on_delete=models.CASCADE, verbose_name='история просмотров')
+    def do_something(self):
+        Product = self._meta.apps.get_model('app_merch', 'Product')
+        # do something with the Product model
+        views = models.ManyToManyField(Product, on_delete=models.CASCADE, verbose_name='история просмотров')
 
     class Meta:
         verbose_name = 'Покупатель'
