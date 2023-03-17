@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from .forms import UserRegisterForm, UserLoginForm, UserPasswordResetForm, UserSetPasswordForm
 
+
 class CustomLoginView(LoginView):
     form_class = UserLoginForm
     template_name = 'users/login.html'
@@ -10,7 +11,7 @@ class CustomLoginView(LoginView):
     success_url = reverse_lazy('pages:index')
 
 class CustomLogoutView(LogoutView):
-    next_page = reverse_lazy('app_users:logout')
+    next_page = reverse_lazy('app_users:login')
 
 class CustomPasswordResetView(PasswordResetView):
     form_class = UserPasswordResetForm

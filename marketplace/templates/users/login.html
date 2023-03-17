@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
-{% block content %}
+
+{% block content %} 
 <h2>Вход в систему</h2>
 {% if form.errors %}
     <p>Пожалуйста, исправьте следующие ошибки:</p>
@@ -14,5 +15,5 @@
     {{ form.as_p }}
     <button type="submit">Войти</button>
 </form>
-<p>Еще не зарегистрированы? <a href="{% url 'register' %}">Зарегистрируйтесь</a></p>
+<p>Еще не зарегистрированы? <a href="{% url 'app_users:register' %}">Зарегистрируйтесь</a></p>
 {% endblock %}
