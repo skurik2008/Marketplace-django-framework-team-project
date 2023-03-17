@@ -2,7 +2,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 # from django.contrib.auth.views import PasswordResetCompleteView
-from .views import CustomLoginView, CustomLogoutView, CustomPasswordResetView, CustomPasswordResetConfirmView, CustomPasswordResetDoneView, CustomRegisterView, PasswordResetCompleteView
+from .views import CustomLoginView, CustomLogoutView, CustomPasswordResetView, CustomPasswordResetConfirmView, CustomPasswordResetDoneView, CustomRegisterView
 
 app_name = 'app_users'
 

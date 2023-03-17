@@ -170,6 +170,7 @@ class Discount(models.Model):
     end_date = models.DateTimeField(verbose_name='дата окончания')
     description = models.TextField(max_length=1000, verbose_name='описание')
     is_active = models.BooleanField(default=True, verbose_name='актуальность')
+    is_priority = models.BooleanField(default=False, verbose_name='приоритет')
 
     class Meta:
         verbose_name = 'Скидка'
@@ -177,6 +178,12 @@ class Discount(models.Model):
 
     def __str__(self):
         return f"Discount for {self.offer}"
+
+    def discounted_price(self):
+        return self.offer.price * self.size / 100
+
+    def sell_price(self):
+        return self.offer.price - self.size
 
 
 class Banner(models.Model):
