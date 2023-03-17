@@ -10,9 +10,11 @@
                     <div class="row">
                       <div class="row-block">
                         <strong class="Slider-title">{{ banner.title }}
-{#                            <span class="text_primary"> 5</span> mini Drone#}
+                            {% if banner.primary_text %}
+                            <span class="text_primary">{{ banner.primary_text }}</span>
+                            {% endif %}
                         </strong>
-                        <div class="Slider-text">{{ banner.description }}
+                        <div class="Slider-text">{{ banner.description|truncatechars:100 }}
                         </div>
                         <div class="Slider-footer"><a class="btn btn_primary" href="{{ banner.link }}">Get Started</a>
                         </div>
