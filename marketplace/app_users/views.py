@@ -1,6 +1,6 @@
 from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordResetConfirmView, PasswordResetDoneView
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, TemplateView
 from .forms import UserRegisterForm, UserLoginForm, UserPasswordResetForm, UserSetPasswordForm
 
 
@@ -32,3 +32,5 @@ class CustomRegisterView(CreateView):
     template_name = 'users/register.html'
     success_url = reverse_lazy('app_users:login')
 
+# class PasswordResetCompleteView(TemplateView):
+#     template_name = 'users/password_reset_complete.html'
