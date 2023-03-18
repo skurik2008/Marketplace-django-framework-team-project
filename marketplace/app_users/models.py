@@ -45,7 +45,12 @@ class Buyer(models.Model):
     Модель покупателя.
     """
     buyer = models.OneToOneField(Profile, on_delete=models.PROTECT, related_name='buyer',
-                                   db_index=True, verbose_name='покупатель')
+                                 db_index=True, verbose_name='покупатель')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
+        self._meta = None
+
     def do_something(self):
         Product = self._meta.apps.get_model('app_merch', 'Product')
         # do something with the Product model
