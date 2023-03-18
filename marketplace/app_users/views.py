@@ -10,8 +10,10 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
     success_url = reverse_lazy('pages:index')
 
+
 class CustomLogoutView(LogoutView):
     next_page = reverse_lazy('app_users:login')
+
 
 class CustomPasswordResetView(PasswordResetView):
     form_class = UserPasswordResetForm
@@ -19,18 +21,22 @@ class CustomPasswordResetView(PasswordResetView):
     email_template_name = 'password_reset_email.html'
     success_url = reverse_lazy('app_users:password_reset_done')
 
+
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     form_class = UserSetPasswordForm
     template_name = 'users/password_reset_confirm.html'
     success_url = reverse_lazy('app_users:password_reset_complete')
 
+
 class CustomPasswordResetDoneView(PasswordResetDoneView):
     template_name = 'users/password_reset_done.html'
+
 
 class CustomRegisterView(CreateView):
     form_class = UserRegisterForm
     template_name = 'users/register.html'
     success_url = reverse_lazy('app_users:login')
+
 
 # class PasswordResetCompleteView(TemplateView):
 #     template_name = 'users/password_reset_complete.html'

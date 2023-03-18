@@ -1,5 +1,5 @@
 from django.views.generic import ListView
-from .models import Category, Product, Banner
+from .models import Category, Product, Banner, Discount
 from app_settings.models import SiteSettings
 from django.core.cache import cache
 
@@ -12,20 +12,10 @@ class IndexView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data()
-        time_to_cache = SiteSettings.load().time_to_cache
         banners_cache_time = SiteSettings.load().banners_cache_time
-
-        if not time_to_cache:
-            time_to_cache = 1
 
         if not banners_cache_time:
             banners_cache_time = 10
-
-        context['categories'] = cache.get_or_set(
-            'Categories',
-            Category.objects.filter(is_active=True),
-            time_to_cache * 60 * 60 * 24
-        )
 
         context['banners'] = cache.get_or_set(
             'Banners',
@@ -50,5 +40,41 @@ class CategoryView(ListView):
         return cache.get_or_set(
             f"Categories",
             Category.objects.filter(is_active=True),
+            time_to_cache * 60 * 60
+        )
+
+
+class AllDiscountView(ListView):
+    """ View для получения всех активных скидок. """
+    template_name = 'base.html'
+    context_object_name = 'all_discounts'
+
+    def get_queryset(self):
+        """ Получаем все доступные скидки и кешируем их на 1 день. """
+        time_to_cache = SiteSettings.load().time_to_cache
+        if not time_to_cache:
+            time_to_cache = 1
+
+        return cache.get_or_set(
+            f"Discounts",
+            Discount.objects.filter(is_active=True),
+            time_to_cache * 60 * 60
+        )
+
+
+class PriorityDiscountView(ListView):
+    """ View для получения приоритетных скидок. """
+    template_name = 'base.html'
+    context_object_name = 'priority_discounts'
+
+    def get_queryset(self):
+        """ Получаем приоритетные скидки и кешируем их на 1 день. """
+        time_to_cache = SiteSettings.load().time_to_cache
+        if not time_to_cache:
+            time_to_cache = 1
+
+        return cache.get_or_set(
+            f"Priority_discounts",
+            Discount.objects.filter(is_priority=True),
             time_to_cache * 60 * 60
         )

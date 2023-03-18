@@ -1,6 +1,6 @@
 {% load static %}
 {% load mptt_tags %}
-
+{% load category_tags %}
         <div class="ControlPanel">
             <div class="wrap">
                 <div class="row ControlPanel-row">
@@ -92,9 +92,11 @@
                             </div>
                         </div>
                         <div class="CategoriesButton-content">
+
+                      {% get_categories as categories %}
                       {% recursetree categories %}
                             <div class="CategoriesButton-link"><a href="#">
-                                    <div class="CategoriesButton-icon"><img src="../{{ node.icon.file }}" alt="icon" />
+                                    <div class="CategoriesButton-icon"><img src="/{{ node.icon.file }}" alt="icon" />
                                     </div><span class="CategoriesButton-text">{{ node.title }}</span>
                                 </a>
                                 {% if not node.is_leaf_node %}
@@ -104,6 +106,7 @@
                                 </div>
                                 {% endif %}
                             </div>
+
                       {% endrecursetree %}
                         </div>
                     </div>

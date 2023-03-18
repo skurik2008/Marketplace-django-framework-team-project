@@ -1,5 +1,5 @@
 from django.contrib import admin
-from app_users.models import Profile, Seller
+from .models import Profile, Seller, Buyer
 
 
 @admin.register(Profile)
@@ -9,7 +9,12 @@ class ProfileAdmin(admin.ModelAdmin):
 
 
 @admin.register(Seller)
-class SallerAdmin(admin.ModelAdmin):
+class SellerAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', ]
     search_fields = ['title', ]
 
+
+@admin.register(Buyer)
+class BuyerAdmin(admin.ModelAdmin):
+    list_display = ['profile']
+    search_fields = ['profile']
