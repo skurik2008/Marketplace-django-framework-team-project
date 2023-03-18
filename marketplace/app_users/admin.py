@@ -16,5 +16,5 @@ class SellerAdmin(admin.ModelAdmin):
 
 @admin.register(Buyer)
 class BuyerAdmin(admin.ModelAdmin):
-    list_display = ['buyer']
-    search_fields = ['buyer']
+    list_display = ['profile']
+    search_fields = ['profile']

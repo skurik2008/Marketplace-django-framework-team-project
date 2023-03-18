@@ -44,8 +44,8 @@ class Buyer(models.Model):
     """
     Модель покупателя.
     """
-    buyer = models.OneToOneField(Profile, on_delete=models.PROTECT, related_name='buyer',
-                                 db_index=True, verbose_name='покупатель')
+    profile = models.OneToOneField(Profile, null=True,  on_delete=models.PROTECT, related_name='profile',
+                                   db_index=True, verbose_name='покупатель')
 
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
@@ -61,4 +61,4 @@ class Buyer(models.Model):
         verbose_name_plural = 'Покупатели'
 
     def __str__(self):
-        return self.buyer
+        return self.profile
