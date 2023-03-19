@@ -126,7 +126,7 @@ class Offer(models.Model):
     """
     Модель предложений.
     """
-    saller = models.ForeignKey(
+    seller = models.ForeignKey(
         Seller,
         on_delete=models.PROTECT,
         related_name='offers',
