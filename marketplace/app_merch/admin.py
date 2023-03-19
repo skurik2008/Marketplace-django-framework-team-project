@@ -40,8 +40,8 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
-    search_fields = ['saller', 'product', ]
-    list_display = ['saller', 'product', 'quantity', 'price', 'is_active', ]
+    search_fields = ['seller', 'product', ]
+    list_display = ['seller', 'product', 'quantity', 'price', 'is_active', ]
     list_filter = ['is_active', ]
 
 
