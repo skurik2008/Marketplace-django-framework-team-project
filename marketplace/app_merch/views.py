@@ -40,7 +40,7 @@ class CategoryView(ListView):
         return cache.get_or_set(
             f"Categories",
             Category.objects.filter(is_active=True),
-            time_to_cache * 60 * 60
+            time_to_cache * 60 * 60 * 24
         )
 
 
@@ -58,7 +58,7 @@ class AllDiscountView(ListView):
         return cache.get_or_set(
             f"Discounts",
             Discount.objects.filter(is_active=True),
-            time_to_cache * 60 * 60
+            time_to_cache * 60 * 60 * 24
         )
 
 
@@ -76,5 +76,8 @@ class PriorityDiscountView(ListView):
         return cache.get_or_set(
             f"Priority_discounts",
             Discount.objects.filter(is_priority=True),
-            time_to_cache * 60 * 60
+            time_to_cache * 60 * 60 * 24
         )
+
+
+
