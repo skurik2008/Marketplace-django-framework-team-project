@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-# from app_merch.models import Product
+from app_merch.models import Product, Offer
 
 
 class Profile(models.Model):
@@ -62,3 +62,32 @@ class Buyer(models.Model):
 
     def __str__(self):
         return self.profile
+
+
+class ComparisonList(models.Model):
+    """
+    Модель для списка сравнения продуктов.
+    """
+    profile = models.OneToOneField(Buyer, null=True,  on_delete=models.PROTECT, related_name='profile',
+                                   db_index=True, verbose_name='владелец списка')
+    offer = models.ForeignKey(Offer, null=True, on_delete=models.PROTECT, related_name='offer',
+                              db_index=True, verbose_name='список для сравнения' )
+
+    class Meta:
+        verbose_name = 'Список сравнения'
+        verbose_name_plural = 'Списки сравнения'
+
+    def add_to_list(self):
+        pass
+
+    def remove_from_list(self):
+        pass
+
+    def return_list(self):
+        pass
+
+    def return_amount_in_list(self):
+        pass
+
+    def __str__(self):
+        return f'Список сравнения {self.profile}'
