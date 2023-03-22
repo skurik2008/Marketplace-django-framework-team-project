@@ -68,7 +68,7 @@ class ComparisonList(models.Model):
     """
     Модель для списка сравнения продуктов.
     """
-    profile = models.OneToOneField(Buyer, null=True,  on_delete=models.PROTECT, related_name='profile',
+    profile = models.OneToOneField(Buyer, null=True,  on_delete=models.PROTECT, related_name='compare',
                                    db_index=True, verbose_name='владелец списка')
     offer = models.ForeignKey(Offer, null=True, on_delete=models.PROTECT, related_name='offer',
                               db_index=True, verbose_name='список для сравнения' )
