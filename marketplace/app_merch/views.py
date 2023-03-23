@@ -1,6 +1,9 @@
 from django.views.generic import ListView
-from .models import Category, Product, Banner, Discount, Offer
+
+from . import review_service
+from .models import Category, Product, Banner, Discount, Offer, Review
 from app_settings.models import SiteSettings
+from app_users.models import Profile
 from django.core.cache import cache
 
 
@@ -96,3 +99,12 @@ class CatalogView(ListView):
             Offer.objects.filter(is_active=True),
             time_to_cache * 60 * 60 * 24
         )
+
+def add_product_review(request):
+    """ Вью для добавления отзыва к товару """
+    if request.method == 'POST':
+        review_service.new_review(request)
+
+
+
+
