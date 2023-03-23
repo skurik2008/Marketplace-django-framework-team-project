@@ -11,5 +11,5 @@ app_name = 'pages'
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index-page'),
-    path('catalog/', CatalogView.as_view(), name='catalog-view'),
+    path('products/', CatalogView.as_view(), name='catalog-view'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
