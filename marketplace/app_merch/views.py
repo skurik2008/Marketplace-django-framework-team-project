@@ -1,5 +1,5 @@
 from django.views.generic import ListView
-from .models import Category, Product, Banner, Discount
+from .models import Category, Product, Banner, Discount, Offer
 from app_settings.models import SiteSettings
 from django.core.cache import cache
 
@@ -80,4 +80,19 @@ class PriorityDiscountView(ListView):
         )
 
 
+class CatalogView(ListView):
+    """ Вью класс для получения списка товаров и отображения их в каталоге. """
+    template_name = 'catalog.html'
+    context_object_name = 'offers'
 
+    def get_queryset(self):
+        """ Кешируем активные товары на один день. """
+        time_to_cache = SiteSettings.load().time_to_cache
+        if not time_to_cache:
+            time_to_cache = 1
+
+        return cache.get_or_set(
+            f"Catalog",
+            Offer.objects.filter(is_active=True),
+            time_to_cache * 60 * 60 * 24
+        )

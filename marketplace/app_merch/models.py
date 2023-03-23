@@ -149,7 +149,7 @@ class Offer(models.Model):
         verbose_name_plural = 'Предложения'
 
     def __str__(self):
-        return f"{self.product} from {self.saller}"
+        return f"{self.product} from {self.seller}"
 
 
 class Discount(models.Model):
