@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.db import models
 from django.contrib.auth.models import User
 from app_merch.models import Product, Offer
@@ -38,6 +39,24 @@ class Seller(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        """
+        Сброс кеша при изменении продавца.
+        """
+        if cache.get(f'Seller {self.pk} top products'):
+            cache.delete(f'Seller {self.pk} top products')
+        super().save()
+
+    def delete(self, using=None, keep_parents=False):
+        """
+        Сброс кеша при удалении продавца.
+        """
+        if cache.get(f'Seller {self.pk} top products'):
+            cache.delete(f'Seller {self.pk} top products')
+        super().delete()
+
 
 
 class Buyer(models.Model):
