@@ -11,9 +11,11 @@ def new_review(request):
                           text=text_review,
                           rating=rating)
 
+
 def review_list(offer_id):
     reviews = Review.objects.filter(offer=offer_id, is_active=True).all()
     return reviews
+
 
 def review_count(offer_id):
     count = Review.objects.filter(offer=offer_id, is_active=True).count()

@@ -100,6 +100,7 @@ class CatalogView(ListView):
             time_to_cache * 60 * 60 * 24
         )
 
+
 def add_product_review(request):
     """ Вью для добавления отзыва к товару """
     if request.method == 'POST':

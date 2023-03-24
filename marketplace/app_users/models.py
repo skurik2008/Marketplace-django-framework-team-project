@@ -58,22 +58,13 @@ class Seller(models.Model):
         super().delete()
 
 
-
 class Buyer(models.Model):
     """
     Модель покупателя.
     """
     profile = models.OneToOneField(Profile, null=True,  on_delete=models.PROTECT, related_name='profile',
                                    db_index=True, verbose_name='покупатель')
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(args, kwargs)
-        self._meta = None
-
-    def do_something(self):
-        Product = self._meta.apps.get_model('app_merch', 'Product')
-        # do something with the Product model
-        views = models.ManyToManyField(Product, on_delete=models.CASCADE, verbose_name='история просмотров')
+    views = models.ManyToManyField('app_merch.Product', verbose_name='история просмотров')
 
     class Meta:
         verbose_name = 'Покупатель'
@@ -89,8 +80,8 @@ class ComparisonList(models.Model):
     """
     profile = models.OneToOneField(Buyer, null=True,  on_delete=models.PROTECT, related_name='compare',
                                    db_index=True, verbose_name='владелец списка')
-    offer = models.ForeignKey(Offer, null=True, on_delete=models.PROTECT, related_name='offer',
-                              db_index=True, verbose_name='список для сравнения' )
+    offer = models.ForeignKey('app_merch.Offer', null=True, on_delete=models.PROTECT, related_name='offer',
+                              db_index=True, verbose_name='список для сравнения')
 
     class Meta:
         verbose_name = 'Список сравнения'
