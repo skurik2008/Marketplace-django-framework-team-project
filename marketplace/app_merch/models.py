@@ -213,3 +213,20 @@ class Banner(models.Model):
         if cache.get('Banners'):
             cache.delete('Banners')
         super().delete()
+
+
+class Review(models.Model):
+    profile = models.ForeignKey('app_users.Profile', on_delete=models.CASCADE, related_name='reviews')
+    offer = models.ForeignKey(Offer, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.PositiveIntegerField(verbose_name='Рейтинг', help_text='Введите рейтинг от 1 до 5')
+    text = models.TextField(verbose_name='Текст отзыва', help_text='Введите текст отзыва')
+    created_at = models.DateField(auto_now_add=True, verbose_name='Дата создания', help_text='Дата создания отзыва')
+    is_active = models.BooleanField(default=True, verbose_name='Активен', help_text='Отображать ли этот отзыв на сайте')
+
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.profile.user.username} - {self.offer.product}'

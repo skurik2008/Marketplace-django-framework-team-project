@@ -1,8 +1,7 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-# from django.contrib.auth.views import PasswordResetCompleteView
-from app_users.views import CustomLoginView, CustomLogoutView, CustomPasswordResetView, CustomPasswordResetConfirmView, \
+from .views import CustomLoginView, CustomLogoutView, CustomPasswordResetView, CustomPasswordResetConfirmView, \
     CustomPasswordResetDoneView, CustomRegisterView, SellerView
 
 app_name = 'app_users'
