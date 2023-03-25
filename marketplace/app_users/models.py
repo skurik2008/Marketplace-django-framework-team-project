@@ -1,7 +1,7 @@
+from app_merch.models import Offer, Product
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
-from django.contrib.auth.models import User
-from app_merch.models import Product, Offer
 
 
 class Profile(models.Model):
@@ -71,7 +71,7 @@ class Buyer(models.Model):
         verbose_name_plural = 'Покупатели'
 
     def __str__(self):
-        return self.profile
+        return f'{self.profile}'
 
 
 class ComparisonList(models.Model):

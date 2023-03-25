@@ -1,7 +1,7 @@
+from django.core.cache import cache
 from django.db import models
 from django.urls import reverse
-from mptt.models import TreeForeignKey, MPTTModel
-from django.core.cache import cache
+from mptt.models import MPTTModel, TreeForeignKey
 
 
 class Image(models.Model):
@@ -86,6 +86,7 @@ class Product(models.Model):
     title = models.CharField(max_length=150, verbose_name='название')
     description = models.TextField(max_length=1000, verbose_name='описание')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='дата создания')
+    sellers = models.ManyToManyField('app_users.Seller', related_name='products', through='Offer')
     category = models.ForeignKey(
         Category,
         on_delete=models.PROTECT,

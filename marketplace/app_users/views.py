@@ -1,12 +1,15 @@
-from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordResetConfirmView, \
-    PasswordResetDoneView
+from app_merch.models import Offer
+from app_settings.models import SiteSettings
+from app_users.forms import (UserLoginForm, UserPasswordResetForm,
+                             UserRegisterForm, UserSetPasswordForm)
+from app_users.models import Seller
+from django.contrib.auth.views import (LoginView, LogoutView,
+                                       PasswordResetConfirmView,
+                                       PasswordResetDoneView,
+                                       PasswordResetView)
 from django.core.cache import cache
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView
-from app_merch.models import Offer
-from app_settings.models import SiteSettings
-from app_users.forms import UserRegisterForm, UserLoginForm, UserPasswordResetForm, UserSetPasswordForm
-from app_users.models import Seller
 from sql_util.utils import SubqueryCount
 
 

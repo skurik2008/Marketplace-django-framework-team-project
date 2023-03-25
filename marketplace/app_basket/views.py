@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-from django.shortcuts import render
-from .cart import CartService
 from app_merch.models import Offer
+from django.shortcuts import render
+
+from .cart import CartService
+
 
 def get_cart(request):
     """

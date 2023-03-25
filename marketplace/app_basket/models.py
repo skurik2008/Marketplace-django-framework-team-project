@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-from django.db import models
-from app_users.models import Buyer
 from app_merch.models import Offer
+from app_users.models import Buyer
+from django.db import models
 
 
 class Cart(models.Model):

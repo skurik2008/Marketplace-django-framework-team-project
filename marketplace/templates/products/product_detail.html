@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}<title> GoodsDetail </title>{% endblock %}
+
+{% block content %}
+
+<h1>{{ product.title }}</h1>
+    <img src="{{ product.icon.url }}" alt="{{ product.title }}" width="200" height="200">
+    <p>{{ product.description }}</p>
+    <p>Категория: {{ product.category.title }}</p>
+    <p>Тэги: {% for tag in product.tags.all %}{{ tag.title }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+    <p>Характеристики:</p>
+    <ul>
+        {% for key, value in product.characters.items %}
+            <li>{{ key }}: {{ value }}</li>
+        {% endfor %}
+    </ul>
+    <h2>Список продавцов и цен:</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Продавец</th>
+                <th>Цена</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for offer in product.offers.all %}
+                <tr>
+                    <td>{{ offer.seller }}</td>
+                    <td>{{ offer.price }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2">Нет доступных предложений</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Добавить отзыв:</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+    <button type="submit">Submit</button>
+    </form>
+
+<h2>Отзывы:</h2>
+    <ul>
+        {% for review in reviews %}
+            <li>{{ review.profile.username }}: {{ review.text }}</li>
+        {% empty %}
+            <li>Пока нет отзывов.</li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}
+
+
+

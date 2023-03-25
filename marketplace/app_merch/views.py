@@ -1,10 +1,12 @@
-from django.views.generic import ListView
-
-from . import review_service
-from .models import Category, Product, Banner, Discount, Offer, Review
 from app_settings.models import SiteSettings
 from app_users.models import Profile
 from django.core.cache import cache
+from django.shortcuts import redirect, render
+from django.views.generic import DetailView, ListView
+
+from . import review_service
+from .forms import ReviewForm
+from .models import Banner, Category, Discount, Offer, Product, Review
 
 
 class IndexView(ListView):
@@ -99,6 +101,33 @@ class CatalogView(ListView):
             Offer.objects.filter(is_active=True),
             time_to_cache * 60 * 60 * 24
         )
+
+
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'products/product_detail.html'
+    context_object_name = 'product'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        reviews = Review.objects.filter(offer__product=self.object, is_active=True)
+        context['reviews'] = reviews
+        form = ReviewForm()
+        context['form'] = form
+        return context
+
+    def post(self, request, pk):
+        product = self.get_object()
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.offer = product.offers.first()
+            review.profile = request.user.profile
+            review.save()
+            return redirect('pages:product_detail', pk=product.pk)
+        context = self.get_context_data()
+        context['form'] = form
+        return render(request, self.template_name, context)
 
 
 def add_product_review(request):
