@@ -147,6 +147,7 @@ class Offer(models.Model):
     class Meta:
         verbose_name = 'Предложение'
         verbose_name_plural = 'Предложения'
+        ordering = ['price']
 
     def __str__(self):
         return f"{self.product} from {self.seller}"

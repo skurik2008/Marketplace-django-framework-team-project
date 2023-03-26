@@ -42,7 +42,7 @@
         </div>
         <div class="wrap">
             <div class="row Header-rowMain">
-                <div class="row-block Header-logo"><a class="logo" href="index.html"><img class="logo-image" src="{% static 'assets/img/logo.png' %}" alt="logo.png" /></a>
+                <div class="row-block Header-logo"><a class="logo" href="{% url 'pages:index-page' %}"><img class="logo-image" src="{% static 'assets/img/logo.png' %}" alt="logo.png" /></a>
                 </div>
                 <nav class="row-block row-block_right Header-menu">
                     <div class="menuModal" id="navigate">
@@ -95,7 +95,7 @@
 
                       {% get_categories as categories %}
                       {% recursetree categories %}
-                            <div class="CategoriesButton-link"><a href="#">
+                            <div class="CategoriesButton-link"><a href="{% url 'pages:catalog-view' %}?cat={{ node.slug }}">
                                     <div class="CategoriesButton-icon"><img src="/{{ node.icon.file }}" alt="icon" />
                                     </div><span class="CategoriesButton-text">{{ node.title }}</span>
                                 </a>
