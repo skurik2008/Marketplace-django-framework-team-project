@@ -5,7 +5,7 @@ from django.urls import path
 from .views import (CustomLoginView, CustomLogoutView,
                     CustomPasswordResetConfirmView,
                     CustomPasswordResetDoneView, CustomPasswordResetView,
-                    CustomRegisterView, SellerView)
+                    CustomRegisterView, ProfileUpdateView, SellerView)
 
 app_name = 'app_users'
 
@@ -16,5 +16,6 @@ urlpatterns = [
     path('password_reset/done/', CustomPasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('register/', CustomRegisterView.as_view(), name='register'),
+    path('profile_update/<int:pk>/', ProfileUpdateView.as_view(), name='profile-update'),
     path('seller/<int:pk>/', SellerView.as_view(), name='seller_detail'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

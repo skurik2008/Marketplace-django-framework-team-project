@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<h1>{{ product.title }}</h1>
+<h1>{{ offer.product.title }}</h1>
     <img src="{{ product.icon.url }}" alt="{{ product.title }}" width="200" height="200">
     <p>{{ product.description }}</p>
     <p>Категория: {{ product.category.title }}</p>
@@ -23,9 +23,9 @@
             </tr>
         </thead>
         <tbody>
-            {% for offer in product.offers.all %}
+            {% for offer in offers %}
                 <tr>
-                    <td>{{ offer.seller }}</td>
+                    <td>{{ offer.seller.profile.full_name }}</td>
                     <td>{{ offer.price }}</td>
                 </tr>
             {% empty %}
@@ -40,17 +40,28 @@
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-    <button type="submit">Submit</button>
+<!--        <label for="seller">Продавец:</label>-->
+<!--        <select name="seller" id="seller">-->
+<!--          {% for seller in sellers %}-->
+<!--            <option value="{{ seller.id }}">{{ seller.title }}</option>-->
+<!--          {% endfor %}-->
+<!--        </select>-->
+        <button type="submit">Отправить</button>
     </form>
 
 <h2>Отзывы:</h2>
+    {% if product.reviews.exists %}
     <ul>
-        {% for review in reviews %}
-            <li>{{ review.profile.username }}: {{ review.text }}</li>
-        {% empty %}
-            <li>Пока нет отзывов.</li>
-        {% endfor %}
+      {% for review in product.reviews.all %}
+        <li>
+            {{ review.offer.seller.title }} - {{ review.rating }}
+            {{ review.author }}: {{ review.text }}
+        </li>
+      {% endfor %}
     </ul>
+  {% else %}
+    <p>Пока нет отзывов</p>
+  {% endif %}
 
 {% endblock %}
 

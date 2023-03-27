@@ -24,6 +24,21 @@ class UserRegisterForm(UserCreationForm):
         }
 
 
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['full_name', 'phone_number', 'address', 'avatar']
+        labels = {
+            'full_name': 'Полное имя',
+            'phone_number': 'Номер телефона',
+            'address': 'Адрес',
+            'avatar': 'Аватар',
+        }
+        widgets = {
+            'avatar': forms.ClearableFileInput(attrs={'multiple': True}),
+        }
+
+
 class UserLoginForm(AuthenticationForm):
     username = forms.CharField(max_length=254, required=True, label='Имя пользователя')
     password = forms.CharField(widget=forms.PasswordInput, required=True, label='Пароль')

@@ -1,7 +1,7 @@
 from app_settings.models import SiteSettings
-from app_users.models import Profile
+from app_users.models import Profile, Seller
 from django.core.cache import cache
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView
 
 from . import review_service
@@ -110,24 +110,24 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        offers = Offer.objects.filter(product=self.object)
+        context['offers'] = offers
+        # добавляем форму для отзыва
         reviews = Review.objects.filter(offer__product=self.object, is_active=True)
         context['reviews'] = reviews
-        form = ReviewForm()
-        context['form'] = form
+        # добавляем список продавцов для выбора в форме
+        sellers = Seller.objects.filter(profile__in=[offer.seller.profile for offer in offers])
+        context['sellers'] = sellers
+
+        # создаём форму для отзыва
+        if self.request.user.is_authenticated:
+            form = ReviewForm()
+            context['form'] = form
         return context
 
-    def post(self, request, pk):
-        product = self.get_object()
-        form = ReviewForm(request.POST)
-        if form.is_valid():
-            review = form.save(commit=False)
-            review.offer = product.offers.first()
-            review.profile = request.user.profile
-            review.save()
-            return redirect('pages:product_detail', pk=product.pk)
-        context = self.get_context_data()
-        context['form'] = form
-        return render(request, self.template_name, context)
+    # def post(self, request, pk):
+    #     """ логика для добавления отзыва к товару """
+    #     pass
 
 
 def add_product_review(request):

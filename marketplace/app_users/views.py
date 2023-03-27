@@ -1,16 +1,20 @@
 from app_merch.models import Offer
 from app_settings.models import SiteSettings
-from app_users.forms import (UserLoginForm, UserPasswordResetForm,
-                             UserRegisterForm, UserSetPasswordForm)
+from app_users.forms import (ProfileUpdateForm, UserLoginForm,
+                             UserPasswordResetForm, UserRegisterForm,
+                             UserSetPasswordForm)
 from app_users.models import Seller
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LoginView, LogoutView,
                                        PasswordResetConfirmView,
                                        PasswordResetDoneView,
                                        PasswordResetView)
 from django.core.cache import cache
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView
+from django.views.generic import CreateView, DetailView, UpdateView
 from sql_util.utils import SubqueryCount
+
+from .models import Profile
 
 
 class CustomLoginView(LoginView):
@@ -42,13 +46,26 @@ class CustomPasswordResetDoneView(PasswordResetDoneView):
 
 
 class CustomRegisterView(CreateView):
+    model = Profile
     form_class = UserRegisterForm
     template_name = 'users/register.html'
-    success_url = reverse_lazy('app_users:login')
+    success_url = reverse_lazy('pages:index-page')
+
+    def form_valid(self, form):
+        user = form.save()
+        Profile.objects.create(user=user,
+                               full_name=form.cleaned_data.get('full_name'),
+                               phone_number=form.cleaned_data.get('phone_number'),
+                               address=form.cleaned_data.get('address'),
+                               avatar=form.cleaned_data.get('avatar'))
+        return super().form_valid(form)
 
 
-# class PasswordResetCompleteView(TemplateView):
-#     template_name = 'users/password_reset_complete.html'
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = Profile
+    form_class = ProfileUpdateForm
+    template_name = 'users/profile_update.html'
+    success_url = '/'
 
 
 class SellerView(DetailView):
