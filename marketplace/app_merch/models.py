@@ -1,7 +1,7 @@
+from django.core.cache import cache
 from django.db import models
 from django.urls import reverse
-from mptt.models import TreeForeignKey, MPTTModel
-from django.core.cache import cache
+from mptt.models import MPTTModel, TreeForeignKey
 
 
 class Image(models.Model):
@@ -232,3 +232,4 @@ class Review(models.Model):
 
     def __str__(self):
         return f'{self.profile.user.username} - {self.offer.product}'
+

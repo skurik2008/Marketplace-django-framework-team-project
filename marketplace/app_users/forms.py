@@ -1,5 +1,6 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, SetPasswordForm, UserCreationForm
+from django.contrib.auth.forms import (AuthenticationForm, PasswordResetForm,
+                                       SetPasswordForm, UserCreationForm)
 from django.contrib.auth.models import User
 from django.forms.widgets import FileInput
 
@@ -20,6 +21,21 @@ class UserRegisterForm(UserCreationForm):
             'email': 'Email',
             'password1': 'Пароль',
             'password2': 'Подтверждение пароля',
+        }
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['full_name', 'phone_number', 'address', 'avatar']
+        labels = {
+            'full_name': 'Полное имя',
+            'phone_number': 'Номер телефона',
+            'address': 'Адрес',
+            'avatar': 'Аватар',
+        }
+        widgets = {
+            'avatar': forms.ClearableFileInput(attrs={'multiple': True}),
         }
 
 

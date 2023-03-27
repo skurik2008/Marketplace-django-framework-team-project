@@ -1,5 +1,6 @@
-from .singleton_model import SingletonModel
 from django.db import models
+
+from .singleton_model import SingletonModel
 
 
 class SiteSettings(SingletonModel):

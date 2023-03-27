@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Profile, Seller, Buyer
+
+from .models import Buyer, Profile, Seller
 
 
 @admin.register(Profile)
