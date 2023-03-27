@@ -143,10 +143,12 @@ class Offer(models.Model):
     quantity = models.PositiveIntegerField(default=0, verbose_name='количество')
     is_active = models.BooleanField(default=True, verbose_name='актуальность')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='дата создания')
+    is_delivery_free = models.BooleanField(default=False, verbose_name='бесплатная доставка')
 
     class Meta:
         verbose_name = 'Предложение'
         verbose_name_plural = 'Предложения'
+        ordering = ['price']
 
     def __str__(self):
         return f"{self.product} from {self.seller}"

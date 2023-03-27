@@ -12,10 +12,10 @@
                             </strong>
                         </header>
                         <div class="Section-columnContent">
-                            <form class="form" action="#" method="post">
+                            <form class="form" action="{% url 'pages:catalog-view' %}" method="get">
                                 <div class="form-group">
                                     <div class="range Section-columnRange">
-                                        <input class="range-line" id="price" name="price" type="text" data-type="double" data-min="7" data-max="50" data-from="7" data-to="27" />
+                                        <input class="range-line" id="price" name="price" type="text" data-type="double" data-min="{{ min_price }}" data-max="{{ max_price }}" data-from="{% firstof curr_min_price min_price %}" data-to="{% firstof curr_max_price max_price %}" />
                                         <div class="range-price">Цена:&#32;
                                             <div class="rangePrice">
                                             </div>
@@ -23,25 +23,26 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <input class="form-input form-input_full" id="title" name="title" type="text" placeholder="Название" />
+                                    <input class="form-input form-input_full" id="title" name="title" type="text" placeholder="Название" value="{{ title }}"/>
                                 </div>
                                 <div class="form-group">
                                     <!-- - var options = setOptions(items, ['value', 'selected', 'disabled']);-->
                                 </div>
                                 <div class="form-group">
                                     <label class="toggle">
-                                        <input type="checkbox" /><span class="toggle-box"></span><span class="toggle-text">Только товары в наличии</span>
+                                        <input type="checkbox" {% if in_stock %} checked="checked" {% endif %}name="in_stock"/><span class="toggle-box"></span><span class="toggle-text">Только товары в наличии</span>
                                     </label>
                                 </div>
                                 <div class="form-group">
                                     <label class="toggle">
-                                        <input type="checkbox" /><span class="toggle-box"></span><span class="toggle-text">С бесплатной доставкой</span>
+                                        <input type="checkbox" {% if delivery_free %} checked="checked" {% endif %} name="delivery_free"/><span class="toggle-box"></span><span class="toggle-text">С бесплатной доставкой</span>
                                     </label>
                                 </div>
                                 <div class="form-group">
-                                    <div class="buttons"><a class="btn btn_square btn_dark btn_narrow" href="#">Фильтр</a>
+                                    <div class="buttons"><button class="btn btn_square btn_dark btn_narrow" type="submit">Фильтр</button>
                                     </div>
                                 </div>
+                                <input type="text" name="cat" style="display: None" value="{% firstof category 'all' %}"/>
                             </form>
                         </div>
                     </div>
@@ -51,7 +52,10 @@
                             </strong>
                         </header>
                         <div class="Section-columnContent">
-                            <div class="buttons"><a class="btn btn_default btn_sm" href="#">Видео</a><a class="btn btn_default btn_sm" href="#">Разработка</a><a class="btn btn_default btn_sm" href="#">Игры</a><a class="btn btn_default btn_sm" href="#">Asus</a><a class="btn btn_default btn_sm" href="#">Разработка</a><a class="btn btn_default btn_sm" href="#">Видео</a>
+                            <div class="buttons">
+                            {% for tag in tags %}
+                            <a class="btn btn_default btn_sm" href="{% url 'pages:catalog-view' %}?tag={{ tag.pk }}">{{ tag.title }}</a>
+                            {% endfor %}
                             </div>
                         </div>
                     </div>
@@ -79,6 +83,8 @@
                                 </div>
                             </div>
                         </div>
+                        {% empty %}
+                        <img src="{% static 'assets/img/content/home/no_res.png' %}" alt="no_results" width="450"/>
                         {% endfor %}
                     </div>
                     <div class="Pagination">
