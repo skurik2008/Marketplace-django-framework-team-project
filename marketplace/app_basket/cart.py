@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-from . import models
 from app_users.models import Buyer, Profile
+
+from . import models
 
 
 class ItemDoesNotExist(Exception):

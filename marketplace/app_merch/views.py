@@ -14,8 +14,14 @@ from .models import (
     Tag
 )
 from app_settings.models import SiteSettings
-from app_users.models import Profile
+from app_users.models import Profile, Seller
 from django.core.cache import cache
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.generic import DetailView, ListView
+
+from . import review_service
+from .forms import ReviewForm
+from .models import Banner, Category, Discount, Offer, Product, Review
 
 
 class IndexView(ListView):
@@ -190,6 +196,33 @@ class CatalogView(ListView):
             context['delivery_free'] = True
 
         return context
+
+
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'products/product_detail.html'
+    context_object_name = 'product'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        offers = Offer.objects.filter(product=self.object)
+        context['offers'] = offers
+        # добавляем форму для отзыва
+        reviews = Review.objects.filter(offer__product=self.object, is_active=True)
+        context['reviews'] = reviews
+        # добавляем список продавцов для выбора в форме
+        sellers = Seller.objects.filter(profile__in=[offer.seller.profile for offer in offers])
+        context['sellers'] = sellers
+
+        # создаём форму для отзыва
+        if self.request.user.is_authenticated:
+            form = ReviewForm()
+            context['form'] = form
+        return context
+
+    # def post(self, request, pk):
+    #     """ логика для добавления отзыва к товару """
+    #     pass
 
 
 def add_product_review(request):

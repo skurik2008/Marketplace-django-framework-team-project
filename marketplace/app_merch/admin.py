@@ -1,16 +1,8 @@
 from django.contrib import admin
 from django.template.defaultfilters import truncatechars
-
-from .models import (
-    Image,
-    Category,
-    Tag,
-    Product,
-    Offer,
-    Discount,
-    Banner
-)
 from django_mptt_admin.admin import DjangoMpttAdmin
+
+from .models import Banner, Category, Discount, Image, Offer, Product, Tag
 
 
 @admin.register(Image)

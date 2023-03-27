@@ -4,6 +4,8 @@ from django.db.models import Count
 
 from app_merch.models import Category
 from app_settings.models import SiteSettings
+from django import template
+from django.core.cache import cache
 
 register = template.Library()
 

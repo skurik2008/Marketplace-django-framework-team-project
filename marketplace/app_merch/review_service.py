@@ -1,5 +1,6 @@
-from .models import Review, Offer
 from app_users.models import Profile
+
+from .models import Offer, Review
 
 
 def new_review(request):
