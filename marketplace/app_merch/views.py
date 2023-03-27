@@ -134,6 +134,9 @@ class CatalogView(ListView):
         if in_stock:
             queryset: QuerySet = queryset.filter(quantity__gt=0)
 
+        if delivery_free:
+            queryset: QuerySet = queryset.filter(is_delivery_free=True)
+
         if tag:
             queryset: QuerySet = queryset.filter(product__tags__pk=tag)
 
@@ -159,6 +162,7 @@ class CatalogView(ListView):
         category: str = self.request.GET.get('cat')
         title: str = self.request.GET.get('title')
         in_stock: str = self.request.GET.get('in_stock')
+        delivery_free: str = self.request.GET.get('delivery_free')
 
         min_price = self.object_list.aggregate(Min('price'))['price__min']
         max_price = self.object_list.aggregate(Max('price'))['price__max']
@@ -182,6 +186,8 @@ class CatalogView(ListView):
             context['title'] = title
         if in_stock:
             context['in_stock'] = True
+        if delivery_free:
+            context['delivery_free'] = True
 
         return context
 

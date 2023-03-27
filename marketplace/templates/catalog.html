@@ -30,12 +30,12 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="toggle">
-                                        <input type="checkbox" name="in_stock"/><span class="toggle-box"></span><span class="toggle-text">Только товары в наличии</span>
+                                        <input type="checkbox" {% if in_stock %} checked="checked" {% endif %}name="in_stock"/><span class="toggle-box"></span><span class="toggle-text">Только товары в наличии</span>
                                     </label>
                                 </div>
                                 <div class="form-group">
                                     <label class="toggle">
-                                        <input type="checkbox" name="delivery_free"/><span class="toggle-box"></span><span class="toggle-text">С бесплатной доставкой</span>
+                                        <input type="checkbox" {% if delivery_free %} checked="checked" {% endif %} name="delivery_free"/><span class="toggle-box"></span><span class="toggle-text">С бесплатной доставкой</span>
                                     </label>
                                 </div>
                                 <div class="form-group">
