@@ -119,7 +119,7 @@ class CatalogView(ListView):
         price_range: str = self.request.GET.get('price')
         title: str = self.request.GET.get('title')
         in_stock: str = self.request.GET.get('in_stock')
-        delivery_free: str = self.request.GET.get('delivery_free')  # No field in Offer model
+        delivery_free: str = self.request.GET.get('delivery_free')
         slug: str = self.request.GET.get('cat')
         tag = self.request.GET.get('tag')
 
