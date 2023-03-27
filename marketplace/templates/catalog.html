@@ -65,9 +65,9 @@
                     </div>
                     <div class="Cards">
                         {% for offer in offers %}
-                        <div class="Card"><a class="Card-picture" href="#"><img src="/{% firstof offer.product.icon.file 'static/assets/img/content/home/card.jpg' %}" alt="card.jpg" /></a>
+                        <div class="Card"><a class="Card-picture" href="{% url 'pages:product-detail' offer.pk %}"><img src="/{% firstof offer.product.icon.file 'static/assets/img/content/home/card.jpg' %}" alt="card.jpg" /></a>
                             <div class="Card-content">
-                                <strong class="Card-title"><a href="#">{{ offer.product.title }}</a>
+                                <strong class="Card-title"><a href="{% url 'pages:product-detail' offer.pk %}">{{ offer.product.title }}</a>
                                 </strong>
                                 <div class="Card-description">
                                     <div class="Card-cost"><span class="Card-price">${{ offer.price }}</span>
