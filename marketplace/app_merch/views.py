@@ -104,6 +104,7 @@ class CatalogView(ListView):
     """ Вью класс для получения списка товаров и отображения их в каталоге. """
     template_name = 'catalog.html'
     context_object_name = 'offers'
+    paginate_by = 8
 
     def get_queryset(self):
         """
