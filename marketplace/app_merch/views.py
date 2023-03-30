@@ -1,10 +1,5 @@
-from copy import copy
-
 from django.db.models import QuerySet, Min, Max, Count
-from django.views.generic import ListView
 from mptt.querysets import TreeQuerySet
-
-from . import review_service
 from .models import (
     Category,
     Product,
