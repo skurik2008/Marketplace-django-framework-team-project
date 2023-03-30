@@ -64,7 +64,58 @@
                     <div class="Sort">
                         <div class="Sort-title">Сортировать по:
                         </div>
-                        <div class="Sort-variants"><a class="Sort-sortBy Sort-sortBy_dec" href="#">Популярности</a><a class="Sort-sortBy" href="#">Цене</a><a class="Sort-sortBy" href="#">Отзывам</a><a class="Sort-sortBy Sort-sortBy_inc" href="#">Новизне</a>
+                        <div class="Sort-variants">
+                            <a
+                                    {% if purchase_sort == 'desc' %}
+                                        class="Sort-sortBy Sort-sortBy_inc"
+                                        href="?{% query_transform purchase_sort='asc' %}"
+                                    {% elif purchase_sort == 'asc' %}
+                                        class="Sort-sortBy Sort-sortBy_dec"
+                                        href="?{% query_transform purchase_sort='desc' %}"
+                                    {% else %}
+                                        class="Sort-sortBy"
+                                        href="?{% query_transform purchase_sort='desc' %}"
+                                    {% endif %}
+                            >Популярности
+                            </a>
+                            <a
+                                    {% if price_sort == '-price' %}
+                                        class="Sort-sortBy Sort-sortBy_inc"
+                                        href="?{% query_transform price_sort='price' %}"
+                                    {% elif price_sort == 'price' %}
+                                        class="Sort-sortBy Sort-sortBy_dec"
+                                        href="?{% query_transform price_sort='-price' %}"
+                                    {% else %}
+                                        class="Sort-sortBy"
+                                        href="?{% query_transform price_sort='-price' %}"
+                                    {% endif %}>Цене
+                            </a>
+                            <a
+                                    {% if reviews_sort == 'desc' %}
+                                        class="Sort-sortBy Sort-sortBy_dec"
+                                        href="?{% query_transform reviews_sort='asc' %}"
+                                    {% elif reviews_sort == 'asc' %}
+                                        class="Sort-sortBy Sort-sortBy_inc"
+                                        href="?{% query_transform reviews_sort='desc' %}"
+                                    {% else %}
+                                        class="Sort-sortBy"
+                                        href="?{% query_transform reviews_sort='desc' %}"
+                                    {% endif %}>Отзывам</a>
+                            <a
+                                    {% if created_at_sort == '-created_at' %}
+                                        class="Sort-sortBy Sort-sortBy_inc"
+                                        href="?{% query_transform created_at_sort='created_at' %}"
+                                    {% elif created_at_sort == 'created_at' %}
+                                        class="Sort-sortBy Sort-sortBy_dec"
+                                        href="?{% query_transform created_at_sort='-created_at' %}"
+                                    {% else %}
+                                        class="Sort-sortBy"
+                                        href="?{% query_transform created_at_sort='-created_at' %}"
+                                    {% endif %}>Новизне
+                            </a>
+                            {% if any_sort %}
+                            <a style="font-size: 13px" href="{% url 'pages:catalog-view' %}">x Сбросить</a>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="Cards">
