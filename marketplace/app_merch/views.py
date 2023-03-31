@@ -122,7 +122,7 @@ class CatalogView(ListView):
         price_sort: str = self.request.GET.get('price_sort')
         created_at_sort: str = self.request.GET.get('created_at_sort')
         reviews_sort: str = self.request.GET.get('reviews_sort')
-        purchase_sort: str = self.request.GET.get('purchase_sort')
+        views_sort: str = self.request.GET.get('views_sort')
 
         if slug and slug != 'all':
             category: Category = Category.objects.get(slug=slug)
@@ -152,19 +152,18 @@ class CatalogView(ListView):
                 queryset: QuerySet = queryset.order_by('-review_amount')
             else:
                 queryset: QuerySet = queryset.order_by('review_amount')
-        if purchase_sort in ('desc', 'asc'):
-            queryset: QuerySet = queryset.annotate(purchases=Count('orders'))
-            if purchase_sort == 'desc':
-                queryset: QuerySet = queryset.order_by('-purchases')
+        if views_sort in ('desc', 'asc'):
+            if views_sort == 'desc':
+                queryset: QuerySet = queryset.order_by('-total_views')
             else:
-                queryset: QuerySet = queryset.order_by('purchases')
+                queryset: QuerySet = queryset.order_by('total_views')
 
         return cache.get_or_set(
             f"Catalog_{slug}_{price_range}_"
             f"{title}_{in_stock}_"
             f"{delivery_free}_{tag}_"
             f"{price_sort}_{created_at_sort}_"
-            f"{reviews_sort}_{purchase_sort}",
+            f"{reviews_sort}_{views_sort}",
             queryset,
             time_to_cache * 60 * 60 * 24
         )
@@ -190,7 +189,7 @@ class CatalogView(ListView):
         price_sort: str = self.request.GET.get('price_sort')
         created_at_sort: str = self.request.GET.get('created_at_sort')
         reviews_sort: str = self.request.GET.get('reviews_sort')
-        purchase_sort: str = self.request.GET.get('purchase_sort')
+        views_sort: str = self.request.GET.get('views_sort')
 
         min_price = self.object_list.aggregate(Min('price'))['price__min']
         max_price = self.object_list.aggregate(Max('price'))['price__max']
@@ -223,8 +222,8 @@ class CatalogView(ListView):
             context['created_at_sort'] = created_at_sort
         if reviews_sort:
             context['reviews_sort'] = reviews_sort
-        if purchase_sort:
-            context['purchase_sort'] = purchase_sort
+        if views_sort:
+            context['purchase_sort'] = views_sort
 
         if price_sort or created_at_sort or reviews_sort:
             context['any_sort'] = True
