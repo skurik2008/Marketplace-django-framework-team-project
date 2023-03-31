@@ -1,27 +1,15 @@
-
-from django.db.models import QuerySet, Min, Max
-from django.views.generic import ListView
-from mptt.querysets import TreeQuerySet
-
-from . import review_service
-from .models import (
-    Category,
-    Product,
-    Banner,
-    Discount,
-    Offer,
-    Review,
-    Tag
-)
 from app_settings.models import SiteSettings
 from app_users.models import Profile, Seller
 from django.core.cache import cache
+from django.db.models import Avg, Max, Min, QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView
+from django.views.generic.edit import FormView
+from mptt.querysets import TreeQuerySet
 
 from . import review_service
-from .forms import ReviewForm
-from .models import Banner, Category, Discount, Offer, Product, Review
+from .forms import PurchaseForm, ReviewForm
+from .models import Banner, Category, Discount, Offer, Product, Review, Tag
 
 
 class IndexView(ListView):
@@ -206,7 +194,11 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        product = self.get_object()
+        context['icon_url'] = product.icon.file.url if product.icon else None
         offers = Offer.objects.filter(product=self.object)
+        average_price = offers.aggregate(Avg('price'))['price__avg']
+        context['average_price'] = average_price
         context['offers'] = offers
         # добавляем форму для отзыва
         reviews = Review.objects.filter(offer__product=self.object, is_active=True)
@@ -221,12 +213,36 @@ class ProductDetailView(DetailView):
             context['form'] = form
         return context
 
-    # def post(self, request, pk):
-    #     """ логика для добавления отзыва к товару """
-    #     pass
+    def post(self, request, pk):
+        """ логика для добавления отзыва к товару """
+        pass
 
 
 def add_product_review(request):
     """ Вью для добавления отзыва к товару """
     if request.method == 'POST':
         review_service.new_review(request)
+
+
+class ProductPurchaseView(FormView):
+    template_name = 'products/offer_purchase.html'
+    form_class = PurchaseForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['offer'] = get_object_or_404(Offer, pk=self.kwargs['pk'])
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        offer = get_object_or_404(Offer, pk=self.kwargs['pk'])
+        context['product'] = offer.product
+        context['seller'] = offer.seller
+        context['price'] = offer.price
+        context['icon_url'] = offer.product.icon.file.url if offer.product.icon else None
+        return context
+
+    def form_valid(self, form):
+        # Обработка успешной отправки формы
+        # Здесь можно добавить логику для создания заказа и т. д.
+        return super().form_valid(form)
