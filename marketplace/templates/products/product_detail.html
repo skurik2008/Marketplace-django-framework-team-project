@@ -65,9 +65,13 @@
     <ul>
       {% for review in reviews %}
         <li>
-            <p>{{ review.text }}</p>
-          <p class="text-muted"> {{ review.user.username }}, {{ review.created_at }} | Seller: {{ review.offer.seller }}</p>
-        </li>
+            <p>
+                Комментарий: {{ review.text }}<br />
+                Рейтинг: {{ review.rating }} / 5 <br />
+                Продавец: <b>{{ review.offer.seller.title }}</b>
+                От <b>{{ review.profile.user.username }}</b>, дата: {{ review.created_at }}
+            </p>
+        </li> <br />
       {% endfor %}
     </ul>
   {% else %}

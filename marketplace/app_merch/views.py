@@ -2,6 +2,7 @@ from app_settings.models import SiteSettings
 from app_users.models import Profile, Seller
 from django.core.cache import cache
 from django.db.models import Avg, Max, Min, QuerySet
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import FormView
@@ -213,9 +214,30 @@ class ProductDetailView(DetailView):
             context['form'] = form
         return context
 
-    def post(self, request, pk):
-        """ логика для добавления отзыва к товару """
-        pass
+    # def post(self, request, pk):
+    #     """ логика для добавления отзыва к товару """
+    #     pass
+    def post(self, request, *args, **kwargs):
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            product = self.get_object()
+            seller_id = request.POST.get('seller')
+            offer = get_object_or_404(Offer, product=product, seller__id=seller_id)
+            # profile = request.user.profile if hasattr(request.user, 'profile') else None
+            # if not profile:
+            #     profile = Profile.objects.create(user=request.user)
+            profile, created = Profile.objects.get_or_create(user=request.user)
+            review = Review.objects.create(
+                profile=profile,
+                offer=offer,
+                rating=form.cleaned_data['rating'],
+                text=form.cleaned_data['text']
+            )
+            return HttpResponseRedirect(request.path_info)
+        else:
+            context = self.get_context_data(**kwargs)
+            context['form'] = form
+            return render(request, self.template_name, context)
 
 
 def add_product_review(request):
