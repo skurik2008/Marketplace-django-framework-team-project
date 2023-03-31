@@ -61,14 +61,14 @@
     {% endif %}
 
 <h2>Отзывы:</h2>
+<span>Количество отзывов: {{ review_count }}</span>
     {% if reviews %}
     <ul>
       {% for review in reviews %}
         <li>
             <p>
+                Рейтинг: {{ review.rating }} / 5 | Продавец: <b>{{ review.offer.seller.title }}</b><br />
                 Комментарий: {{ review.text }}<br />
-                Рейтинг: {{ review.rating }} / 5 <br />
-                Продавец: <b>{{ review.offer.seller.title }}</b>
                 От <b>{{ review.profile.user.username }}</b>, дата: {{ review.created_at }}
             </p>
         </li> <br />

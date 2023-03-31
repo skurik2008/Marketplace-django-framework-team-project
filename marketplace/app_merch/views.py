@@ -198,46 +198,26 @@ class ProductDetailView(DetailView):
         product = self.get_object()
         context['icon_url'] = product.icon.file.url if product.icon else None
         offers = Offer.objects.filter(product=self.object)
+        context['offers'] = offers
         average_price = offers.aggregate(Avg('price'))['price__avg']
         context['average_price'] = average_price
-        context['offers'] = offers
-        # добавляем форму для отзыва
         reviews = Review.objects.filter(offer__product=self.object, is_active=True)
         context['reviews'] = reviews
-        # добавляем список продавцов для выбора в форме
         sellers = Seller.objects.filter(profile__in=[offer.seller.profile for offer in offers])
         context['sellers'] = sellers
 
-        # создаём форму для отзыва
+        review_count = review_service.review_count(product)
+        context['review_count'] = review_count
+
         if self.request.user.is_authenticated:
             form = ReviewForm()
             context['form'] = form
         return context
 
-    # def post(self, request, pk):
-    #     """ логика для добавления отзыва к товару """
-    #     pass
     def post(self, request, *args, **kwargs):
-        form = ReviewForm(request.POST)
-        if form.is_valid():
-            product = self.get_object()
-            seller_id = request.POST.get('seller')
-            offer = get_object_or_404(Offer, product=product, seller__id=seller_id)
-            # profile = request.user.profile if hasattr(request.user, 'profile') else None
-            # if not profile:
-            #     profile = Profile.objects.create(user=request.user)
-            profile, created = Profile.objects.get_or_create(user=request.user)
-            review = Review.objects.create(
-                profile=profile,
-                offer=offer,
-                rating=form.cleaned_data['rating'],
-                text=form.cleaned_data['text']
-            )
-            return HttpResponseRedirect(request.path_info)
-        else:
-            context = self.get_context_data(**kwargs)
-            context['form'] = form
-            return render(request, self.template_name, context)
+        """ логика для добавления отзыва к товару """
+        product = self.get_object()
+        return review_service.new_review(request, product)
 
 
 def add_product_review(request):
