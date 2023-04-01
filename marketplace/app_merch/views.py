@@ -2,8 +2,7 @@ from app_settings.models import SiteSettings
 from app_users.models import Profile, Seller
 from django.core.cache import cache
 from django.db.models import Avg, Max, Min, QuerySet
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
