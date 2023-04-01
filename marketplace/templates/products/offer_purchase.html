@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h3>Заказ товара "{{ product }}" у продавца "{{ seller }}" стоимостью {{ price }}</h3>
+  {% if icon_url %}
+    <img src="{{ icon_url }}" alt="{{ object.title }}" width="400" height="400" />
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Оформить заказ</button>
+  </form>
+{% endblock %}

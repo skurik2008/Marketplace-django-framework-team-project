@@ -3,9 +3,12 @@
 
 {% block content %}
 
-<h1>{{ offer.product.title }}</h1>
-    <img src="{{ product.icon.url }}" alt="{{ product.title }}" width="200" height="200">
+<h1>{{ product.title }}</h1>
+    {% if icon_url %}
+        <img src="{{ icon_url }}" alt="{{ object.title }}" width="400" height="400" />
+    {% endif %}
     <p>{{ product.description }}</p>
+    <p>Средняя цена товара:  {{ average_price }}  </p>
     <p>Категория: {{ product.category.title }}</p>
     <p>Тэги: {% for tag in product.tags.all %}{{ tag.title }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
     <p>Характеристики:</p>
@@ -20,43 +23,55 @@
             <tr>
                 <th>Продавец</th>
                 <th>Цена</th>
+                <th>-</th>
             </tr>
         </thead>
         <tbody>
             {% for offer in offers %}
                 <tr>
-                    <td>{{ offer.seller.profile.full_name }}</td>
+                    <td>{{ offer.seller.title }}</td>
                     <td>{{ offer.price }}</td>
+                    <td><a href="{% url 'pages:offer-purchase' offer.pk %}">Купить</a></td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="2">Нет доступных предложений</td>
+                    <td colspan="3">Нет доступных предложений</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
 
     <h2>Добавить отзыв:</h2>
+    {% if user.is_authenticated %}
     <form method="post">
         {% csrf_token %}
+        <label for="seller">Продавец:</label>
+        <select name="seller" id="seller">
+          {% for seller in sellers %}
+            <option value="{{ seller.id }}">{{ seller.title }}</option>
+          {% endfor %}
+        </select>
+
         {{ form.as_p }}
-<!--        <label for="seller">Продавец:</label>-->
-<!--        <select name="seller" id="seller">-->
-<!--          {% for seller in sellers %}-->
-<!--            <option value="{{ seller.id }}">{{ seller.title }}</option>-->
-<!--          {% endfor %}-->
-<!--        </select>-->
+
         <button type="submit">Отправить</button>
     </form>
+    {% else %}
+        <p>Вы должны сначала <a href="{% url 'login' %}">войти,</a> чтобы оставить отзыв.</p>
+    {% endif %}
 
 <h2>Отзывы:</h2>
-    {% if product.reviews.exists %}
+<span>Количество отзывов: {{ review_count }}</span>
+    {% if reviews %}
     <ul>
-      {% for review in product.reviews.all %}
+      {% for review in reviews %}
         <li>
-            {{ review.offer.seller.title }} - {{ review.rating }}
-            {{ review.author }}: {{ review.text }}
-        </li>
+            <p>
+                Рейтинг: {{ review.rating }} / 5 | Продавец: <b>{{ review.offer.seller.title }}</b><br />
+                Комментарий: {{ review.text }}<br />
+                От <b>{{ review.profile.user.username }}</b>, дата: {{ review.created_at }}
+            </p>
+        </li> <br />
       {% endfor %}
     </ul>
   {% else %}
