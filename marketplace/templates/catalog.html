@@ -66,10 +66,10 @@
                         </div>
                         <div class="Sort-variants">
                             <a
-                                    {% if purchase_sort == 'desc' %}
+                                    {% if views_sort == 'desc' %}
                                         class="Sort-sortBy Sort-sortBy_inc"
                                         href="?{% query_transform views_sort='asc' %}"
-                                    {% elif purchase_sort == 'asc' %}
+                                    {% elif views_sort == 'asc' %}
                                         class="Sort-sortBy Sort-sortBy_dec"
                                         href="?{% query_transform views_sort='desc' %}"
                                     {% else %}

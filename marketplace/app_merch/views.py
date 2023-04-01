@@ -223,9 +223,9 @@ class CatalogView(ListView):
         if reviews_sort:
             context['reviews_sort'] = reviews_sort
         if views_sort:
-            context['purchase_sort'] = views_sort
+            context['views_sort'] = views_sort
 
-        if price_sort or created_at_sort or reviews_sort:
+        if price_sort or created_at_sort or reviews_sort or views_sort:
             context['any_sort'] = True
 
         return context
