@@ -135,3 +135,10 @@ LOGIN_REDIRECT_URL = "/"
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Celery config
+CELERY_BROKER_URL = "redis://0.0.0.0:6379/0"
+CELERY_RESULT_BACKEND = "redis://0.0.0.0:6379/0"
+
+# FastAPI payment service
+PURCHASE_URL = "http://0.0.0.0:5000/api/v1/purchase/"

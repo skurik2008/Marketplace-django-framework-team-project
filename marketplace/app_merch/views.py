@@ -1,9 +1,5 @@
-
-from django.db.models import QuerySet, Min, Max
-from django.views.generic import ListView
+from django.db.models import QuerySet, Min, Max, Count
 from mptt.querysets import TreeQuerySet
-
-from . import review_service
 from .models import (
     Category,
     Product,
@@ -16,12 +12,15 @@ from .models import (
 from app_settings.models import SiteSettings
 from app_users.models import Profile, Seller
 from django.core.cache import cache
-from django.shortcuts import get_object_or_404, redirect, render
+from django.db.models import Avg, Max, Min, QuerySet
+from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
+from django.views.generic.edit import FormView
+from mptt.querysets import TreeQuerySet
 
 from . import review_service
-from .forms import ReviewForm
-from .models import Banner, Category, Discount, Offer, Product, Review
+from .forms import PurchaseForm, ReviewForm
+from .models import Banner, Category, Discount, Offer, Product, Review, Tag
 
 
 class IndexView(ListView):
@@ -108,7 +107,7 @@ class CatalogView(ListView):
 
     def get_queryset(self):
         """
-        Получение списка товаров по фильтру.
+        Получение списка товаров по фильтру и сортировке.
         Список кешируется на 1 день.
         """
         queryset: QuerySet = Offer.objects.filter(is_active=True)
@@ -124,31 +123,51 @@ class CatalogView(ListView):
         slug: str = self.request.GET.get('cat')
         tag = self.request.GET.get('tag')
 
+        price_sort: str = self.request.GET.get('price_sort')
+        created_at_sort: str = self.request.GET.get('created_at_sort')
+        reviews_sort: str = self.request.GET.get('reviews_sort')
+        views_sort: str = self.request.GET.get('views_sort')
+
         if slug and slug != 'all':
             category: Category = Category.objects.get(slug=slug)
             sub_categories: TreeQuerySet = category.get_descendants(include_self=True)
 
             queryset: QuerySet = Offer.objects.select_related('product__category').filter(
                 product__category__in=sub_categories).filter(is_active=True)
-
         if price_range:
             min_price, max_price = price_range.split(';')[0], price_range.split(';')[1]
             queryset: QuerySet = queryset.filter(price__range=(min_price, max_price))
-
         if title:
             queryset: QuerySet = queryset.filter(product__title__icontains=title)
-
         if in_stock:
             queryset: QuerySet = queryset.filter(quantity__gt=0)
-
         if delivery_free:
             queryset: QuerySet = queryset.filter(is_delivery_free=True)
-
         if tag:
             queryset: QuerySet = queryset.filter(product__tags__pk=tag)
 
+        if price_sort in ('-price', 'price'):
+            queryset: QuerySet = queryset.order_by(price_sort)
+        if created_at_sort in ('-created_at', 'created_at'):
+            queryset: QuerySet = queryset.order_by(created_at_sort)
+        if reviews_sort in ('desc', 'asc'):
+            queryset: QuerySet = queryset.annotate(review_amount=Count('reviews'))
+            if reviews_sort == 'desc':
+                queryset: QuerySet = queryset.order_by('-review_amount')
+            else:
+                queryset: QuerySet = queryset.order_by('review_amount')
+        if views_sort in ('desc', 'asc'):
+            if views_sort == 'desc':
+                queryset: QuerySet = queryset.order_by('-total_views')
+            else:
+                queryset: QuerySet = queryset.order_by('total_views')
+
         return cache.get_or_set(
-            f"Catalog_{slug}_{price_range}_{title}_{in_stock}_{delivery_free}_{tag}",
+            f"Catalog_{slug}_{price_range}_"
+            f"{title}_{in_stock}_"
+            f"{delivery_free}_{tag}_"
+            f"{price_sort}_{created_at_sort}_"
+            f"{reviews_sort}_{views_sort}",
             queryset,
             time_to_cache * 60 * 60 * 24
         )
@@ -157,7 +176,7 @@ class CatalogView(ListView):
         """
         Получение контекста для корректного вывода отфильтрованных товаров.
         Контекст наполняется информацией касательно: тегов, макс. и мин. цены,
-        категории, наименовании товара, нахождении товара в наличии.
+        категории, наименовании товара, нахождении товара в наличии, различной сортировки.
         Данные о минимальной и максимальной цене добавляются в сессию для
         последующего получения значения из неё.
         """
@@ -170,6 +189,11 @@ class CatalogView(ListView):
         title: str = self.request.GET.get('title')
         in_stock: str = self.request.GET.get('in_stock')
         delivery_free: str = self.request.GET.get('delivery_free')
+
+        price_sort: str = self.request.GET.get('price_sort')
+        created_at_sort: str = self.request.GET.get('created_at_sort')
+        reviews_sort: str = self.request.GET.get('reviews_sort')
+        views_sort: str = self.request.GET.get('views_sort')
 
         min_price = self.object_list.aggregate(Min('price'))['price__min']
         max_price = self.object_list.aggregate(Max('price'))['price__max']
@@ -196,6 +220,18 @@ class CatalogView(ListView):
         if delivery_free:
             context['delivery_free'] = True
 
+        if price_sort:
+            context['price_sort'] = price_sort
+        if created_at_sort:
+            context['created_at_sort'] = created_at_sort
+        if reviews_sort:
+            context['reviews_sort'] = reviews_sort
+        if views_sort:
+            context['views_sort'] = views_sort
+
+        if price_sort or created_at_sort or reviews_sort or views_sort:
+            context['any_sort'] = True
+
         return context
 
 
@@ -206,27 +242,56 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        product = self.get_object()
+        context['icon_url'] = product.icon.file.url if product.icon else None
         offers = Offer.objects.filter(product=self.object)
         context['offers'] = offers
-        # добавляем форму для отзыва
+        average_price = offers.aggregate(Avg('price'))['price__avg']
+        context['average_price'] = average_price
         reviews = Review.objects.filter(offer__product=self.object, is_active=True)
         context['reviews'] = reviews
-        # добавляем список продавцов для выбора в форме
         sellers = Seller.objects.filter(profile__in=[offer.seller.profile for offer in offers])
         context['sellers'] = sellers
 
-        # создаём форму для отзыва
+        review_count = review_service.review_count(product)
+        context['review_count'] = review_count
+
         if self.request.user.is_authenticated:
             form = ReviewForm()
             context['form'] = form
         return context
 
-    # def post(self, request, pk):
-    #     """ логика для добавления отзыва к товару """
-    #     pass
+    def post(self, request, *args, **kwargs):
+        """ логика для добавления отзыва к товару """
+        product = self.get_object()
+        return review_service.new_review(request, product)
 
 
 def add_product_review(request):
     """ Вью для добавления отзыва к товару """
     if request.method == 'POST':
         review_service.new_review(request)
+
+
+class ProductPurchaseView(FormView):
+    template_name = 'products/offer_purchase.html'
+    form_class = PurchaseForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['offer'] = get_object_or_404(Offer, pk=self.kwargs['pk'])
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        offer = get_object_or_404(Offer, pk=self.kwargs['pk'])
+        context['product'] = offer.product
+        context['seller'] = offer.seller
+        context['price'] = offer.price
+        context['icon_url'] = offer.product.icon.file.url if offer.product.icon else None
+        return context
+
+    def form_valid(self, form):
+        # Обработка успешной отправки формы
+        # Здесь можно добавить логику для создания заказа и т. д.
+        return super().form_valid(form)
