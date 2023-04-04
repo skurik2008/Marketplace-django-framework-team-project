@@ -1,2 +1,62 @@
 {% extends 'base.html' %}
+{% load static %}
 
+{% block content %}
+    <div class="Middle Middle_top">
+        <div class="Section">
+            <div class="wrap">
+                <form class="form Cart" action="" method="post">
+                    {% for cartitem in cart_user %}
+                    <div class="Cart-product">
+                        <div class="Cart-block Cart-block_row">
+                            <div class="Cart-block Cart-block_pict"><a class="Cart-pict" href="#"><img class="Cart-img" src="/{{cartitem.offer.product.icon.file}}" alt="bigGoods2.jpg" /></a>
+                            </div>
+                            <div class="Cart-block Cart-block_info"><a class="Cart-title" href="{% url 'pages:product-detail' cartitem.offer.pk %}">{{cartitem.offer.product.title}}</a>
+                                <div class="Cart-desc">{{cartitem.offer.product.description}}</div>
+                            </div>
+
+                        </div>
+                            <div class="Cart-block Cart-block_row">
+                                <div class="Cart-block Cart-block_seller">
+                                    <div class="Cart-desc">Продавец: {{cartitem.offer.seller}}</div>
+                                <!-- - var options = setOptions(items, ['value', 'selected', 'disabled']);-->
+
+                                </div>
+                                <div class="Cart-block Cart-block_price">
+                                <div class="Cart-desc">Цена за ед.</div>
+                                <div class="Cart-price">{{cartitem.offer.price}}&nbsp;₽</div>
+                            </div>
+                            <div class="Cart-block Cart-block_amount">
+
+                                <div class="Cart-amount">
+                                    <div class="Amount">
+
+
+                                        <input class="Amount-input form-input" name="amount" type="number" min="1" max="{{cartitem.offer.quantity}}" step="1" value="{{cartitem.quantity}}"/>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="Cart-block Cart-block_price">
+                                <div class="Cart-desc">Сумма</div>
+                                <div class="Cart-price">{{cartitem.total_price}}&nbsp;₽</div>
+                            </div>
+                            <div class="Cart-block Cart-block_delete"><a class="Cart-delete" href="{% url 'app_basket:remove_from_cart' %}?cartitem_id={{cartitem.id}}"><img src="{% static '/assets/img/icons/card/delete.svg'%}" alt="delete.svg" /></a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="Cart-total">
+                        <div class="Cart-block Cart-block_total">
+                            <strong class="Cart-title">Итого:
+                            </strong><span class="Cart-price">{{cart.get_total_price_cart}} ₽</span>
+                        </div>
+                        <div class="Cart-block"><a class="btn btn_success btn_lg" href="order.html">Оформить заказ</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

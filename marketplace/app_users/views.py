@@ -9,12 +9,15 @@ from django.contrib.auth.views import (LoginView, LogoutView,
                                        PasswordResetConfirmView,
                                        PasswordResetDoneView,
                                        PasswordResetView)
+from django.contrib.auth import login as auth_login
 from django.core.cache import cache
+from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, UpdateView
 from sql_util.utils import SubqueryCount
 
-from .models import Profile
+from .models import Profile, Buyer
+from app_basket.models import Cart, CartItem
 
 
 class CustomLoginView(LoginView):
@@ -23,6 +26,24 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
     success_url = reverse_lazy('pages:index')
 
+    def form_valid(self, form):
+        username = form.get_user()
+        cart_id = self.request.session.get('cart_id')
+        cart_username = Cart.objects.filter(buyer__profile__user__username=username).first()
+        if not cart_username:
+            Cart.objects.filter(id=int(cart_id)).update(
+                buyer=Buyer.objects.create(profile=Profile.objects.get(user__username=username)))
+        else:
+            cartitems_anonymoususer = CartItem.objects.filter(cart=int(cart_id))
+            cartitems_username = CartItem.objects.filter(cart=cart_username.id)
+            cartitems_username_offer_ids_list = [cartitem.offer.id for cartitem in cartitems_username]
+            for cartitem in cartitems_anonymoususer:
+                if cartitem.offer.id not in cartitems_username_offer_ids_list:
+                    cartitem.cart = cart_username
+                    cartitem.save()
+
+        auth_login(self.request, form.get_user())
+        return HttpResponseRedirect(self.get_success_url())
 
 class CustomLogoutView(LogoutView):
     next_page = reverse_lazy('app_users:login')
