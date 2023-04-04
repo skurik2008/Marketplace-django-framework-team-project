@@ -1,14 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-
 from app_merch.models import Offer
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-
-
 from .cart import CartService
-from .models import CartItem
 
 
 def get_cart(request):
@@ -24,7 +20,6 @@ def add_to_cart(request):
     """
     quantity = request.GET.get('amount', 1)
     offer_id = request.GET.get('offer_id')
-    print(offer_id)
     offer = Offer.objects.get(id=offer_id)
     cart_user = CartService(request)
     cart_user.add_offer(offer=offer, quantity=quantity)

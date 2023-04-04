@@ -31,7 +31,7 @@
                 <tr>
                     <td>{{ offer.seller.title }}</td>
                     <td>{{ offer.price }}</td>
-                    <td><a href="{% url 'pages:offer-purchase' offer.pk %}">Купить</a></td>
+                    <td><a href="{% url 'app_basket:add_to_cart'%}?offer_id={{offer.pk}}">Купить</a></td>
                 </tr>
             {% empty %}
                 <tr>
@@ -57,7 +57,7 @@
         <button type="submit">Отправить</button>
     </form>
     {% else %}
-        <p>Вы должны сначала <a href="{% url 'login' %}">войти,</a> чтобы оставить отзыв.</p>
+        <p>Вы должны сначала <a href="{% url 'app_users:login' %}">войти,</a> чтобы оставить отзыв.</p>
     {% endif %}
 
 <h2>Отзывы:</h2>
