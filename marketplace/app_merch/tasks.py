@@ -9,7 +9,7 @@ def send_request_to_payment_service(
         order_id: int,
         card_number: str,
         amount: float
-):
+) -> dict | str:
     """
     Задача, которая будет добавлена в очередь на выполнение.
     Отправляет запрос на оплату заказа.
