@@ -1,9 +1,13 @@
+from django.contrib.auth.models import User
+from django.db.models import Q
+from sql_util.aggregates import SubquerySum
+
 from app_merch.models import Offer
 from app_settings.models import SiteSettings
 from app_users.forms import (ProfileUpdateForm, UserLoginForm,
                              UserPasswordResetForm, UserRegisterForm,
                              UserSetPasswordForm)
-from app_users.models import Seller
+from app_users.models import Seller, Order, OrderItem
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LoginView, LogoutView,
                                        PasswordResetConfirmView,
@@ -119,4 +123,20 @@ class SellerView(DetailView):
             ).order_by('-sales')[:10],
             top_seller_products_cache_time * 60 * 60
         )
+        return context
+
+
+class AccountView(LoginRequiredMixin, DetailView):
+    model = User
+    template_name = "users/account.html"
+    context_object_name = "user"
+    slug_url_kwarg = 'username'
+    slug_field = 'username'
+
+    def get_context_data(self, **kwargs):
+        context = super(AccountView, self).get_context_data(**kwargs)
+        last_order = Order.objects.filter(buyer=self.request.user.profile.buyer).order_by('order_date').last()
+        if last_order:
+            context['last_order'] = last_order
+            context['last_order_cost'] = sum(item.offer.price * item.quantity for item in OrderItem.objects.filter(order=last_order))
         return context

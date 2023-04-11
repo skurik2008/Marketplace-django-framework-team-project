@@ -17,7 +17,6 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
-
 from . import review_service
 from .forms import PurchaseForm, ReviewForm
 from .models import Banner, Category, Discount, Offer, Product, Review, Tag
