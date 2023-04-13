@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Q, Min, F
 from sql_util.aggregates import SubquerySum
 
 from app_merch.models import Offer
@@ -17,9 +17,7 @@ from django.contrib.auth import login as auth_login
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, UpdateView
-from sql_util.utils import SubqueryCount
-
+from django.views.generic import CreateView, DetailView, UpdateView, ListView
 from .models import Profile, Buyer
 from app_basket.models import Cart, CartItem
 
@@ -86,13 +84,6 @@ class CustomRegisterView(CreateView):
         return super().form_valid(form)
 
 
-class ProfileUpdateView(LoginRequiredMixin, UpdateView):
-    model = Profile
-    form_class = ProfileUpdateForm
-    template_name = 'users/profile_update.html'
-    success_url = '/'
-
-
 class SellerView(DetailView):
     model = Seller
     template_name = 'seller.html'
@@ -119,7 +110,7 @@ class SellerView(DetailView):
         context['offers'] = cache.get_or_set(
             f"Seller {kwargs.get('pk')} top products",
             Offer.objects.filter(seller=self.get_object()).annotate(
-                sales=SubqueryCount('order_items')
+                sales=SubquerySum('order_items__quantity')
             ).order_by('-sales')[:10],
             top_seller_products_cache_time * 60 * 60
         )
@@ -138,5 +129,41 @@ class AccountView(LoginRequiredMixin, DetailView):
         last_order = Order.objects.filter(buyer=self.request.user.profile.buyer).order_by('order_date').last()
         if last_order:
             context['last_order'] = last_order
-            context['last_order_cost'] = sum(item.offer.price * item.quantity for item in OrderItem.objects.filter(order=last_order))
+            context['last_order_cost'] = sum(item.offer.price * item.quantity
+                                             for item in OrderItem.objects.filter(order=last_order)
+                                             )
+        context['last_views'] = self.request.user.profile.buyer.views.all()[:3].annotate(
+            min_price=Min("offers__price")
+        )
         return context
+
+
+class ProfileEditView(LoginRequiredMixin, UpdateView):
+    model = User
+    template_name = "users/profile.html"
+    context_object_name = 'user'
+    slug_url_kwarg = 'username'
+    slug_field = 'username'
+    form_class = ''
+
+
+class OrdersHistoryView(LoginRequiredMixin, ListView):
+    model = Order
+    context_object_name = "orders"
+    template_name = "users/historyorder.html"
+    ordering = "-order_date"
+
+    def get_queryset(self):
+        queryset = super(OrdersHistoryView, self).get_queryset()
+        queryset = queryset.filter(buyer=self.request.user.profile.buyer).annotate(
+            price=F("order_items__offer__price") * F("order_items__quantity")
+        )
+        return queryset
+
+
+class ViewsHistoryView(LoginRequiredMixin, DetailView):
+    model = User
+    context_object_name = "buyer"
+    template_name = "users/historyview.html"
+    slug_url_kwarg = 'username'
+    slug_field = 'username'

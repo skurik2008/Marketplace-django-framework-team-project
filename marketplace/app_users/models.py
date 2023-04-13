@@ -11,7 +11,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='profile',
                                 db_index=True, verbose_name='пользователь')
     full_name = models.CharField(max_length=150, verbose_name='полное имя')
-    phone_number = models.CharField(max_length=50, verbose_name='номер телефона')
+    phone_number = models.CharField(max_length=50, verbose_name='номер телефона', unique=True)
     address = models.CharField(max_length=255, verbose_name='адрес')
     avatar = models.ForeignKey('app_merch.Image', on_delete=models.SET_NULL, related_name='profile',
                                blank=True, null=True, verbose_name='аватар')
