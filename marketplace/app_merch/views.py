@@ -168,9 +168,24 @@ class CatalogView(ListView):
             f"{delivery_free}_{tag}_"
             f"{price_sort}_{created_at_sort}_"
             f"{reviews_sort}_{views_sort}",
-            queryset,
+            self.__unique_queryset(queryset),
             time_to_cache * 60 * 60 * 24
         )
+
+    @staticmethod
+    def __unique_queryset(offers: QuerySet):
+        """
+        В случае существования предложения с одинаковыми товарами,
+        выводим предложения в единственном числе с минимальной ценой.
+        """
+        product_ids = []
+        unique_ids = []
+        for offer in offers:
+            if offer.product.pk not in product_ids:
+                product_ids.append(offer.product.pk)
+                unique_ids.append(offer.pk)
+
+        return offers.filter(pk__in=unique_ids).order_by('price')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         """
