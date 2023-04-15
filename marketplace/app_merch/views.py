@@ -1,5 +1,3 @@
-from time import sleep
-
 from django.db.models import QuerySet, Min, Max, Count
 from mptt.querysets import TreeQuerySet
 from .models import (
