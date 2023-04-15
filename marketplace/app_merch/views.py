@@ -102,7 +102,7 @@ class PriorityDiscountView(ListView):
 class CatalogView(ListView):
     """ Вью класс для получения списка товаров и отображения их в каталоге. """
     template_name = 'catalog.html'
-    context_object_name = 'offers'
+    context_object_name = 'products'
     paginate_by = 8
 
     def get_queryset(self):
@@ -110,7 +110,7 @@ class CatalogView(ListView):
         Получение списка товаров по фильтру и сортировке.
         Список кешируется на 1 день.
         """
-        queryset: QuerySet = Offer.objects.filter(is_active=True)
+        queryset: QuerySet = Product.objects.filter(offers__is_active=True)
 
         time_to_cache: int = SiteSettings.load().time_to_cache
         if not time_to_cache:
@@ -132,42 +132,40 @@ class CatalogView(ListView):
             category: Category = Category.objects.get(slug=slug)
             sub_categories: TreeQuerySet = category.get_descendants(include_self=True)
 
-            queryset: QuerySet = Offer.objects.select_related('product__category').filter(
-                product__category__in=sub_categories).filter(is_active=True)
+            queryset: QuerySet = queryset.select_related('category').filter(
+                category__in=sub_categories)
         if price_range:
             min_price, max_price = price_range.split(';')[0], price_range.split(';')[1]
-            queryset: QuerySet = queryset.filter(price__range=(min_price, max_price))
+            queryset: QuerySet = queryset.filter(offers__price__range=(min_price, max_price))
         if title:
-            queryset: QuerySet = queryset.filter(product__title__icontains=title)
+            queryset: QuerySet = queryset.filter(title__icontains=title)
         if in_stock:
-            queryset: QuerySet = queryset.filter(quantity__gt=0)
+            queryset: QuerySet = queryset.filter(offers__quantity__gt=0)
         if delivery_free:
-            queryset: QuerySet = queryset.filter(is_delivery_free=True)
+            queryset: QuerySet = queryset.filter(offers__is_delivery_free=True)
         if tag:
-            queryset: QuerySet = queryset.filter(product__tags__pk=tag)
+            queryset: QuerySet = queryset.filter(tags__pk=tag)
 
-        if price_sort in ('-price', 'price'):
+        if price_sort in ('-offers__price', 'offers__price'):
             queryset: QuerySet = queryset.order_by(price_sort)
-        if created_at_sort in ('-created_at', 'created_at'):
+        if created_at_sort in ('-offers__created_at', 'offers__created_at'):
             queryset: QuerySet = queryset.order_by(created_at_sort)
         if reviews_sort in ('desc', 'asc'):
-            queryset: QuerySet = queryset.annotate(review_amount=Count('reviews'))
+            queryset: QuerySet = queryset.annotate(review_amount=Count('offers__reviews'))
             if reviews_sort == 'desc':
                 queryset: QuerySet = queryset.order_by('-review_amount')
             else:
                 queryset: QuerySet = queryset.order_by('review_amount')
         if views_sort in ('desc', 'asc'):
             if views_sort == 'desc':
-                queryset: QuerySet = queryset.order_by('-total_views')
+                queryset: QuerySet = queryset.order_by('-offers__total_views')
             else:
-                queryset: QuerySet = queryset.order_by('total_views')
+                queryset: QuerySet = queryset.order_by('offers__total_views')
+
+        queryset = queryset.annotate(min_price=Min('offers__price'))
 
         return cache.get_or_set(
-            f"Catalog_{slug}_{price_range}_"
-            f"{title}_{in_stock}_"
-            f"{delivery_free}_{tag}_"
-            f"{price_sort}_{created_at_sort}_"
-            f"{reviews_sort}_{views_sort}",
+            f"{str(queryset)}".replace(' ', '_'),
             queryset,
             time_to_cache * 60 * 60 * 24
         )
@@ -195,15 +193,15 @@ class CatalogView(ListView):
         reviews_sort: str = self.request.GET.get('reviews_sort')
         views_sort: str = self.request.GET.get('views_sort')
 
-        min_price = self.object_list.aggregate(Min('price'))['price__min']
-        max_price = self.object_list.aggregate(Max('price'))['price__max']
+        min_price = self.object_list.aggregate(Min('offers__price'))['offers__price__min']
+        max_price = self.object_list.aggregate(Max('offers__price'))['offers__price__max']
 
         if not self.request.session.get('min_price') or not self.request.session.get('max_price'):
             self.request.session['min_price'] = str(min_price)
             self.request.session['max_price'] = str(max_price)
         else:
-            min_price = self.request.session.get('min_price')
-            max_price = self.request.session.get('max_price')
+            min_price = self.request.session.get('min_price', min_price)
+            max_price = self.request.session.get('max_price', min_price)
 
         if price_range:
             curr_min_price, curr_max_price = price_range.split(';')[0], price_range.split(';')[1]
