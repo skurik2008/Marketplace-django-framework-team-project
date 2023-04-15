@@ -1,7 +1,9 @@
-from app_merch.models import Offer, Product
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
+
+
+User._meta.get_field('email')._unique = True
 
 
 class Profile(models.Model):

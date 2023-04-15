@@ -1,12 +1,11 @@
 from django.contrib.auth.models import User
-from django.db.models import Q, Min, F
+from django.db.models import Min, F
+from django.shortcuts import render
 from sql_util.aggregates import SubquerySum
-
 from app_merch.models import Offer
 from app_settings.models import SiteSettings
-from app_users.forms import (ProfileUpdateForm, UserLoginForm,
-                             UserPasswordResetForm, UserRegisterForm,
-                             UserSetPasswordForm)
+from app_users.forms import UserLoginForm, UserPasswordResetForm, UserRegisterForm, UserSetPasswordForm, UserUpdateForm, \
+    ProfileUpdateForm, UpdatePasswordForm
 from app_users.models import Seller, Order, OrderItem
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LoginView, LogoutView,
@@ -46,6 +45,7 @@ class CustomLoginView(LoginView):
 
         auth_login(self.request, form.get_user())
         return HttpResponseRedirect(self.get_success_url())
+
 
 class CustomLogoutView(LogoutView):
     next_page = reverse_lazy('app_users:login')
@@ -138,13 +138,35 @@ class AccountView(LoginRequiredMixin, DetailView):
         return context
 
 
-class ProfileEditView(LoginRequiredMixin, UpdateView):
+class ProfileEditView(LoginRequiredMixin, DetailView):
     model = User
     template_name = "users/profile.html"
-    context_object_name = 'user'
+    context_object_name = 'user_form'
     slug_url_kwarg = 'username'
     slug_field = 'username'
-    form_class = ''
+
+    def get_context_data(self, **kwargs):
+        context = super(ProfileEditView, self).get_context_data(**kwargs)
+        context["profile_form"] = ProfileUpdateForm(instance=self.request.user.profile)
+        context["user_form"] = UserUpdateForm(instance=self.request.user)
+        context["password_form"] = UpdatePasswordForm(self.request.user)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        password_form = UpdatePasswordForm(request.user, request.POST)
+        if user_form.is_valid() and profile_form.is_valid() and password_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            password_form.save()
+            return render(request, 'users/profile.html')
+        context = {
+            "user_form": user_form,
+            "profile_form": profile_form,
+            "password_form": password_form
+        }
+        return render(request, 'users/profile.html', context)
 
 
 class OrdersHistoryView(LoginRequiredMixin, ListView):
