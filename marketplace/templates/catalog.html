@@ -79,15 +79,15 @@
                             >Популярности
                             </a>
                             <a
-                                    {% if price_sort == '-offers__price' %}
+                                    {% if price_sort == '-min_price' %}
                                         class="Sort-sortBy Sort-sortBy_inc"
-                                        href="?{% query_transform price_sort='offers__price' %}"
-                                    {% elif price_sort == 'offers__price' %}
+                                        href="?{% query_transform price_sort='min_price' %}"
+                                    {% elif price_sort == 'min_price' %}
                                         class="Sort-sortBy Sort-sortBy_dec"
-                                        href="?{% query_transform price_sort='-offers__price' %}"
+                                        href="?{% query_transform price_sort='-min_price' %}"
                                     {% else %}
                                         class="Sort-sortBy"
-                                        href="?{% query_transform price_sort='-offers__price' %}"
+                                        href="?{% query_transform price_sort='-min_price' %}"
                                     {% endif %}>Цене
                             </a>
                             <a
@@ -102,15 +102,15 @@
                                         href="?{% query_transform reviews_sort='desc' %}"
                                     {% endif %}>Отзывам</a>
                             <a
-                                    {% if created_at_sort == '-offers__created_at' %}
+                                    {% if created_at_sort == '-created_at' %}
                                         class="Sort-sortBy Sort-sortBy_inc"
-                                        href="?{% query_transform created_at_sort='offers__created_at' %}"
-                                    {% elif created_at_sort == 'offers__created_at' %}
+                                        href="?{% query_transform created_at_sort='created_at' %}"
+                                    {% elif created_at_sort == 'created_at' %}
                                         class="Sort-sortBy Sort-sortBy_dec"
-                                        href="?{% query_transform created_at_sort='-offers__created_at' %}"
+                                        href="?{% query_transform created_at_sort='-created_at' %}"
                                     {% else %}
                                         class="Sort-sortBy"
-                                        href="?{% query_transform created_at_sort='-offers__created_at' %}"
+                                        href="?{% query_transform created_at_sort='-created_at' %}"
                                     {% endif %}>Новизне
                             </a>
                             {% if any_sort %}
@@ -120,14 +120,14 @@
                     </div>
                     <div class="Cards">
                         {% for product in products %}
-                        <div class="Card"><a class="Card-picture" href="{% url 'pages:product-detail' product.pk %}"><img src="/{% firstof product.icon.file 'static/assets/img/content/home/card.jpg' %}" alt="card.jpg" /></a>
+                        <div class="Card"><a class="Card-picture" href="{% url 'pages:product-detail' product.pk %}"><img src="/{% firstof product.icon__file 'static/assets/img/content/home/card.jpg' %}" alt="card.jpg" /></a>
                             <div class="Card-content">
                                 <strong class="Card-title"><a href="{% url 'pages:product-detail' product.pk %}">{{ product.title }}</a>
                                 </strong>
                                 <div class="Card-description">
                                     <div class="Card-cost"><span class="Card-price">${{ product.min_price }}</span>
                                     </div>
-                                    <div class="Card-category">{{ product.category.title }}
+                                    <div class="Card-category">{{ product.category__title }}
                                     </div>
                                     <div class="Card-hover"><a class="Card-btn" href="#"><img src="{% static 'assets/img/icons/card/cart.svg' %}" alt="cart.svg" /></a>
                                     </div>

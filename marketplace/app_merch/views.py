@@ -145,9 +145,13 @@ class CatalogView(ListView):
         if tag:
             queryset: QuerySet = queryset.filter(tags__pk=tag)
 
-        if price_sort in ('-offers__price', 'offers__price'):
+        queryset = queryset.values(
+            'pk', 'category__title', 'icon__file', 'title'
+        ).annotate(min_price=Min('offers__price'))
+
+        if price_sort in ('-min_price', 'min_price'):
             queryset: QuerySet = queryset.order_by(price_sort)
-        if created_at_sort in ('-offers__created_at', 'offers__created_at'):
+        if created_at_sort in ('-created_at', 'created_at'):
             queryset: QuerySet = queryset.order_by(created_at_sort)
         if reviews_sort in ('desc', 'asc'):
             queryset: QuerySet = queryset.annotate(review_amount=Count('offers__reviews'))
@@ -161,13 +165,7 @@ class CatalogView(ListView):
             else:
                 queryset: QuerySet = queryset.order_by('offers__total_views')
 
-        queryset = queryset.annotate(min_price=Min('offers__price'))
-
-        return cache.get_or_set(
-            f"{str(queryset)}".replace(' ', '_'),
-            queryset,
-            time_to_cache * 60 * 60 * 24
-        )
+        return queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
         """
