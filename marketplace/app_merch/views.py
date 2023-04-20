@@ -13,8 +13,8 @@ from app_settings.models import SiteSettings
 from app_users.models import Profile, Seller
 from django.core.cache import cache
 from django.db.models import Avg, Max, Min, QuerySet
-from django.shortcuts import get_object_or_404
-from django.views.generic import DetailView, ListView
+from django.shortcuts import get_object_or_404, render
+from django.views.generic import DetailView, ListView, View
 from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
 from . import review_service
@@ -290,3 +290,18 @@ class ProductPurchaseView(FormView):
         # Обработка успешной отправки формы
         # Здесь можно добавить логику для создания заказа и т. д.
         return super().form_valid(form)
+
+
+class OrderView(View):
+    """ View для оформления заказа. """
+
+    def get(self, request):
+        context = {}
+        if self.request.user.is_authenticated:
+            context = {
+                "user_fullname": f"{self.request.user.first_name} {self.request.user.last_name}",
+                'user_phone': self.request.user.profile.phone_number,
+                'user_email': self.request.user.email
+            }
+
+        return render(request, 'orders/order.html', context=context)
