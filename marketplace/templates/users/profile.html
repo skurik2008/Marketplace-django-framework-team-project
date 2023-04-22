@@ -37,7 +37,7 @@
                                         <label class="form-label" for="avatar">Аватар
                                         </label>
                                         <div class="Profile-avatar Profile-avatar_noimg">
-                                            <label class="Profile-fileLabel" for="avatar"><img src="assets/img/icons/upload.png" alt="#.png" />Загрузить фото
+                                            <label class="Profile-fileLabel" for="avatar"><img src="{% static 'assets/img/icons/upload.png' %}" alt="#.png" />Загрузить фото
                                             </label>
                                             {{ profile_form.avatar.errors }}
                                             {{ profile_form.avatar }}
