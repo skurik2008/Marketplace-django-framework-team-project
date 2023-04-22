@@ -70,7 +70,7 @@
                                                                                                        src="/{{ item.offer.product.icon.file }}"
                                                                                                        alt="card.jpg"/></a>
                             </div>
-                            <div class="Cart-block Cart-block_info"><a class="Cart-title" href="{% url 'pages:product-detail' item.offer.pk %}">{{ item.offer.product.title }}</a>
+                            <div class="Cart-block Cart-block_info"><a class="Cart-title" href="{% url 'pages:product-detail' item.offer.product.pk %}">{{ item.offer.product.title }}</a>
                                 <div class="Cart-desc">{{ item.offer.product.description }}
                                 </div>
                             </div>
@@ -101,7 +101,7 @@
     {% else %}
         <div align="center">
             <h2 class="Section-title">Заполните информацию на <a href="{% url 'pages:order-step-3' %}">шаге 3</a>, пожалуйста!</h2>
-            <img src="{% static 'assets/img/content/home/bad_order.jpg' %}" alt="bad_order" width="700"/>
+            <img src="{% static 'assets/img/content/home/bad_order.jpg' %}" alt="bad_order" style="max-width: 700px; width: 100%"/>
         </div>
     {% endif %}
     </form>

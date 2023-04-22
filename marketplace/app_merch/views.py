@@ -305,7 +305,8 @@ class OrderUserDataView(View):
             context = {
                 "user_fullname": f"{self.request.user.profile.full_name}",
                 'user_phone': self.request.user.profile.phone_number,
-                'user_email': self.request.user.email
+                'user_email': self.request.user.email,
+                'cart_items': CartService(self.request).get_cart_item_list()
             }
 
         return render(self.request, 'orders/order_user_data.html', context=context)

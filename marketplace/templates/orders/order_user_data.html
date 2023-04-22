@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block order_step %}
+    {% if cart_items %}
     <form method="post" class="form">
     {% csrf_token %}
     <div class="Order-block Order-block_OPEN" id="step1">
@@ -58,4 +59,10 @@
         {% endif %}
     </div>
     </form>
+    {% else %}
+        <h2 class="Section-title">Ваша корзина пуста. <a href="{% url 'pages:catalog-view' %}">Продолжить покупки.</a></h2>
+        <div align="center">
+            <img src="{% static 'assets/img/content/home/empty_order.svg'%}" alt="empty_order" style="max-width: 350px"/>
+        </div>
+    {% endif %}
 {% endblock %}
