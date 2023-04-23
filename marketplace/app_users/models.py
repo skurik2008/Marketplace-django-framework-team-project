@@ -105,9 +105,25 @@ class ComparisonList(models.Model):
         return f'Список сравнения {self.profile}'
 
 
+class PaymentType(models.Model):
+    """ Модель типа оплаты. """
+
+    title = models.CharField(max_length=100, verbose_name='вид оплаты')
+    is_active = models.BooleanField(default=True, verbose_name='активен')
+
+    class Meta:
+        verbose_name = 'вид оплаты'
+        verbose_name_plural = 'виды оплаты'
+
+    def __str__(self):
+        return self.title
+
+
 class Payment(models.Model):
     buyer = models.ForeignKey(Buyer, on_delete=models.PROTECT, related_name='payments', verbose_name='покупатель')
-    type = models.CharField(max_length=100, verbose_name='тип')
+    payment_type = models.ForeignKey(
+        PaymentType, on_delete=models.PROTECT, related_name='payment', verbose_name='тип оплаты'
+    )
     credit_card = models.CharField(max_length=8, verbose_name='номер счета')
 
     class Meta:
@@ -115,7 +131,7 @@ class Payment(models.Model):
         verbose_name_plural = 'Типы оплаты'
 
     def __str__(self):
-        return self.type
+        return self.payment_type
 
 
 class DeliveryType(models.Model):

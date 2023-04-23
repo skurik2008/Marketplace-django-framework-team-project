@@ -1,6 +1,15 @@
 from django.contrib import admin
 
-from .models import Buyer, Profile, Seller, Order, OrderItem, Payment, DeliveryType
+from .models import (
+    Buyer,
+    Profile,
+    Seller,
+    Order,
+    OrderItem,
+    Payment,
+    DeliveryType,
+    PaymentType
+)
 
 
 @admin.register(Profile)
@@ -35,7 +44,7 @@ class OrderItemAdmin(admin.ModelAdmin):
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ['buyer', 'type']
+    list_display = ['buyer', 'payment_type']
     search_fields = ['buyer']
 
 
@@ -43,3 +52,9 @@ class PaymentAdmin(admin.ModelAdmin):
 class DeliveryTypeAdmin(admin.ModelAdmin):
     list_display = ['type']
     search_fields = ['type']
+
+
+@admin.register(PaymentType)
+class PaymentTypeAdmin(admin.ModelAdmin):
+    list_display = ['pk', 'title']
+    list_filter = ['is_active']
