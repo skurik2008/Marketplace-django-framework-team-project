@@ -1,4 +1,5 @@
 from django.db.models import QuerySet, Min, Max, Count
+from django.urls import reverse
 from mptt.querysets import TreeQuerySet
 from .models import (
     Category,
@@ -13,13 +14,15 @@ from app_settings.models import SiteSettings
 from app_users.models import Profile, Seller
 from django.core.cache import cache
 from django.db.models import Avg, Max, Min, QuerySet
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import DetailView, ListView, View
 from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
 from . import review_service
 from .forms import PurchaseForm, ReviewForm
 from .models import Banner, Category, Discount, Offer, Product, Review, Tag
+from app_basket.cart import CartService
+from app_users.models import DeliveryType
 
 
 class IndexView(ListView):
@@ -292,16 +295,66 @@ class ProductPurchaseView(FormView):
         return super().form_valid(form)
 
 
-class OrderView(View):
-    """ View для оформления заказа. """
+class OrderUserDataView(View):
+    """ View для оформления заказа. 1-ый шаг заполнения, информация о пользователе. """
 
-    def get(self, request):
+    def get(self, *args, **kwargs):
+        self.request.session['step'] = 1
         context = {}
         if self.request.user.is_authenticated:
             context = {
-                "user_fullname": f"{self.request.user.first_name} {self.request.user.last_name}",
+                "user_fullname": f"{self.request.user.profile.full_name}",
                 'user_phone': self.request.user.profile.phone_number,
-                'user_email': self.request.user.email
+                'user_email': self.request.user.email,
+                'cart_items': CartService(self.request).get_cart_item_list()
             }
 
-        return render(request, 'orders/order.html', context=context)
+        return render(self.request, 'orders/order_user_data.html', context=context)
+
+    def post(self, *args, **kwargs):
+        self.request.session['user_data'] = dict(self.request.POST)
+        self.request.session['step'] = 2
+        return redirect('pages:order-step-2')
+
+
+class OrderDeliveryView(View):
+    """ View для оформления заказа. 2-ый шаг заполнения, способ доставки. """
+
+    def get(self, *args, **kwargs):
+        self.request.session['step'] = 2
+        return render(self.request, 'orders/order_delivery.html', context={
+            'delivery_type': DeliveryType.objects.all()
+        })
+
+    def post(self, *args, **kwargs):
+        self.request.session['user_data'].update(
+            {"delivery_data": dict(self.request.POST)}
+        )
+        self.request.session['step'] = 3
+        return redirect('pages:order-step-3')
+
+
+class OrderPaymentView(View):
+    """ View для оформления заказа. 3-ый шаг заполнения, способ оплаты."""
+
+    def get(self, *args, **kwargs):
+        self.request.session['step'] = 3
+        return render(self.request, 'orders/order_payment.html')
+
+    def post(self, *args, **kwargs):
+        self.request.session['user_data'].update(
+            {"payment_data": dict(self.request.POST)}
+        )
+        self.request.session['step'] = 4
+        return redirect('pages:order-step-4')
+
+
+class OrderPurchaseView(View):
+    """ View для оформления заказа. 4-ый шаг, проверка введённых данных. """
+
+    def get(self, *args, **kwargs):
+        self.request.session['step'] = 4
+        context = {
+            "cart_items": CartService(self.request).get_cart_item_list()
+        }
+        return render(self.request, 'orders/order_purchase.html', context=context)

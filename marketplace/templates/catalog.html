@@ -135,7 +135,7 @@
                             </div>
                         </div>
                         {% empty %}
-                        <img src="{% static 'assets/img/content/home/no_res.png' %}" alt="no_results" width="450"/>
+                        <img src="{% static 'assets/img/content/home/no_res.png' %}" alt="no_results" style="max-width: 600px; width: 100%"/>
                         {% endfor %}
                     </div>
                     {% if page_obj.has_other_pages %}
