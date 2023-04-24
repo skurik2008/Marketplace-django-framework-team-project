@@ -52,4 +52,6 @@ class CartItem(models.Model):
         verbose_name_plural = 'Товары в корзине'
 
     def __str__(self):
+        if self.cart.buyer is None:
+            return f'{self.offer.product.title} from Anonymous user'
         return f'{self.offer.product.title} from {self.cart.buyer.profile.user.username}'

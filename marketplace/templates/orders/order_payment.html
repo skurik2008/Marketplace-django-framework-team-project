@@ -14,24 +14,28 @@
                 {% if not request.session.user_data.payment_data %}
                 <div>
                     <label class="toggle">
-                        <input type="radio" name="pay" value="online" checked="checked"/><span
-                            class="toggle-box"></span><span class="toggle-text">Онлайн картой</span>
+                        <input type="radio" name="pay" value="{{ payment_type.0.title }}" checked="checked" /><span class="toggle-box"></span><span
+                            class="toggle-text">{{ payment_type.0.title }}</span>
                     </label>
                 </div>
+                {% for payment in payment_type|slice:"1:" %}
+                <div>
+                    <label class="toggle">
+                        <input type="radio" name="pay" value="{{ payment.title }}" {% if request.session.user_data.payment_data.pay.0 == payment.title %} checked="checked" {% endif %}/><span
+                            class="toggle-box"></span><span class="toggle-text">{{ payment.title }}</span>
+                    </label>
+                </div>
+                {% endfor %}
                 {% else %}
+                {% for payment in payment_type %}
                 <div>
                     <label class="toggle">
-                        <input type="radio" name="pay" value="online" {% if request.session.user_data.payment_data.pay.0 == "online" %} checked="checked" {% endif %}/><span
-                            class="toggle-box"></span><span class="toggle-text">Онлайн картой</span>
+                        <input type="radio" name="pay" value="{{ payment.title }}" {% if request.session.user_data.payment_data.pay.0 == payment.title %} checked="checked" {% endif %}/><span
+                            class="toggle-box"></span><span class="toggle-text">{{ payment.title }}</span>
                     </label>
                 </div>
+                {% endfor %}
                 {% endif %}
-                <div>
-                    <label class="toggle">
-                        <input type="radio" name="pay" value="someone" {% if request.session.user_data.payment_data.pay.0 == "someone" %} checked="checked" {% endif %}/><span class="toggle-box"></span><span
-                            class="toggle-text">Онлайн со случайного чужого счета</span>
-                    </label>
-                </div>
             </div>
             <div class="Order-footer"><button class="btn btn_success" type="submit">Дальше</button>
             </div>

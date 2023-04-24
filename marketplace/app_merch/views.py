@@ -22,7 +22,7 @@ from . import review_service
 from .forms import PurchaseForm, ReviewForm
 from .models import Banner, Category, Discount, Offer, Product, Review, Tag
 from app_basket.cart import CartService
-from app_users.models import DeliveryType
+from app_users.models import DeliveryType, PaymentType
 
 
 class IndexView(ListView):
@@ -300,14 +300,13 @@ class OrderUserDataView(View):
 
     def get(self, *args, **kwargs):
         self.request.session['step'] = 1
-        context = {}
+        context = {'cart_items': CartService(self.request).get_cart_item_list()}
         if self.request.user.is_authenticated:
-            context = {
-                "user_fullname": f"{self.request.user.profile.full_name}",
+            context.update({
+                'user_fullname': f'{self.request.user.profile.full_name}',
                 'user_phone': self.request.user.profile.phone_number,
-                'user_email': self.request.user.email,
-                'cart_items': CartService(self.request).get_cart_item_list()
-            }
+                'user_email': self.request.user.email
+            })
 
         return render(self.request, 'orders/order_user_data.html', context=context)
 
@@ -339,7 +338,9 @@ class OrderPaymentView(View):
 
     def get(self, *args, **kwargs):
         self.request.session['step'] = 3
-        return render(self.request, 'orders/order_payment.html')
+        return render(self.request, 'orders/order_payment.html', context={
+            'payment_type': PaymentType.objects.filter(is_active=True)
+        })
 
     def post(self, *args, **kwargs):
         self.request.session['user_data'].update(
