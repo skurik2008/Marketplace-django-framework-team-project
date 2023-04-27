@@ -65,6 +65,12 @@ class UserUpdateForm(UserChangeForm):
     class Meta:
         model = User
         fields = ('email', )
+        widgets = {
+            'email': forms.TextInput(attrs={"class": "form-input", "id": "mail", "name": "mail",
+                                            "data-validate": "require"
+                                            }
+                                     ),
+        }
 
 
 class ProfileUpdateForm(forms.ModelForm):
@@ -86,6 +92,7 @@ class ProfileUpdateForm(forms.ModelForm):
 
 class UpdatePasswordForm(SetPasswordForm):
     new_password1 = forms.CharField(
+        required=False,
         widget=forms.PasswordInput(attrs={"class": "form-input", "id": "password", "name": "password",
                                           "placeholder": "Тут можно изменить пароль"
                                           }
@@ -93,6 +100,7 @@ class UpdatePasswordForm(SetPasswordForm):
         strip=False,
     )
     new_password2 = forms.CharField(
+        required=False,
         strip=False,
         widget=forms.PasswordInput(attrs={"class": "form-input", "id": "passwordReply", "name": "passwordReply",
                                           "placeholder": "Введите пароль повторно"

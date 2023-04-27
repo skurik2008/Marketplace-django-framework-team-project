@@ -41,7 +41,7 @@
                             </div>
                             <div class="Account-column">
                                 <div class="Account-name">{{ user.profile.full_name }}
-                                </div><a class="Account-editLink" href="#">Редактировать профиль</a>
+                                </div><a class="Account-editLink" href="{% url "app_users:profile_edit" user.username %}">Редактировать профиль</a>
                             </div>
                         </div>
                         <header class="Section-header">
