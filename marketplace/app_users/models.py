@@ -174,6 +174,9 @@ class Order(models.Model):
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
 
+    def __str__(self):
+        return f"Заказ {self.id} от {self.order_date}"
+
 
 class OrderItem(models.Model):
     offer = models.ForeignKey('app_merch.Offer', on_delete=models.PROTECT, related_name='order_items',
