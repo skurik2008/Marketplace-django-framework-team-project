@@ -131,7 +131,7 @@ class Payment(models.Model):
         verbose_name_plural = 'Типы оплаты'
 
     def __str__(self):
-        return self.payment_type
+        return self.payment_type.title
 
 
 class DeliveryType(models.Model):
@@ -172,6 +172,9 @@ class Order(models.Model):
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
+
+    def __str__(self):
+        return f"Заказ {self.id} от {self.order_date}"
 
 
 class OrderItem(models.Model):

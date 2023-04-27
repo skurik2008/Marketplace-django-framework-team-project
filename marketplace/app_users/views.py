@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.models import User
-from django.db.models import Min, F
+from django.db.models import Min, F, Sum
 from django.shortcuts import render, redirect
 from sql_util.aggregates import SubquerySum
 from app_merch.models import Offer
@@ -184,7 +184,7 @@ class OrdersHistoryView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = super(OrdersHistoryView, self).get_queryset()
         queryset = queryset.filter(buyer=self.request.user.profile.buyer).annotate(
-            price=F("order_items__offer__price") * F("order_items__quantity")
+            price=Sum(F("order_items__offer__price") * F("order_items__quantity"))
         )
         return queryset
 
@@ -195,3 +195,19 @@ class ViewsHistoryView(LoginRequiredMixin, DetailView):
     template_name = "users/historyview.html"
     slug_url_kwarg = 'username'
     slug_field = 'username'
+
+
+class OrderDetailView(DetailView):
+    model = Order
+    context_object_name = "order"
+    template_name = "users/oneorder.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(OrderDetailView, self).get_context_data(**kwargs)
+        context["order_items"] = OrderItem.objects.filter(order=self.get_object()).annotate(
+            price=F("offer__price") * F("quantity")
+        )
+        context["order_cost"] = sum(item.offer.price * item.quantity
+                                    for item in OrderItem.objects.filter(order=self.get_object())
+                                    )
+        return context
