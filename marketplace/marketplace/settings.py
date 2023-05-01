@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "app_settings",
     "mptt",
     "django_mptt_admin",
+    "mathfilters",
 ]
 
 MIDDLEWARE = [

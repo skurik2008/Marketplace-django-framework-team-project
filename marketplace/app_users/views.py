@@ -1,23 +1,23 @@
+from app_basket.models import Cart, CartItem
 from app_merch.models import Offer
 from app_settings.models import SiteSettings
 from app_users.forms import (ProfileUpdateForm, UserLoginForm,
                              UserPasswordResetForm, UserRegisterForm,
                              UserSetPasswordForm)
 from app_users.models import Seller
+from django.contrib.auth import login as auth_login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LoginView, LogoutView,
                                        PasswordResetConfirmView,
                                        PasswordResetDoneView,
                                        PasswordResetView)
-from django.contrib.auth import login as auth_login
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, UpdateView
 from sql_util.utils import SubqueryCount
 
-from .models import Profile, Buyer
-from app_basket.models import Cart, CartItem
+from .models import Buyer, Profile
 
 
 class CustomLoginView(LoginView):

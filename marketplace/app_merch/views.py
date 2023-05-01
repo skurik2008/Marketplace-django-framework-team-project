@@ -1,24 +1,14 @@
-from django.db.models import QuerySet, Min, Max, Count
-from mptt.querysets import TreeQuerySet
-from .models import (
-    Category,
-    Product,
-    Banner,
-    Discount,
-    Offer,
-    Review,
-    Tag
-)
 from app_settings.models import SiteSettings
 from app_users.models import Profile, Seller
 from django.core.cache import cache
-from django.db.models import Avg, Max, Min, QuerySet
+from django.db.models import Avg, Count, Max, Min, QuerySet
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
 
 from . import review_service
+from .discount_service import DiscountService
 from .forms import PurchaseForm, ReviewForm
 from .models import Banner, Category, Discount, Offer, Product, Review, Tag
 
@@ -244,17 +234,35 @@ class ProductDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         product = self.get_object()
         context['icon_url'] = product.icon.file.url if product.icon else None
+
         offers = Offer.objects.filter(product=self.object)
-        context['offers'] = offers
-        average_price = offers.aggregate(Avg('price'))['price__avg']
+
+        discount_service = DiscountService()
+
+        average_price = discount_service.calculate_average_price(offers)
         context['average_price'] = average_price
+
+        offers_with_discount, offers_without_discount = discount_service.get_offers_with_and_without_discount(offers)
+
+        average_with_discount = discount_service.calculate_average_with_discount(offers_with_discount, offers_without_discount)
+        context['average_with_discount'] = average_with_discount
+
+        price_difference = discount_service.calculate_price_difference(average_price, average_with_discount)
+        percentage_difference = discount_service.calculate_percentage_difference(price_difference, average_price)
+        context['percentage_difference'] = percentage_difference
+
+        offers_combined = discount_service.combine_offers_with_discount_and_without_discount(offers_with_discount,
+                                                                                             offers_without_discount)
+
+        context['offers_combined'] = offers_combined
+
         reviews = Review.objects.filter(offer__product=self.object, is_active=True)
         context['reviews'] = reviews
-        sellers = Seller.objects.filter(profile__in=[offer.seller.profile for offer in offers])
-        context['sellers'] = sellers
-
         review_count = review_service.review_count(product)
         context['review_count'] = review_count
+
+        sellers = Seller.objects.filter(profile__in=[offer.seller.profile for offer in offers])
+        context['sellers'] = sellers
 
         if self.request.user.is_authenticated:
             form = ReviewForm()
@@ -267,10 +275,10 @@ class ProductDetailView(DetailView):
         return review_service.new_review(request, product)
 
 
-def add_product_review(request):
-    """ Вью для добавления отзыва к товару """
-    if request.method == 'POST':
-        review_service.new_review(request)
+# def add_product_review(request):
+#     """ Вью для добавления отзыва к товару """
+#     if request.method == 'POST':
+#         review_service.new_review(request)
 
 
 class ProductPurchaseView(FormView):

@@ -2,10 +2,7 @@ from random import choice
 
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-
-from schemas import (
-    PaymentInformation
-)
+from schemas import PaymentInformation
 
 app = FastAPI()
 
