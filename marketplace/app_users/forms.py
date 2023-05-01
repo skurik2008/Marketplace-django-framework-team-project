@@ -1,9 +1,9 @@
 from django import forms
+from django.contrib.auth import password_validation
 from django.contrib.auth.forms import (AuthenticationForm, PasswordResetForm,
-                                       SetPasswordForm, UserCreationForm)
+                                       SetPasswordForm, UserCreationForm, UserChangeForm)
 from django.contrib.auth.models import User
 from django.forms.widgets import FileInput
-
 from .models import Profile
 
 
@@ -21,21 +21,6 @@ class UserRegisterForm(UserCreationForm):
             'email': 'Email',
             'password1': 'Пароль',
             'password2': 'Подтверждение пароля',
-        }
-
-
-class ProfileUpdateForm(forms.ModelForm):
-    class Meta:
-        model = Profile
-        fields = ['full_name', 'phone_number', 'address', 'avatar']
-        labels = {
-            'full_name': 'Полное имя',
-            'phone_number': 'Номер телефона',
-            'address': 'Адрес',
-            'avatar': 'Аватар',
-        }
-        widgets = {
-            'avatar': forms.ClearableFileInput(attrs={'multiple': True}),
         }
 
 
@@ -74,3 +59,43 @@ class UserSetPasswordForm(SetPasswordForm):
             'new_password1': 'Новый пароль',
             'new_password2': 'Подтверждение нового пароля',
         }
+
+
+class UserUpdateForm(UserChangeForm):
+    class Meta:
+        model = User
+        fields = ('email', )
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ('full_name', 'phone_number',  'avatar', )
+        widgets = {
+            "phone_number": forms.TextInput(attrs={"class": "form-input", "id": "phone", "name": "phone"}),
+            "full_name": forms.TextInput(attrs={"class": "form-input", "id": "name", "name": "name",
+                                                "data-validate": "require"
+                                                }
+                                         ),
+            "avatar": forms.ClearableFileInput(attrs={"class": "Profile-file form-input", "id": "avatar",
+                                                      "name": "avatar", "data-validate": "onlyImgAvatar"
+                                                      }
+                                               ),
+        }
+
+
+class UpdatePasswordForm(SetPasswordForm):
+    new_password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={"class": "form-input", "id": "password", "name": "password",
+                                          "placeholder": "Тут можно изменить пароль"
+                                          }
+                                   ),
+        strip=False,
+    )
+    new_password2 = forms.CharField(
+        strip=False,
+        widget=forms.PasswordInput(attrs={"class": "form-input", "id": "passwordReply", "name": "passwordReply",
+                                          "placeholder": "Введите пароль повторно"
+                                          }
+                                   ),
+    )

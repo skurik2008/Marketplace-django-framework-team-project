@@ -1,0 +1,68 @@
+{% extends "orders/order_base.html" %}
+{% load static %}
+
+{% block order_step %}
+    {% if cart_items %}
+    <form method="post" class="form">
+    {% csrf_token %}
+    <div class="Order-block Order-block_OPEN" id="step1">
+        <header class="Section-header Section-header_sm">
+            <h2 class="Section-title">Шаг 1. Параметры пользователя
+            </h2>
+        </header>
+        <div class="row">
+            <div class="row-block">
+                <div class="form-group">
+                    <label class="form-label" for="name">ФИО
+                    </label>
+                    <input class="form-input" id="name" name="name" type="text" value="{% firstof request.session.user_data.name.0 user_fullname %}"
+                           data-validate="require"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="phone">Телефон
+                    </label>
+                    <input class="form-input" id="phone" name="phone" type="text" value="{% firstof request.session.user_data.phone.0 user_phone %}"
+                           data-validate="require"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="mail">E-mail
+                    </label>
+                    <input class="form-input" id="mail" name="mail" type="text" value="{% firstof request.session.user_data.mail.0 user_email %}"
+                           data-validate="require"/>
+                </div>
+            </div>
+            {% if not user.is_authenticated %}
+                <div class="row-block">
+                    <div class="form-group">
+                        <label class="form-label" for="password">Пароль
+                        </label>
+                        <input class="form-input" id="password" name="password" type="password" data-validate="require"
+                               placeholder="Введите ваш пароль"/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="passwordReply">Подтверждение пароля
+                        </label>
+                        <input class="form-input" id="passwordReply" name="passwordReply" type="password"
+                               data-validate="require" placeholder="Введите пароль повторно"/>
+                    </div>
+                    <div class="form-group"><a class="btn btn_muted Order-btnReg" href="{% url 'app_users:login' %}">Я уже зарегистрирован</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        {% if request.user.is_authenticated %}
+            <div class="Order-footer"><button class="btn btn_success" type="submit">Дальше</button>
+            </div>
+        {% else %}
+            <div class="Order-footer"><a class="btn btn_success" type="submit" href="{% url 'app_users:register' %}">Зарегистрироваться</a>
+            </div>
+        {% endif %}
+    </div>
+    </form>
+    {% else %}
+        <h2 class="Section-title">Ваша корзина пуста. <a href="{% url 'pages:catalog-view' %}">Продолжить покупки.</a></h2>
+        <div align="center">
+            <img src="{% static 'assets/img/content/home/empty_order.svg'%}" alt="empty_order" style="max-width: 350px"/>
+        </div>
+    {% endif %}
+{% endblock %}

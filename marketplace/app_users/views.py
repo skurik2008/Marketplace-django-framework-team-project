@@ -1,11 +1,12 @@
-from app_basket.models import Cart, CartItem
+from django.contrib.auth.models import User
+from django.db.models import Min, F
+from django.shortcuts import render
+from sql_util.aggregates import SubquerySum
 from app_merch.models import Offer
 from app_settings.models import SiteSettings
-from app_users.forms import (ProfileUpdateForm, UserLoginForm,
-                             UserPasswordResetForm, UserRegisterForm,
-                             UserSetPasswordForm)
-from app_users.models import Seller
-from django.contrib.auth import login as auth_login
+from app_users.forms import UserLoginForm, UserPasswordResetForm, UserRegisterForm, UserSetPasswordForm, UserUpdateForm, \
+    ProfileUpdateForm, UpdatePasswordForm
+from app_users.models import Seller, Order, OrderItem
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LoginView, LogoutView,
                                        PasswordResetConfirmView,
@@ -14,10 +15,9 @@ from django.contrib.auth.views import (LoginView, LogoutView,
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, UpdateView
-from sql_util.utils import SubqueryCount
-
-from .models import Buyer, Profile
+from django.views.generic import CreateView, DetailView, UpdateView, ListView
+from .models import Profile, Buyer
+from app_basket.models import Cart, CartItem
 
 
 class CustomLoginView(LoginView):
@@ -44,6 +44,7 @@ class CustomLoginView(LoginView):
 
         auth_login(self.request, form.get_user())
         return HttpResponseRedirect(self.get_success_url())
+
 
 class CustomLogoutView(LogoutView):
     next_page = reverse_lazy('app_users:login')
@@ -82,13 +83,6 @@ class CustomRegisterView(CreateView):
         return super().form_valid(form)
 
 
-class ProfileUpdateView(LoginRequiredMixin, UpdateView):
-    model = Profile
-    form_class = ProfileUpdateForm
-    template_name = 'users/profile_update.html'
-    success_url = '/'
-
-
 class SellerView(DetailView):
     model = Seller
     template_name = 'seller.html'
@@ -115,8 +109,82 @@ class SellerView(DetailView):
         context['offers'] = cache.get_or_set(
             f"Seller {kwargs.get('pk')} top products",
             Offer.objects.filter(seller=self.get_object()).annotate(
-                sales=SubqueryCount('order_items')
+                sales=SubquerySum('order_items__quantity')
             ).order_by('-sales')[:10],
             top_seller_products_cache_time * 60 * 60
         )
         return context
+
+
+class AccountView(LoginRequiredMixin, DetailView):
+    model = User
+    template_name = "users/account.html"
+    context_object_name = "user"
+    slug_url_kwarg = 'username'
+    slug_field = 'username'
+
+    def get_context_data(self, **kwargs):
+        context = super(AccountView, self).get_context_data(**kwargs)
+        last_order = Order.objects.filter(buyer=self.request.user.profile.buyer).order_by('order_date').last()
+        if last_order:
+            context['last_order'] = last_order
+            context['last_order_cost'] = sum(item.offer.price * item.quantity
+                                             for item in OrderItem.objects.filter(order=last_order)
+                                             )
+        context['last_views'] = self.request.user.profile.buyer.views.all()[:3].annotate(
+            min_price=Min("offers__price")
+        )
+        return context
+
+
+class ProfileEditView(LoginRequiredMixin, DetailView):
+    model = User
+    template_name = "users/profile.html"
+    context_object_name = 'user_form'
+    slug_url_kwarg = 'username'
+    slug_field = 'username'
+
+    def get_context_data(self, **kwargs):
+        context = super(ProfileEditView, self).get_context_data(**kwargs)
+        context["profile_form"] = ProfileUpdateForm(instance=self.request.user.profile)
+        context["user_form"] = UserUpdateForm(instance=self.request.user)
+        context["password_form"] = UpdatePasswordForm(self.request.user)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        password_form = UpdatePasswordForm(request.user, request.POST)
+        if user_form.is_valid() and profile_form.is_valid() and password_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            password_form.save()
+            return render(request, 'users/profile.html')
+        context = {
+            "user_form": user_form,
+            "profile_form": profile_form,
+            "password_form": password_form
+        }
+        return render(request, 'users/profile.html', context)
+
+
+class OrdersHistoryView(LoginRequiredMixin, ListView):
+    model = Order
+    context_object_name = "orders"
+    template_name = "users/historyorder.html"
+    ordering = "-order_date"
+
+    def get_queryset(self):
+        queryset = super(OrdersHistoryView, self).get_queryset()
+        queryset = queryset.filter(buyer=self.request.user.profile.buyer).annotate(
+            price=F("order_items__offer__price") * F("order_items__quantity")
+        )
+        return queryset
+
+
+class ViewsHistoryView(LoginRequiredMixin, DetailView):
+    model = User
+    context_object_name = "buyer"
+    template_name = "users/historyview.html"
+    slug_url_kwarg = 'username'
+    slug_field = 'username'

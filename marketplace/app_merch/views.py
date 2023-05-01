@@ -1,16 +1,29 @@
+from django.db.models import QuerySet, Min, Max, Count
+from django.urls import reverse
+from mptt.querysets import TreeQuerySet
+from .models import (
+    Category,
+    Product,
+    Banner,
+    Discount,
+    Offer,
+    Review,
+    Tag
+)
 from app_settings.models import SiteSettings
 from app_users.models import Profile, Seller
 from django.core.cache import cache
-from django.db.models import Avg, Count, Max, Min, QuerySet
-from django.shortcuts import get_object_or_404
-from django.views.generic import DetailView, ListView
+from django.db.models import Avg, Max, Min, QuerySet
+from django.shortcuts import get_object_or_404, render, redirect
+from django.views.generic import DetailView, ListView, View
 from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
-
 from . import review_service
 from .discount_service import DiscountService
 from .forms import PurchaseForm, ReviewForm
 from .models import Banner, Category, Discount, Offer, Product, Review, Tag
+from app_basket.cart import CartService
+from app_users.models import DeliveryType, PaymentType
 
 
 class IndexView(ListView):
@@ -92,7 +105,7 @@ class PriorityDiscountView(ListView):
 class CatalogView(ListView):
     """ Вью класс для получения списка товаров и отображения их в каталоге. """
     template_name = 'catalog.html'
-    context_object_name = 'offers'
+    context_object_name = 'products'
     paginate_by = 8
 
     def get_queryset(self):
@@ -100,7 +113,7 @@ class CatalogView(ListView):
         Получение списка товаров по фильтру и сортировке.
         Список кешируется на 1 день.
         """
-        queryset: QuerySet = Offer.objects.filter(is_active=True)
+        queryset: QuerySet = Product.objects.filter(offers__is_active=True)
 
         time_to_cache: int = SiteSettings.load().time_to_cache
         if not time_to_cache:
@@ -122,45 +135,41 @@ class CatalogView(ListView):
             category: Category = Category.objects.get(slug=slug)
             sub_categories: TreeQuerySet = category.get_descendants(include_self=True)
 
-            queryset: QuerySet = Offer.objects.select_related('product__category').filter(
-                product__category__in=sub_categories).filter(is_active=True)
+            queryset: QuerySet = queryset.select_related('category').filter(
+                category__in=sub_categories)
         if price_range:
             min_price, max_price = price_range.split(';')[0], price_range.split(';')[1]
-            queryset: QuerySet = queryset.filter(price__range=(min_price, max_price))
+            queryset: QuerySet = queryset.filter(offers__price__range=(min_price, max_price))
         if title:
-            queryset: QuerySet = queryset.filter(product__title__icontains=title)
+            queryset: QuerySet = queryset.filter(title__icontains=title)
         if in_stock:
-            queryset: QuerySet = queryset.filter(quantity__gt=0)
+            queryset: QuerySet = queryset.filter(offers__quantity__gt=0)
         if delivery_free:
-            queryset: QuerySet = queryset.filter(is_delivery_free=True)
+            queryset: QuerySet = queryset.filter(offers__is_delivery_free=True)
         if tag:
-            queryset: QuerySet = queryset.filter(product__tags__pk=tag)
+            queryset: QuerySet = queryset.filter(tags__pk=tag)
 
-        if price_sort in ('-price', 'price'):
+        queryset = queryset.values(
+            'pk', 'category__title', 'icon__file', 'title'
+        ).annotate(min_price=Min('offers__price'))
+
+        if price_sort in ('-min_price', 'min_price'):
             queryset: QuerySet = queryset.order_by(price_sort)
         if created_at_sort in ('-created_at', 'created_at'):
             queryset: QuerySet = queryset.order_by(created_at_sort)
         if reviews_sort in ('desc', 'asc'):
-            queryset: QuerySet = queryset.annotate(review_amount=Count('reviews'))
+            queryset: QuerySet = queryset.annotate(review_amount=Count('offers__reviews'))
             if reviews_sort == 'desc':
                 queryset: QuerySet = queryset.order_by('-review_amount')
             else:
                 queryset: QuerySet = queryset.order_by('review_amount')
         if views_sort in ('desc', 'asc'):
             if views_sort == 'desc':
-                queryset: QuerySet = queryset.order_by('-total_views')
+                queryset: QuerySet = queryset.order_by('-offers__total_views')
             else:
-                queryset: QuerySet = queryset.order_by('total_views')
+                queryset: QuerySet = queryset.order_by('offers__total_views')
 
-        return cache.get_or_set(
-            f"Catalog_{slug}_{price_range}_"
-            f"{title}_{in_stock}_"
-            f"{delivery_free}_{tag}_"
-            f"{price_sort}_{created_at_sort}_"
-            f"{reviews_sort}_{views_sort}",
-            queryset,
-            time_to_cache * 60 * 60 * 24
-        )
+        return queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
         """
@@ -185,15 +194,15 @@ class CatalogView(ListView):
         reviews_sort: str = self.request.GET.get('reviews_sort')
         views_sort: str = self.request.GET.get('views_sort')
 
-        min_price = self.object_list.aggregate(Min('price'))['price__min']
-        max_price = self.object_list.aggregate(Max('price'))['price__max']
+        min_price = self.object_list.aggregate(Min('offers__price'))['offers__price__min']
+        max_price = self.object_list.aggregate(Max('offers__price'))['offers__price__max']
 
         if not self.request.session.get('min_price') or not self.request.session.get('max_price'):
             self.request.session['min_price'] = str(min_price)
             self.request.session['max_price'] = str(max_price)
         else:
-            min_price = self.request.session.get('min_price')
-            max_price = self.request.session.get('max_price')
+            min_price = self.request.session.get('min_price', min_price)
+            max_price = self.request.session.get('max_price', min_price)
 
         if price_range:
             curr_min_price, curr_max_price = price_range.split(';')[0], price_range.split(';')[1]
@@ -303,3 +312,69 @@ class ProductPurchaseView(FormView):
         # Обработка успешной отправки формы
         # Здесь можно добавить логику для создания заказа и т. д.
         return super().form_valid(form)
+
+
+class OrderUserDataView(View):
+    """ View для оформления заказа. 1-ый шаг заполнения, информация о пользователе. """
+
+    def get(self, *args, **kwargs):
+        self.request.session['step'] = 1
+        context = {'cart_items': CartService(self.request).get_cart_item_list()}
+        if self.request.user.is_authenticated:
+            context.update({
+                'user_fullname': f'{self.request.user.profile.full_name}',
+                'user_phone': self.request.user.profile.phone_number,
+                'user_email': self.request.user.email
+            })
+
+        return render(self.request, 'orders/order_user_data.html', context=context)
+
+    def post(self, *args, **kwargs):
+        self.request.session['user_data'] = dict(self.request.POST)
+        self.request.session['step'] = 2
+        return redirect('pages:order-step-2')
+
+
+class OrderDeliveryView(View):
+    """ View для оформления заказа. 2-ый шаг заполнения, способ доставки. """
+
+    def get(self, *args, **kwargs):
+        self.request.session['step'] = 2
+        return render(self.request, 'orders/order_delivery.html', context={
+            'delivery_type': DeliveryType.objects.all()
+        })
+
+    def post(self, *args, **kwargs):
+        self.request.session['user_data'].update(
+            {"delivery_data": dict(self.request.POST)}
+        )
+        self.request.session['step'] = 3
+        return redirect('pages:order-step-3')
+
+
+class OrderPaymentView(View):
+    """ View для оформления заказа. 3-ый шаг заполнения, способ оплаты."""
+
+    def get(self, *args, **kwargs):
+        self.request.session['step'] = 3
+        return render(self.request, 'orders/order_payment.html', context={
+            'payment_type': PaymentType.objects.filter(is_active=True)
+        })
+
+    def post(self, *args, **kwargs):
+        self.request.session['user_data'].update(
+            {"payment_data": dict(self.request.POST)}
+        )
+        self.request.session['step'] = 4
+        return redirect('pages:order-step-4')
+
+
+class OrderPurchaseView(View):
+    """ View для оформления заказа. 4-ый шаг, проверка введённых данных. """
+
+    def get(self, *args, **kwargs):
+        self.request.session['step'] = 4
+        context = {
+            "cart_items": CartService(self.request).get_cart_item_list()
+        }
+        return render(self.request, 'orders/order_purchase.html', context=context)
