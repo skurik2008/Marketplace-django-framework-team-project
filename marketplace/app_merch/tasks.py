@@ -1,6 +1,6 @@
-from marketplace.celery import app
-
 from app_merch.payment_service import pay_for_the_order
+
+from marketplace.celery import app
 
 
 @app.task

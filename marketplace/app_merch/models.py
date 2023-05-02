@@ -121,6 +121,21 @@ class Product(models.Model):
         return self.title
 
 
+class ProductGroup(models.Model):
+    """
+    Модель группы товаров.
+    """
+    name = models.CharField(max_length=100, verbose_name='название')
+    products = models.ManyToManyField(Product, related_name='product_groups', verbose_name='продукты')
+
+    class Meta:
+        verbose_name = 'Группа товаров'
+        verbose_name_plural = 'Группы товаров'
+
+    def __str__(self):
+        return self.name
+
+
 class Offer(models.Model):
     """
     Модель предложений.
@@ -155,16 +170,40 @@ class Offer(models.Model):
         return f"{self.product} from {self.seller}"
 
 
+class SetOfProducts(models.Model):
+    """
+    Модель наборов товаров.
+    """
+    name = models.CharField(max_length=100, verbose_name='название')
+    product_groups = models.ManyToManyField(ProductGroup, related_name='set_of_products', verbose_name='группы товаров')
+
+    class Meta:
+        verbose_name = 'Набор товаров'
+        verbose_name_plural = 'Наборы товаров'
+
+    def __str__(self):
+        return self.name
+
+
 class Discount(models.Model):
     """
     Модель скидок.
     """
-    offer = models.OneToOneField(
-        Offer,
+    product = models.OneToOneField(
+        Product,
         on_delete=models.PROTECT,
         related_name='discounts',
         db_index=True,
-        verbose_name='предложение'
+        verbose_name='продукт',
+        null=True
+    )
+    set_of_products = models.ForeignKey(
+        SetOfProducts,
+        on_delete=models.PROTECT,
+        related_name='discounts',
+        db_index=True,
+        verbose_name='набор товаров',
+        null=True
     )
     is_percent = models.BooleanField(verbose_name='в процентах')
     size = models.PositiveIntegerField(verbose_name='размер')
@@ -179,13 +218,72 @@ class Discount(models.Model):
         verbose_name_plural = 'Скидки'
 
     def __str__(self):
-        return f"Discount for {self.offer}"
+        return f"{self.size}"
 
-    def discounted_price(self):
-        return self.offer.price * self.size / 100
+    # def discounted_price(self):
+    #     return self.offer.price * self.size / 100
+    #
+    # def sell_price(self):
+    #     return self.offer.price - self.size
 
-    def sell_price(self):
-        return self.offer.price - self.size
+
+class SetDiscount(models.Model):
+    """
+    Модель скидок на наборы товаров.
+    """
+    product_groups = models.ManyToManyField(
+        ProductGroup,
+        related_name='set_discounts',
+        db_index=True,
+        verbose_name='группы товаров'
+    )
+    discount = models.ForeignKey(
+        Discount,
+        on_delete=models.PROTECT,
+        related_name='set_discounts',
+        db_index=True,
+        verbose_name='скидка'
+    )
+
+    class Meta:
+        verbose_name = 'Скидка на набор'
+        verbose_name_plural = 'Скидки на наборы'
+
+    def __str__(self):
+        return f"{self.discount.size}"
+
+
+# class GroupDiscount(models.Model):
+#     """
+#     Модель групповых скидок.
+#     """
+#     discount = models.ForeignKey(
+#         Discount,
+#         on_delete=models.PROTECT,
+#         related_name='group_discounts',
+#         verbose_name='скидка'
+#     )
+#     products = models.ManyToManyField(
+#         Product,
+#         related_name='group_discounts',
+#         verbose_name='товары',
+#     )
+#     categories = models.ManyToManyField(
+#         Category,
+#         related_name='group_discounts',
+#         verbose_name='категории',
+#     )
+#     min_items = models.PositiveIntegerField(
+#         default=0,
+#         verbose_name='минимальное количество товаров в группе',
+#     )
+#
+#     class Meta:
+#         verbose_name = 'Групповая скидка'
+#         verbose_name_plural = 'Групповые скидки'
+#
+#     def __str__(self):
+#         return f"Групповая скидка для {', '.join(self.products.values_list('title', flat=True))}"
 
 
 class Banner(models.Model):
@@ -233,4 +331,6 @@ class Review(models.Model):
 
     def __str__(self):
         return f'{self.profile.user.username} - {self.offer.product}'
+
+
 

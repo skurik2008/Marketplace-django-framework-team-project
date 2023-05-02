@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 from datetime import datetime
+
 from .models import Product
 
 VIEWED_PRODUCTS = 'viewed_products'

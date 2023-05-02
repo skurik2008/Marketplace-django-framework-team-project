@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.template.defaultfilters import truncatechars
 from django_mptt_admin.admin import DjangoMpttAdmin
 
-from .models import Banner, Category, Discount, Image, Offer, Product, Tag
+from .models import (Banner, Category, Discount, Image, Offer, Product,
+                     SetOfProducts, Tag)
 
 
 @admin.register(Image)
@@ -30,6 +31,12 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ['title', 'category', ]
 
 
+@admin.register(SetOfProducts)
+class SetOfProductsAdmin(admin.ModelAdmin):
+    search_fields = ['name', ]
+    list_display = ['name',]
+
+
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
     search_fields = ['seller', 'product', ]
@@ -39,13 +46,18 @@ class OfferAdmin(admin.ModelAdmin):
 
 @admin.register(Discount)
 class DiscountAdmin(admin.ModelAdmin):
-    list_display = ['offer', 'start_date', 'end_date', 'short_description']
+    list_display = ['product', 'start_date', 'end_date', 'short_description']
     list_filter = ['is_active', ]
 
     def short_description(self, obj):
         if len(obj.description) > 20:
             return f'{obj.description[:20]}...'
         return obj.description
+
+
+# @admin.register(GroupDiscount)
+# class GroupDiscountAdmin(admin.ModelAdmin):
+#     list_display = ['min_items', ]
 
 
 @admin.register(Banner)
