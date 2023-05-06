@@ -1,29 +1,18 @@
-from django.db.models import QuerySet, Min, Max, Count
-from django.urls import reverse
-from mptt.querysets import TreeQuerySet
-from .models import (
-    Category,
-    Product,
-    Banner,
-    Discount,
-    Offer,
-    Review,
-    Tag
-)
+from app_basket.cart import CartService
 from app_settings.models import SiteSettings
-from app_users.models import Profile, Seller
+from app_users.models import DeliveryType, PaymentType, Profile, Seller
 from django.core.cache import cache
-from django.db.models import Avg, Max, Min, QuerySet
-from django.shortcuts import get_object_or_404, render, redirect
+from django.db.models import Avg, Count, Max, Min, QuerySet
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.generic import DetailView, ListView, View
 from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
+
 from . import review_service
 from .discount_service import DiscountService
 from .forms import PurchaseForm, ReviewForm
 from .models import Banner, Category, Discount, Offer, Product, Review, Tag
-from app_basket.cart import CartService
-from app_users.models import DeliveryType, PaymentType
 
 
 class IndexView(ListView):
@@ -68,7 +57,7 @@ class CategoryView(ListView):
 
 class AllDiscountView(ListView):
     """ View для получения всех активных скидок. """
-    template_name = 'base.html'
+    template_name = 'products/all_discounts.html'
     context_object_name = 'all_discounts'
 
     def get_queryset(self):
@@ -79,15 +68,41 @@ class AllDiscountView(ListView):
 
         return cache.get_or_set(
             f"Discounts",
-            Discount.objects.filter(is_active=True),
+            Product.objects.filter(discounts__is_active=True),
             time_to_cache * 60 * 60 * 24
         )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        products = Product.objects.filter(discounts__is_active=True)
+        discount_service = DiscountService()
+        product_info_list = []
+        for product in products:
+            icon_url = product.icon.file.url if product.icon else None
+            offers = Offer.objects.filter(product=product)
+
+            offers_with_discount, offers_without_discount = discount_service.get_offers_with_and_without_discount(offers)
+
+            average_with_discount = discount_service.calculate_average_with_discount(offers_with_discount,
+                                                                                     offers_without_discount)
+
+            average_price = discount_service.calculate_average_price(offers)
+            product_info = {
+                'product': product,
+                'icon_url': icon_url,
+                'average_price': average_price,
+                'average_with_discount': average_with_discount,
+            }
+            product_info_list.append(product_info)
+        context['product_info_list'] = product_info_list
+        return context
 
 
 class PriorityDiscountView(ListView):
     """ View для получения приоритетных скидок. """
-    template_name = 'base.html'
-    context_object_name = 'priority_discounts'
+    template_name = 'products/priorities_discounts.html'
+    context_object_name = 'priorities_discounts'
 
     def get_queryset(self):
         """ Получаем приоритетные скидки и кешируем их на 1 день. """
@@ -96,8 +111,8 @@ class PriorityDiscountView(ListView):
             time_to_cache = 1
 
         return cache.get_or_set(
-            f"Priority_discounts",
-            Discount.objects.filter(is_priority=True),
+            f"Priorities_discounts",
+            Product.objects.filter(discounts__is_priority=True),
             time_to_cache * 60 * 60 * 24
         )
 

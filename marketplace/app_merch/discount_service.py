@@ -10,6 +10,7 @@ from .models import Discount, Offer, Product, SetDiscount, SetOfProducts
 
 
 class DiscountService:
+
     def calculate_average_price(self, offers):
         """
         Метод для расчета средней цены на основе списка предложений.
