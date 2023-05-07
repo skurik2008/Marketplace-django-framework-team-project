@@ -57,7 +57,7 @@ class CategoryView(ListView):
 
 class AllDiscountView(ListView):
     """ View для получения всех активных скидок. """
-    template_name = 'products/all_discounts.html'
+    template_name = 'products/all_product_discounts.html'
     context_object_name = 'all_discounts'
 
     def get_queryset(self):
@@ -393,3 +393,15 @@ class OrderPurchaseView(View):
             "cart_items": CartService(self.request).get_cart_item_list()
         }
         return render(self.request, 'orders/order_purchase.html', context=context)
+
+
+class DiscountListView(ListView):
+    model = Discount
+    template_name = 'discounts/list_discounts.html'
+    context_object_name = 'discounts'
+
+
+class DiscountDetailView(DetailView):
+    model = Discount
+    template_name = 'discounts/discount_detail.html'
+    context_object_name = 'discount'
