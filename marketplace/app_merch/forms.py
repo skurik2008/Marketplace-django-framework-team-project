@@ -1,6 +1,7 @@
 from django import forms
-from django.core import validators
 from .models import Offer, Review
+import re
+from django.core.validators import ValidationError
 
 
 class ReviewForm(forms.ModelForm):
@@ -37,17 +38,27 @@ class OrderUserDataForm(forms.Form):
     name = forms.CharField(required=True, widget=forms.TextInput(
         attrs={'class': 'form-input'}),
         label='ФИО',
+        error_messages={'required': 'Поле "ФИО" обязательно для заполнения'}
     )
     phone = forms.CharField(required=True, widget=forms.TextInput(
-        attrs={'class': 'form-input'}),
+        attrs={'class': 'form-input',
+               'placeholder': '+7(___) ___-____'}),
         label='Телефон',
-        error_messages={'invalid': 'Введите корректный Телефон'}
+        error_messages={'invalid': 'Введите корректный Телефон',
+                        'required': 'Поле "Телефон" обязательно для заполнения'}
     )
     mail = forms.EmailField(required=True, widget=forms.TextInput(
         attrs={'class': 'form-input'}),
         label='E-mail',
-        error_messages={'invalid': 'Введите корректный E-mail'}
+        error_messages={'invalid': 'Введите корректный E-mail',
+                        'required': 'Поле "E-mail" обязательно для заполнения'}
     )
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        if not re.findall(r'^(\(\d{3}\)\s?\d{3}-\d{4})$', phone):
+            raise ValidationError('Номер телефона должен иметь формат (000) 000-0000')
+        return
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)

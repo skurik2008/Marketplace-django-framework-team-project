@@ -1,3 +1,4 @@
+from django.contrib.auth import login as auth_login
 from django.contrib.auth.models import User
 from django.db.models import Min, F
 from django.shortcuts import render

@@ -103,8 +103,3 @@ class CartService:
         """
         return Decimal(sum(cartitem.offer.price * cartitem.quantity
                            for cartitem in models.CartItem.objects.filter(cart=self.cart)))
-
-
-
-
-
