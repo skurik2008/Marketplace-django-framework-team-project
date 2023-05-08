@@ -1,6 +1,5 @@
-from app_basket.cart import CartService
 from app_settings.models import SiteSettings
-from app_users.models import DeliveryType, PaymentType, Profile, Seller
+from app_users.models import DeliveryType, PaymentType, Seller
 from django.core.cache import cache
 from django.db.models import Avg, Count, Max, Min, QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
@@ -13,6 +12,9 @@ from . import review_service
 from .discount_service import DiscountService
 from .forms import PurchaseForm, ReviewForm
 from .models import Banner, Category, Discount, Offer, Product, Review, Tag
+from app_basket.cart import CartService
+from .order_service import OrderCreation
+from .forms import OrderUserDataForm, OrderDeliveryDataForm
 
 
 class IndexView(ListView):
@@ -334,20 +336,31 @@ class OrderUserDataView(View):
 
     def get(self, *args, **kwargs):
         self.request.session['step'] = 1
-        context = {'cart_items': CartService(self.request).get_cart_item_list()}
-        if self.request.user.is_authenticated:
-            context.update({
-                'user_fullname': f'{self.request.user.profile.full_name}',
-                'user_phone': self.request.user.profile.phone_number,
-                'user_email': self.request.user.email
-            })
+        form = OrderUserDataForm(request=self.request)
+        context = {'cart_items': CartService(self.request).get_cart_item_list(), 'form': form}
 
         return render(self.request, 'orders/order_user_data.html', context=context)
 
     def post(self, *args, **kwargs):
-        self.request.session['user_data'] = dict(self.request.POST)
-        self.request.session['step'] = 2
-        return redirect('pages:order-step-2')
+        form = OrderUserDataForm(self.request.POST)
+        context = {'cart_items': CartService(self.request).get_cart_item_list(), 'form': form}
+
+        if any(up in self.request.POST for up in ('password', 'passwordRetry')):
+            self.request.session['user_register_data'] = dict(self.request.POST)
+            return redirect('app_users:register')
+
+        if form.is_valid():
+            self.request.session['user_data'] = dict(self.request.POST)
+            self.request.session['step'] = 2
+
+            OrderCreation.create_new_order(self.request.user.profile)
+
+            return redirect('pages:order-step-2')
+
+        if self.request.session.get('user_data'):
+            self.request.session.pop('user_data')
+
+        return render(self.request, 'orders/order_user_data.html', context=context)
 
 
 class OrderDeliveryView(View):
@@ -356,14 +369,35 @@ class OrderDeliveryView(View):
     def get(self, *args, **kwargs):
         self.request.session['step'] = 2
         return render(self.request, 'orders/order_delivery.html', context={
-            'delivery_type': DeliveryType.objects.all()
+            'delivery_type': DeliveryType.objects.all(),
+            'form': OrderDeliveryDataForm(request=self.request)
         })
 
     def post(self, *args, **kwargs):
+        form = OrderDeliveryDataForm(self.request.POST)
+
+        if not form.is_valid():
+            return render(self.request, 'orders/order_delivery.html', context={
+                'delivery_type': DeliveryType.objects.all(),
+                'form': form
+            })
+
         self.request.session['user_data'].update(
             {"delivery_data": dict(self.request.POST)}
         )
         self.request.session['step'] = 3
+
+        full_address = {
+            "city": self.request.POST.get('city'),
+            "address": self.request.POST.get('address')
+        }
+
+        OrderCreation.add_delivery_data_to_order(
+            buyer=self.request.user.profile.buyer,
+            delivery_type=self.request.POST.get('delivery'),
+            address=full_address
+        )
+
         return redirect('pages:order-step-3')
 
 
@@ -380,6 +414,12 @@ class OrderPaymentView(View):
         self.request.session['user_data'].update(
             {"payment_data": dict(self.request.POST)}
         )
+
+        OrderCreation.add_payment_data_to_order(
+            buyer=self.request.user.profile.buyer,
+            payment_type=self.request.POST.get('pay')
+        )
+
         self.request.session['step'] = 4
         return redirect('pages:order-step-4')
 
@@ -393,3 +433,6 @@ class OrderPurchaseView(View):
             "cart_items": CartService(self.request).get_cart_item_list()
         }
         return render(self.request, 'orders/order_purchase.html', context=context)
+
+    def post(self, *args, **kwargs):
+        pass

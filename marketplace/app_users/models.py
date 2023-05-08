@@ -124,14 +124,14 @@ class Payment(models.Model):
     payment_type = models.ForeignKey(
         PaymentType, on_delete=models.PROTECT, related_name='payment', verbose_name='тип оплаты'
     )
-    credit_card = models.CharField(max_length=8, verbose_name='номер счета')
+    credit_card = models.CharField(max_length=8, verbose_name='номер счета', null=True)
 
     class Meta:
         verbose_name = 'Тип оплаты'
         verbose_name_plural = 'Типы оплаты'
 
     def __str__(self):
-        return self.payment_type
+        return self.payment_type.title
 
 
 class DeliveryType(models.Model):
@@ -159,15 +159,17 @@ class Order(models.Model):
 
     buyer = models.ForeignKey(Buyer, on_delete=models.PROTECT, related_name='orders',
                               db_index=True, verbose_name='покупатель')
-    payment = models.ForeignKey(Payment, on_delete=models.PROTECT, related_name='orders', verbose_name='тип оплаты')
+    payment = models.ForeignKey(Payment, on_delete=models.PROTECT, related_name='orders', verbose_name='тип оплаты',
+                                null=True)
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOISES, verbose_name='статус оплаты')
-    address = models.CharField(max_length=255, verbose_name='адрес')
+    address = models.JSONField(verbose_name='адрес', null=True)
     delivery_type = models.ForeignKey(DeliveryType, on_delete=models.PROTECT, related_name='orders',
-                                      verbose_name='тип доставки')
+                                      verbose_name='тип доставки', null=True)
     order_date = models.DateTimeField(auto_now_add=True, verbose_name='дата заказа')
     departure_date = models.DateTimeField(null=True, blank=True, verbose_name='дата отправки')
     delivery_date = models.DateTimeField(null=True, blank=True, verbose_name='дата доставки')
-    order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOISES, verbose_name='статус доставки')
+    order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOISES, verbose_name='статус доставки',
+                                    null=True)
 
     class Meta:
         verbose_name = 'Заказ'
