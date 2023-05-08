@@ -88,10 +88,13 @@ class OrderDeliveryDataForm(forms.Form):
         if not self.request:
             return
 
-        self.delivery_data = self.request.session.get('user_data').get('delivery_data')
+        self.delivery_data = self.request.session.get('user_data')
+        if self.delivery_data:
+            self.delivery_data = self.delivery_data.get('delivery_data')
 
-        city = self.delivery_data.get('city')[0] if self.delivery_data else ''
-        address = self.delivery_data.get('address')[0] if self.delivery_data else ''
+        if self.delivery_data:
+            city = self.delivery_data.get('city')[0] if self.delivery_data else ''
+            address = self.delivery_data.get('address')[0] if self.delivery_data else ''
 
-        self.fields['city'].initial = city
-        self.fields['address'].initial = address
+            self.fields['city'].initial = city
+            self.fields['address'].initial = address
