@@ -61,6 +61,16 @@
                 e.target.value = ''
             }
         });
+
+        window.addEventListener("load", (event) => {
+            let e = document.getElementById('id_phone')
+            var x = e.value.slice(1).replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+            e.value = '(' +x[1] + ') '+ x[2] + '-' + x[3]
+
+            if (e.value.length < 5) {
+                e.value = ''
+            }
+        });
     </script>
 
 {% endblock %}
