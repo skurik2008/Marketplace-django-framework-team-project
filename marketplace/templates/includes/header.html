@@ -25,7 +25,7 @@
                             <div class="row-block">
                                 {% if request.user.is_anonymous %}
                                     <a class="ControlPanel-title" href="{% url 'app_users:login' %}">Вход</a>
-                                    <a class="ControlPanel-title" href="registr.html">Регистрация</a>
+                                    <a class="ControlPanel-title" href="{% url 'app_users:register' %}">Регистрация</a>
                                 {% endif %}
                             </div>
                         </div>
@@ -67,7 +67,7 @@
                             <button class="dropbtn"><img class="CartBlock-img" src="{% static 'assets/img/icons/loon-icon.svg'%}" alt="loon-icon.svg" /></button>
                             <div class="dropdown-content">
                                 <a class="dropdown-content-a" href="{% url "app_users:account" request.user.username %}">Личный кабинет</a>
-                                <a class="dropdown-content-a" href="account.html">Административный раздел</a>
+                                <a class="dropdown-content-a" href="/admin">Административный раздел</a>
                                 <a class="dropdown-content-a" href="/users/logout">Выход</a>
                             </div>
                         </div>
