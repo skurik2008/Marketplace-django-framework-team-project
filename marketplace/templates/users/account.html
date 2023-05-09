@@ -32,11 +32,7 @@
                         <div class="Account-group">
                             <div class="Account-column">
                                 <div class="Account-avatar">
-                                    {% if user.profile.avatar %}
-                                        <img src="{% static user.profile.avatar.image.file %}" alt="profile.png" />
-                                    {% else %}
-                                        <img src="{% static "assets/img/icons/profile.png" %}" alt="profile.png" />
-                                    {% endif %}
+                                    <img src="/{% firstof user.profile.avatar.file 'assets/img/icons/profile.png' %}" alt="profile.png" />
                                 </div>
                             </div>
                             <div class="Account-column">
