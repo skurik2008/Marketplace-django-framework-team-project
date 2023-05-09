@@ -1,9 +1,10 @@
 from django import forms
-from django.contrib.auth import password_validation
 from django.contrib.auth.forms import (AuthenticationForm, PasswordResetForm,
                                        SetPasswordForm, UserCreationForm, UserChangeForm)
 from django.contrib.auth.models import User
 from django.forms.widgets import FileInput
+
+from app_merch.models import Image
 from .models import Profile
 
 
@@ -64,7 +65,7 @@ class UserSetPasswordForm(SetPasswordForm):
 class UserUpdateForm(UserChangeForm):
     class Meta:
         model = User
-        fields = ('email', )
+        fields = ('email',)
         widgets = {
             'email': forms.TextInput(attrs={"class": "form-input", "id": "mail", "name": "mail",
                                             "data-validate": "require"
@@ -76,17 +77,13 @@ class UserUpdateForm(UserChangeForm):
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ('full_name', 'phone_number',  'avatar', )
+        fields = ('full_name', 'phone_number', )
         widgets = {
             "phone_number": forms.TextInput(attrs={"class": "form-input", "id": "phone", "name": "phone"}),
             "full_name": forms.TextInput(attrs={"class": "form-input", "id": "name", "name": "name",
                                                 "data-validate": "require"
                                                 }
                                          ),
-            "avatar": forms.ClearableFileInput(attrs={"class": "Profile-file form-input", "id": "avatar",
-                                                      "name": "avatar", "data-validate": "onlyImgAvatar"
-                                                      }
-                                               ),
         }
 
 
@@ -107,3 +104,22 @@ class UpdatePasswordForm(SetPasswordForm):
                                           }
                                    ),
     )
+
+
+class AvatarUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Image
+        fields = '__all__'
+        widgets = {
+            'file': forms.ClearableFileInput(
+                        attrs={"class": "Profile-file form-input",
+                               "id": "avatar",
+                               "name": "avatar",
+                               "data-validate": "onlyImgAvatar"
+                               }
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(AvatarUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['title'].required = False

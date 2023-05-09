@@ -6,7 +6,7 @@ from sql_util.aggregates import SubquerySum
 from app_merch.models import Offer
 from app_settings.models import SiteSettings
 from app_users.forms import UserLoginForm, UserPasswordResetForm, UserRegisterForm, UserSetPasswordForm, UserUpdateForm, \
-    ProfileUpdateForm, UpdatePasswordForm
+    ProfileUpdateForm, UpdatePasswordForm, AvatarUpdateForm
 from app_users.models import Seller, Order, OrderItem
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LoginView, LogoutView,
@@ -150,18 +150,26 @@ class ProfileEditView(LoginRequiredMixin, DetailView):
         context["profile_form"] = ProfileUpdateForm(instance=self.request.user.profile)
         context["user_form"] = UserUpdateForm(instance=self.request.user)
         context["password_form"] = UpdatePasswordForm(self.request.user)
+        context["avatar_form"] = AvatarUpdateForm()
         return context
 
     def post(self, request, *args, **kwargs):
         user_form = UserUpdateForm(request.POST, instance=request.user)
-        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        profile_form = ProfileUpdateForm(request.POST, instance=request.user.profile)
         if not request.POST["new_password1"] == request.POST["new_password1"] == '':
             password_form = UpdatePasswordForm(request.user, request.POST)
         else:
             password_form = UpdatePasswordForm(request.user)
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
-            profile_form.save()
+            profile = profile_form.save()
+            avatar_form = AvatarUpdateForm(request.POST, request.FILES)
+            if avatar_form.is_valid():
+                avatar = avatar_form.save(commit=False)
+                avatar.title = f"Аватар {profile.user.username}"
+                avatar.save()
+                profile.avatar = avatar
+                profile.save()
             if password_form.is_valid():
                 user = password_form.save()
                 auth_login(request, user)
@@ -196,7 +204,7 @@ class ViewsHistoryView(LoginRequiredMixin, DetailView):
     slug_field = 'username'
 
 
-class OrderDetailView(DetailView):
+class OrderDetailView(LoginRequiredMixin, DetailView):
     model = Order
     context_object_name = "order"
     template_name = "users/oneorder.html"

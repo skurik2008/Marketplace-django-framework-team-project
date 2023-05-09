@@ -1,4 +1,5 @@
 from app_basket.models import Cart
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
 from django.urls import reverse
@@ -329,4 +330,10 @@ class Review(models.Model):
         return f'{self.profile.user.username} - {self.offer.product}'
 
 
+class WatchedProduct(models.Model):
+    user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='пользователь')
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, verbose_name='продукт', db_index=True)
+    view_date = models.DateTimeField(auto_now_add=True, verbose_name='дата просмотра')
 
+    class Meta:
+        ordering = ['view_date']

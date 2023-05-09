@@ -1,11 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf8 -*-
 from datetime import datetime
-
-from .models import Product
+from django.db.models import QuerySet
+from .models import Product, WatchedProduct
+from django.utils.timezone import now
 
 VIEWED_PRODUCTS = 'viewed_products'
 NUMBER_ITEMS_IN_LIST = 20
+
 
 class ViewedProducts:
     """ Класс-сервис для просмотренных товаров """
@@ -42,3 +42,53 @@ class ViewedProducts:
         sorted_product_id = sorted(dict_viewed_products, key=dict_viewed_products.get, reverse=True)
         list_sorted_products = [Product.objects.get(id=id) for id in sorted_product_id]
         return list_sorted_products
+
+
+class WatchedProductsService:
+    products_amount = 20
+
+    def add_product(self, request, product):
+        if request.user.is_authenticated:
+            watched_products = self.get_watched_products(user=request.user)
+            if self.has_product(watched_products=watched_products, product=product):
+                watched_product = watched_products.get(product=product)
+                watched_product.views_date = now()
+                watched_product.save()
+            else:
+                if self.count_watched_products(request.user) == self.products_amount:
+                    self.remove_product(watched_products=watched_products)
+                WatchedProduct.objects.create(user=request.user, product=product)
+        else:
+            if 'watched_products' not in request.session:
+                request.session['watched_products'] = {product.id: now()}
+            else:
+                watched_products = request.session['watched_products']
+                if product.id in watched_products.keys():
+                    watched_products[product.id] = now()
+                else:
+                    if len(watched_products) == self.products_amount:
+                        watched_products.pop(min(watched_products, key=watched_products.get))
+                    watched_products.update({product.id: now()})
+
+    @staticmethod
+    def remove_product(watched_products):
+        product = watched_products.last()
+        product.delete()
+
+    @staticmethod
+    def has_product(watched_products, product) -> bool:
+        return watched_products.filter(product=product).exists()
+
+    @staticmethod
+    def get_watched_products(user) -> QuerySet:
+        return WatchedProduct.objects.filter(user=user)
+
+    @staticmethod
+    def count_watched_products(watched_products) -> int:
+        return watched_products.count()
+
+    @staticmethod
+    def create_watched_products(request):
+        for product_id, view_date in request.session['watched_products']:
+            product = Product.objects.get(id=product_id)
+            WatchedProduct.objects.create(user=request.user, product=product, view_date=view_date)
