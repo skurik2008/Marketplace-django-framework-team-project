@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Список скидок</h1>
+  {% if discounts %}
+    <ul>
+    {% for discount in discounts %}
+      {% if discount.is_active %}
+        <li>
+          <a href="{% url 'pages:discount_detail' discount.pk %}">
+            {{ discount.product.title }} со скидкой
+            {% if discount.is_percent %}{{ discount.size }}%{% else %}{{ discount.size }}${% endif %}
+          </a>
+        </li>
+      {% endif %}
+    {% empty %}
+      <p>Нет активных скидок.</p>
+    {% endfor %}
+    </ul>
+  {% else %}
+    <p>Нет доступных скидок.</p>
+  {% endif %}
+{% endblock %}

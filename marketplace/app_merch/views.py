@@ -59,7 +59,7 @@ class CategoryView(ListView):
 
 class AllDiscountView(ListView):
     """ View для получения всех активных скидок. """
-    template_name = 'products/all_discounts.html'
+    template_name = 'products/all_product_discounts.html'
     context_object_name = 'all_discounts'
 
     def get_queryset(self):
@@ -434,5 +434,14 @@ class OrderPurchaseView(View):
         }
         return render(self.request, 'orders/order_purchase.html', context=context)
 
-    def post(self, *args, **kwargs):
-        pass
+
+class DiscountListView(ListView):
+    model = Discount
+    template_name = 'discounts/list_discounts.html'
+    context_object_name = 'discounts'
+
+
+class DiscountDetailView(DetailView):
+    model = Discount
+    template_name = 'discounts/discount_detail.html'
+    context_object_name = 'discount'

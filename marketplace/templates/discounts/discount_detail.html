@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>{{ discount.product.title }}</h1>
+  <p>{{ discount.description }}</p>
+  <p>Размер скидки: {% if discount.is_percent %}{{ discount.size }}%{% else %}{{ discount.size }}${% endif %}</p>
+  <p>Начало: {{ discount.start_date }}</p>
+  <p>Окончание: {{ discount.end_date }}</p>
+  <p>Активна: {% if discount.is_active %}Да{% else %}Нет{% endif %}</p>
+{% endblock %}
