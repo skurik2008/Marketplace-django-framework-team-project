@@ -12,24 +12,7 @@
         </header>
         <div class="row">
             <div class="row-block">
-                <div class="form-group">
-                    <label class="form-label" for="name">ФИО
-                    </label>
-                    <input class="form-input" id="name" name="name" type="text" value="{% firstof request.session.user_data.name.0 user_fullname %}"
-                           data-validate="require"/>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="phone">Телефон
-                    </label>
-                    <input class="form-input" id="phone" name="phone" type="text" value="{% firstof request.session.user_data.phone.0 user_phone %}"
-                           data-validate="require"/>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="mail">E-mail
-                    </label>
-                    <input class="form-input" id="mail" name="mail" type="text" value="{% firstof request.session.user_data.mail.0 user_email %}"
-                           data-validate="require"/>
-                </div>
+                {{ form.as_p }}
             </div>
             {% if not user.is_authenticated %}
                 <div class="row-block">
@@ -54,7 +37,7 @@
             <div class="Order-footer"><button class="btn btn_success" type="submit">Дальше</button>
             </div>
         {% else %}
-            <div class="Order-footer"><a class="btn btn_success" type="submit" href="{% url 'app_users:register' %}">Зарегистрироваться</a>
+            <div class="Order-footer"><button class="btn btn_success" type="submit">Зарегистрироваться</button>
             </div>
         {% endif %}
     </div>
@@ -65,4 +48,29 @@
             <img src="{% static 'assets/img/content/home/empty_order.svg'%}" alt="empty_order" style="max-width: 350px"/>
         </div>
     {% endif %}
+
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/jquery.inputmask.min.js' %}"></script>
+
+    <script>
+        document.getElementById('id_phone').addEventListener('input', function (e) {
+            var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+            e.target.value = '(' +x[1] + ') '+ x[2] + '-' + x[3]
+
+            if (e.target.value.length < 5) {
+                e.target.value = ''
+            }
+        });
+
+        window.addEventListener("load", (event) => {
+            let e = document.getElementById('id_phone')
+            var x = e.value.slice(1).replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+            e.value = '(' +x[1] + ') '+ x[2] + '-' + x[3]
+
+            if (e.value.length < 5) {
+                e.value = ''
+            }
+        });
+    </script>
+
 {% endblock %}
