@@ -1,3 +1,4 @@
+from app_basket.models import Cart
 from django.core.cache import cache
 from django.db import models
 from django.urls import reverse
@@ -253,37 +254,32 @@ class SetDiscount(models.Model):
         return f"{self.discount.size}"
 
 
-# class GroupDiscount(models.Model):
-#     """
-#     Модель групповых скидок.
-#     """
-#     discount = models.ForeignKey(
-#         Discount,
-#         on_delete=models.PROTECT,
-#         related_name='group_discounts',
-#         verbose_name='скидка'
-#     )
-#     products = models.ManyToManyField(
-#         Product,
-#         related_name='group_discounts',
-#         verbose_name='товары',
-#     )
-#     categories = models.ManyToManyField(
-#         Category,
-#         related_name='group_discounts',
-#         verbose_name='категории',
-#     )
-#     min_items = models.PositiveIntegerField(
-#         default=0,
-#         verbose_name='минимальное количество товаров в группе',
-#     )
-#
-#     class Meta:
-#         verbose_name = 'Групповая скидка'
-#         verbose_name_plural = 'Групповые скидки'
-#
-#     def __str__(self):
-#         return f"Групповая скидка для {', '.join(self.products.values_list('title', flat=True))}"
+class CartDiscount(models.Model):
+    """
+    Модель скидки на корзину покупок.
+    """
+    cart = models.ForeignKey(
+        Cart,
+        on_delete=models.PROTECT,
+        related_name='discounts',
+        db_index=True,
+        verbose_name='корзина',
+    )
+    min_order_sum = models.PositiveIntegerField(verbose_name='минимальная сумма заказа', null=True, blank=True)
+    min_quantity = models.PositiveIntegerField(verbose_name='минимальное количество товаров', null=True, blank=True)
+    discount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='скидка')
+    is_percent = models.BooleanField(verbose_name='в процентах')
+    start_date = models.DateTimeField(verbose_name='дата начала')
+    end_date = models.DateTimeField(verbose_name='дата окончания')
+    description = models.TextField(max_length=1000, verbose_name='описание')
+    is_active = models.BooleanField(default=True, verbose_name='актуальность')
+
+    class Meta:
+        verbose_name = 'Скидка на корзину'
+        verbose_name_plural = 'Скидки на корзину'
+
+    def __str__(self):
+        return f"{self.discount}"
 
 
 class Banner(models.Model):
