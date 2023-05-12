@@ -1,7 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'base_mini.html' %}
 
-{% block content %}
-<h2>Выход из системы</h2>
+{% block main %}
+<div class="header">
+    <h3 class="sign-in">Выход из системы</h3>
+</div>
 <p>Вы успешно вышли из системы.</p>
-<p><a href="{% url 'login' %}">Войти</a> снова.</p>
+<p><a href="{% url 'app_users:login' %}">Войти</a> снова.</p>
 {% endblock %}
