@@ -48,6 +48,8 @@
                         <td> - </td>
                         <td>{{ offer.price|floatformat:2 }} $</td>
                     {% endif %}
+                    <td><a href="{% url 'app_users:seller_detail' offer.seller.pk %}">{{ offer.seller.title }}</a></td>
+                    <td>{{ offer.price }}</td>
                     <td><a href="{% url 'app_basket:add_to_cart'%}?offer_id={{offer.pk}}">Купить</a></td>
                 </tr>
             {% empty %}

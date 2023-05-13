@@ -19,6 +19,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 from .models import Profile, Buyer
 from app_basket.models import Cart, CartItem
+from app_merch.viewed_products import watched_products_service
 
 
 class CustomLoginView(LoginView):
@@ -106,11 +107,10 @@ class SellerView(DetailView):
 
         if not top_seller_products_cache_time:
             top_seller_products_cache_time = 1
-
         context['offers'] = cache.get_or_set(
             f"Seller {kwargs.get('pk')} top products",
             Offer.objects.filter(seller=self.get_object()).annotate(
-                sales=SubquerySum('order_items__quantity')
+                sales=Sum('order_items__quantity')
             ).order_by('-sales')[:10],
             top_seller_products_cache_time * 60 * 60
         )
@@ -132,9 +132,10 @@ class AccountView(LoginRequiredMixin, DetailView):
             context['last_order_cost'] = sum(item.offer.price * item.quantity
                                              for item in OrderItem.objects.filter(order=last_order)
                                              )
-        context['last_views'] = self.request.user.profile.buyer.views.all()[:3].annotate(
-            min_price=Min("offers__price")
+        watched_products = watched_products_service.get_watched_products(user=self.request.user, count=3).annotate(
+            min_price=Min('product__offers__price')
         )
+        context['watched_products'] = watched_products
         return context
 
 
@@ -165,9 +166,7 @@ class ProfileEditView(LoginRequiredMixin, DetailView):
             profile = profile_form.save()
             avatar_form = AvatarUpdateForm(request.POST, request.FILES)
             if avatar_form.is_valid():
-                avatar = avatar_form.save(commit=False)
-                avatar.title = f"Аватар {profile.user.username}"
-                avatar.save()
+                avatar = avatar_form.save()
                 profile.avatar = avatar
                 profile.save()
             if password_form.is_valid():
@@ -202,6 +201,14 @@ class ViewsHistoryView(LoginRequiredMixin, DetailView):
     template_name = "users/historyview.html"
     slug_url_kwarg = 'username'
     slug_field = 'username'
+
+    def get_context_data(self, **kwargs):
+        context = super(ViewsHistoryView, self).get_context_data(**kwargs)
+        watched_products = watched_products_service.get_watched_products(user=self.request.user).annotate(
+            min_price=Min('product__offers__price')
+        )
+        context['watched_products'] = watched_products
+        return context
 
 
 class OrderDetailView(LoginRequiredMixin, DetailView):
