@@ -1,20 +1,12 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
-from .views import (
-    CustomLoginView,
-    CustomLogoutView,
-    CustomPasswordResetConfirmView,
-    CustomPasswordResetDoneView,
-    CustomPasswordResetView,
-    CustomRegisterView,
-    SellerView,
-    AccountView,
-    ProfileEditView,
-    OrdersHistoryView,
-    ViewsHistoryView,
-    OrderDetailView,
-)
+
+from .views import (AccountView, CustomLoginView, CustomLogoutView,
+                    CustomPasswordResetConfirmView,
+                    CustomPasswordResetDoneView, CustomPasswordResetView,
+                    CustomRegisterView, OrderDetailView, OrdersHistoryView,
+                    ProfileEditView, SellerView, ViewsHistoryView)
 
 app_name = "app_users"
 

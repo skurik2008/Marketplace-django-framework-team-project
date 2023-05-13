@@ -1,3 +1,4 @@
+from app_basket.cart import CartService
 from app_settings.models import SiteSettings
 from app_users.models import DeliveryType, PaymentType, Seller
 from django.core.cache import cache
@@ -6,14 +7,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, ListView, View
 from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
+
 from . import review_service
 from .discount_service import DiscountService
-from .forms import PurchaseForm, ReviewForm
+from .forms import (OrderDeliveryDataForm, OrderUserDataForm, PurchaseForm,
+                    ReviewForm)
 from .models import Banner, Category, Discount, Offer, Product, Review, Tag
-from app_basket.cart import CartService
 from .order_service import OrderCreation
-from .forms import OrderUserDataForm, OrderDeliveryDataForm
-from app_users.models import DeliveryType, PaymentType
 from .viewed_products import watched_products_service
 
 

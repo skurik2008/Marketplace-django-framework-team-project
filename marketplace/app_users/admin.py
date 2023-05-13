@@ -1,15 +1,7 @@
 from django.contrib import admin
 
-from .models import (
-    Buyer,
-    Profile,
-    Seller,
-    Order,
-    OrderItem,
-    Payment,
-    DeliveryType,
-    PaymentType,
-)
+from .models import (Buyer, DeliveryType, Order, OrderItem, Payment,
+                     PaymentType, Profile, Seller)
 
 
 @admin.register(Profile)

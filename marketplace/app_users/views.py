@@ -1,36 +1,28 @@
-from django.contrib.auth import login as auth_login
-from django.contrib.auth.models import User
-from django.db.models import Min, F, Sum
-from django.shortcuts import render, redirect
-from sql_util.aggregates import SubquerySum
+from app_basket.models import Cart, CartItem
 from app_merch.models import Offer
+from app_merch.viewed_products import watched_products_service
 from app_settings.models import SiteSettings
-from app_users.forms import (
-    UserLoginForm,
-    UserPasswordResetForm,
-    UserRegisterForm,
-    UserSetPasswordForm,
-    UserUpdateForm,
-    ProfileUpdateForm,
-    UpdatePasswordForm,
-    AvatarUpdateForm,
-)
-from app_users.models import Seller, Order, OrderItem
+from app_users.forms import (AvatarUpdateForm, ProfileUpdateForm,
+                             UpdatePasswordForm, UserLoginForm,
+                             UserPasswordResetForm, UserRegisterForm,
+                             UserSetPasswordForm, UserUpdateForm)
+from app_users.models import Order, OrderItem, Seller
+from django.contrib.auth import login as auth_login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import (
-    LoginView,
-    LogoutView,
-    PasswordResetConfirmView,
-    PasswordResetDoneView,
-    PasswordResetView,
-)
+from django.contrib.auth.models import User
+from django.contrib.auth.views import (LoginView, LogoutView,
+                                       PasswordResetConfirmView,
+                                       PasswordResetDoneView,
+                                       PasswordResetView)
 from django.core.cache import cache
+from django.db.models import F, Min, Sum
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
-from .models import Profile, Buyer
-from app_basket.models import Cart, CartItem
-from app_merch.viewed_products import watched_products_service
+from sql_util.aggregates import SubquerySum
+
+from .models import Buyer, Profile
 
 
 class CustomLoginView(LoginView):

@@ -1,7 +1,9 @@
-from django import forms
-from .models import Offer, Review
 import re
+
+from django import forms
 from django.core.validators import ValidationError
+
+from .models import Offer, Review
 
 
 class ReviewForm(forms.ModelForm):

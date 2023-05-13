@@ -1,18 +1,12 @@
+from app_merch.models import Image
 from django import forms
 from django.contrib.auth import password_validation
+from django.contrib.auth.forms import (AuthenticationForm, PasswordResetForm,
+                                       SetPasswordForm, UserChangeForm,
+                                       UserCreationForm)
 from django.contrib.auth.models import User
 from django.forms.widgets import FileInput
 
-from django.contrib.auth.forms import (
-    AuthenticationForm,
-    PasswordResetForm,
-    SetPasswordForm,
-    UserCreationForm,
-    UserChangeForm,
-)
-from django.contrib.auth.models import User
-from django.forms.widgets import FileInput
-from app_merch.models import Image
 from .models import Profile
 
 

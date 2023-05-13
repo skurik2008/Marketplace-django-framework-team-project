@@ -2,19 +2,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 
-from .views import (
-    AllDiscountView,
-    CatalogView,
-    DiscountDetailView,
-    DiscountListView,
-    IndexView,
-    OrderDeliveryView,
-    OrderPaymentView,
-    OrderPurchaseView,
-    OrderUserDataView,
-    ProductDetailView,
-    ProductPurchaseView,
-)
+from .views import (AllDiscountView, CatalogView, DiscountDetailView,
+                    DiscountListView, IndexView, OrderDeliveryView,
+                    OrderPaymentView, OrderPurchaseView, OrderUserDataView,
+                    ProductDetailView, ProductPurchaseView)
 
 app_name = "pages"
 

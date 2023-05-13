@@ -1,6 +1,6 @@
+from app_users.models import (Buyer, DeliveryType, Order, Payment, PaymentType,
+                              Profile)
 from django.db import transaction
-
-from app_users.models import Profile, Buyer, Order, DeliveryType, PaymentType, Payment
 
 
 class OrderCreation:

@@ -1,7 +1,8 @@
 # from datetime import datetime
 from django.db.models import QuerySet
-from .models import Product, WatchedProduct
 from django.utils.timezone import now
+
+from .models import Product, WatchedProduct
 
 # VIEWED_PRODUCTS = 'viewed_products'
 # NUMBER_ITEMS_IN_LIST = 20

@@ -1,9 +1,8 @@
 from random import choice
 
+from database import add_user_payment_information, get_database
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-
-from database import get_database, add_user_payment_information
 from schemas import PaymentInformation
 
 app = FastAPI()
