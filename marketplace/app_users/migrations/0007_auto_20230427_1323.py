@@ -4,24 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('app_users', '0006_auto_20230423_0757'),
+        ("app_users", "0006_auto_20230423_0757"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='paymenttype',
-            options={'verbose_name': 'вид оплаты', 'verbose_name_plural': 'виды оплаты'},
+            name="paymenttype",
+            options={
+                "verbose_name": "вид оплаты",
+                "verbose_name_plural": "виды оплаты",
+            },
         ),
         migrations.AlterField(
-            model_name='order',
-            name='payment_status',
-            field=models.CharField(choices=[('not_paid', 'Не оплачен'), ('paid', 'Оплачен')], max_length=20, verbose_name='статус оплаты'),
+            model_name="order",
+            name="payment_status",
+            field=models.CharField(
+                choices=[("not_paid", "Не оплачен"), ("paid", "Оплачен")],
+                max_length=20,
+                verbose_name="статус оплаты",
+            ),
         ),
         migrations.AlterField(
-            model_name='paymenttype',
-            name='title',
-            field=models.CharField(max_length=100, verbose_name='вид оплаты'),
+            model_name="paymenttype",
+            name="title",
+            field=models.CharField(max_length=100, verbose_name="вид оплаты"),
         ),
     ]

@@ -4,16 +4,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('app_merch', '0009_review'),
-        ('app_users', '0002_auto_20230322_1621'),
+        ("app_merch", "0009_review"),
+        ("app_users", "0002_auto_20230322_1621"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='buyer',
-            name='views',
-            field=models.ManyToManyField(to='app_merch.Product', verbose_name='история просмотров'),
+            model_name="buyer",
+            name="views",
+            field=models.ManyToManyField(
+                to="app_merch.Product", verbose_name="история просмотров"
+            ),
         ),
     ]

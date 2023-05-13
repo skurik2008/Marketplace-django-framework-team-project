@@ -5,10 +5,7 @@ from marketplace.settings import PURCHASE_URL
 
 
 def pay_for_the_order(
-        username: str,
-        order_id: int,
-        card_number: str,
-        amount: float
+    username: str, order_id: int, card_number: str, amount: float
 ) -> dict | str:
     """
     Функция отправки запроса на оплату заказа.
@@ -21,9 +18,9 @@ def pay_for_the_order(
                 "username": username,
                 "order_id": order_id,
                 "card_number": card_number,
-                "amount": amount
+                "amount": amount,
             },
-            timeout=10
+            timeout=10,
         )
         return response.json()
     except (ConnectionError, Timeout):

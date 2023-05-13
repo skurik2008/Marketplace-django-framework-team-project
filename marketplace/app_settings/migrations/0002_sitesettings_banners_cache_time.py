@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('app_settings', '0001_initial'),
+        ("app_settings", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='sitesettings',
-            name='banners_cache_time',
-            field=models.PositiveIntegerField(default=0, verbose_name='Время кеширования баннеров'),
+            model_name="sitesettings",
+            name="banners_cache_time",
+            field=models.PositiveIntegerField(
+                default=0, verbose_name="Время кеширования баннеров"
+            ),
         ),
     ]

@@ -5,16 +5,11 @@ from marketplace.celery import app
 
 @app.task
 def send_request_to_payment_service(
-        username: str,
-        order_id: int,
-        card_number: str,
-        amount: float
+    username: str, order_id: int, card_number: str, amount: float
 ) -> dict | str:
     """
     Задача, которая будет добавлена в очередь на выполнение.
     Отправляет запрос на оплату заказа.
     """
-    response = pay_for_the_order(
-        username, order_id, card_number, amount
-    )
+    response = pay_for_the_order(username, order_id, card_number, amount)
     return response

@@ -5,32 +5,63 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('app_merch', '0008_rename_saller_offer_seller'),
-        ('app_users', '0001_initial'),
+        ("app_merch", "0008_rename_saller_offer_seller"),
+        ("app_users", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='buyer',
-            name='buyer',
+            model_name="buyer",
+            name="buyer",
         ),
         migrations.AddField(
-            model_name='buyer',
-            name='profile',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='profile', to='app_users.profile', verbose_name='покупатель'),
+            model_name="buyer",
+            name="profile",
+            field=models.OneToOneField(
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="profile",
+                to="app_users.profile",
+                verbose_name="покупатель",
+            ),
         ),
         migrations.CreateModel(
-            name='ComparisonList',
+            name="ComparisonList",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('offer', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='offer', to='app_merch.offer', verbose_name='список для сравнения')),
-                ('profile', models.OneToOneField(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='compare', to='app_users.buyer', verbose_name='владелец списка')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "offer",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="offer",
+                        to="app_merch.offer",
+                        verbose_name="список для сравнения",
+                    ),
+                ),
+                (
+                    "profile",
+                    models.OneToOneField(
+                        null=True,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="compare",
+                        to="app_users.buyer",
+                        verbose_name="владелец списка",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Список сравнения',
-                'verbose_name_plural': 'Списки сравнения',
+                "verbose_name": "Список сравнения",
+                "verbose_name_plural": "Списки сравнения",
             },
         ),
     ]

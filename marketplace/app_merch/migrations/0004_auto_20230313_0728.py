@@ -6,20 +6,32 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('app_merch', '0003_rename_name_category_title'),
+        ("app_merch", "0003_rename_name_category_title"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='category',
-            name='icon',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='app_merch.image', verbose_name='иконка категории'),
+            model_name="category",
+            name="icon",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="app_merch.image",
+                verbose_name="иконка категории",
+            ),
         ),
         migrations.AlterField(
-            model_name='category',
-            name='parent',
-            field=mptt.fields.TreeForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='children', to='app_merch.category', verbose_name='родительская категория'),
+            model_name="category",
+            name="parent",
+            field=mptt.fields.TreeForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="children",
+                to="app_merch.category",
+                verbose_name="родительская категория",
+            ),
         ),
     ]

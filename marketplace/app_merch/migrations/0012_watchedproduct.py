@@ -6,23 +6,49 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('app_merch', '0011_offer_total_views'),
+        ("app_merch", "0011_offer_total_views"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='WatchedProduct',
+            name="WatchedProduct",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('view_date', models.DateTimeField(auto_now_add=True, verbose_name='дата просмотра')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='app_merch.product', verbose_name='продукт')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL, verbose_name='пользователь')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "view_date",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="дата просмотра"
+                    ),
+                ),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to="app_merch.product",
+                        verbose_name="продукт",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="пользователь",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['view_date'],
+                "ordering": ["view_date"],
             },
         ),
     ]

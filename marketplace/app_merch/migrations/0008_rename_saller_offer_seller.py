@@ -4,15 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('app_merch', '0007_banner_primary_text_discount_is_priority'),
+        ("app_merch", "0007_banner_primary_text_discount_is_priority"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='offer',
-            old_name='saller',
-            new_name='seller',
+            model_name="offer",
+            old_name="saller",
+            new_name="seller",
         ),
     ]

@@ -4,20 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('app_merch', '0006_auto_20230317_1411'),
+        ("app_merch", "0006_auto_20230317_1411"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='banner',
-            name='primary_text',
-            field=models.CharField(blank=True, max_length=10, null=True, verbose_name='главное'),
+            model_name="banner",
+            name="primary_text",
+            field=models.CharField(
+                blank=True, max_length=10, null=True, verbose_name="главное"
+            ),
         ),
         migrations.AddField(
-            model_name='discount',
-            name='is_priority',
-            field=models.BooleanField(default=False, verbose_name='приоритет'),
+            model_name="discount",
+            name="is_priority",
+            field=models.BooleanField(default=False, verbose_name="приоритет"),
         ),
     ]

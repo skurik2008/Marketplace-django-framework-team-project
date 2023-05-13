@@ -4,41 +4,37 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
 from database import get_database, add_user_payment_information
-from schemas import (
-    PaymentInformation
-)
+from schemas import PaymentInformation
 
 app = FastAPI()
 DATABASE = get_database()
-collection = DATABASE['user_payments_1']
+collection = DATABASE["user_payments_1"]
 
 PAYMENT_ERRORS: tuple = (
-    'Not enough money',
-    'Card declined',
-    'Service is unreachable',
-    'Bank not supported'
+    "Not enough money",
+    "Card declined",
+    "Service is unreachable",
+    "Bank not supported",
 )
 
 
 async def validate_card_number(card_number: str) -> bool:
-    """ Функция валидации карты. """
+    """Функция валидации карты."""
 
-    user_card_number: str = card_number.replace(' ', '')
+    user_card_number: str = card_number.replace(" ", "")
     if len(user_card_number) == 8:
         try:
             int_card_number: int = int(user_card_number)
         except ValueError:
             return False
         else:
-            if int_card_number % 2 == 0 and user_card_number[-1] != '0':
+            if int_card_number % 2 == 0 and user_card_number[-1] != "0":
                 return True
     return False
 
 
-@app.post('/api/v1/purchase/')
-async def make_payment(
-        payment_information: PaymentInformation
-) -> JSONResponse:
+@app.post("/api/v1/purchase/")
+async def make_payment(payment_information: PaymentInformation) -> JSONResponse:
     """
     Эндпоинт для проведения оплаты.
     Если карта не проходит валидацию, платёж отклоняется со случайной ошибкой.
@@ -47,10 +43,7 @@ async def make_payment(
     if not await validate_card_number(payment_information.card_number):
         return JSONResponse(
             status_code=403,
-            content={
-                "status": "error",
-                "message": choice(PAYMENT_ERRORS)
-            }
+            content={"status": "error", "message": choice(PAYMENT_ERRORS)},
         )
 
     add_user_payment_information(payment_information, collection)
@@ -61,6 +54,6 @@ async def make_payment(
             "status": "success",
             "message": "Order {} was successfully purchased.".format(
                 payment_information.order_id
-            )
-        }
+            ),
+        },
     )

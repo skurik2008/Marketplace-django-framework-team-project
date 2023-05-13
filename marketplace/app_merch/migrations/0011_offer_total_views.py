@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('app_merch', '0010_auto_20230327_1732'),
+        ("app_merch", "0010_auto_20230327_1732"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='offer',
-            name='total_views',
-            field=models.PositiveIntegerField(default=0, verbose_name='количество просмотров'),
+            model_name="offer",
+            name="total_views",
+            field=models.PositiveIntegerField(
+                default=0, verbose_name="количество просмотров"
+            ),
         ),
     ]

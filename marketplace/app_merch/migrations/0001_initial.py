@@ -4,23 +4,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Image',
+            name="Image",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file', models.FileField(upload_to='static/assets/img/icons/', verbose_name='файл')),
-                ('title', models.CharField(max_length=150, verbose_name='наименование')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "file",
+                    models.FileField(
+                        upload_to="static/assets/img/icons/", verbose_name="файл"
+                    ),
+                ),
+                (
+                    "title",
+                    models.CharField(max_length=150, verbose_name="наименование"),
+                ),
             ],
             options={
-                'verbose_name': 'Картинка',
-                'verbose_name_plural': 'Картинки',
+                "verbose_name": "Картинка",
+                "verbose_name_plural": "Картинки",
             },
         ),
     ]

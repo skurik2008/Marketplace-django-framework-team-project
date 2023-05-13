@@ -11,7 +11,9 @@ from . import models
 class ItemDoesNotExist(Exception):
     pass
 
-CART_ID = 'cart_id'
+
+CART_ID = "cart_id"
+
 
 class CartService:
     """
@@ -47,7 +49,10 @@ class CartService:
 
         else:
             cart = models.Cart.objects.create(
-                buyer=Buyer.objects.create(profile=Profile.objects.get(user=request.user)))
+                buyer=Buyer.objects.create(
+                    profile=Profile.objects.get(user=request.user)
+                )
+            )
         return cart
 
     def add_offer(self, offer, quantity):
@@ -59,7 +64,9 @@ class CartService:
             cart_item.quantity += 1
             cart_item.save()
         else:
-            models.CartItem.objects.create(offer=offer, cart=self.cart, quantity=quantity)
+            models.CartItem.objects.create(
+                offer=offer, cart=self.cart, quantity=quantity
+            )
 
     def delete_cartitem(self, cartitem_id):
         """
@@ -89,7 +96,9 @@ class CartService:
         """
         Получаем список товаров в корзине. Каждый объект товара аннотируем полем с общей стоимостью (с учетом количества)
         """
-        return models.CartItem.objects.filter(cart=self.cart).annotate(total_price=F('offer__price') * F('quantity'))
+        return models.CartItem.objects.filter(cart=self.cart).annotate(
+            total_price=F("offer__price") * F("quantity")
+        )
 
     def get_cart_item_quantity(self):
         """
@@ -101,5 +110,9 @@ class CartService:
         """
         Получаем общую стоимость корзины
         """
-        return Decimal(sum(cartitem.offer.price * cartitem.quantity
-                           for cartitem in models.CartItem.objects.filter(cart=self.cart)))
+        return Decimal(
+            sum(
+                cartitem.offer.price * cartitem.quantity
+                for cartitem in models.CartItem.objects.filter(cart=self.cart)
+            )
+        )

@@ -2,7 +2,8 @@ from django.db import models
 
 
 class SingletonModel(models.Model):
-    """ Singleton модель. """
+    """Singleton модель."""
+
     class Meta:
         abstract = True
 
