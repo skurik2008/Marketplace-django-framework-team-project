@@ -1,17 +1,35 @@
 from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import (AuthenticationForm, PasswordResetForm,
-                                       SetPasswordForm, UserCreationForm, UserChangeForm)
+                                       SetPasswordForm, UserChangeForm,
+                                       UserCreationForm)
 from django.contrib.auth.models import User
 from django.forms.widgets import FileInput
+
 from .models import Profile
 
 
 class UserRegisterForm(UserCreationForm):
-    full_name = forms.CharField(max_length=150, required=True, label='Полное имя')
-    phone_number = forms.CharField(max_length=50, required=True, label='Номер телефона')
-    address = forms.CharField(max_length=255, required=True, label='Адрес')
+    full_name = forms.CharField(max_length=150, required=True, label='Полное имя', widget=forms.TextInput(
+        attrs={'placeholder': 'Имя пользователя'}),)
+    phone_number = forms.CharField(max_length=50, required=True, label='Номер телефона', widget=forms.TextInput(
+        attrs={'placeholder': 'Eg. +79991234567 '}),)
+    address = forms.CharField(max_length=255, required=True, label='Адрес', widget=forms.TextInput(
+        attrs={'placeholder': 'Введите адрес'}),)
     avatar = forms.FileField(widget=FileInput, required=False, label='Аватар')
+
+    password1 = forms.CharField(label='Пароль', strip=False, widget=forms.PasswordInput(
+        attrs={'autocomplete': 'new-password', 'placeholder': 'Введите пароль', 'minlength': 8}),
+                                help_text='Пароль должен содержать не менее 8 символов и быть сложным')
+    password2 = forms.CharField(label='Подтверждение пароля', widget=forms.PasswordInput(
+        attrs={'autocomplete': 'new-password', 'placeholder': 'Подтвердите пароль', 'minlength': 8}),
+                                help_text='Введите пароль еще раз для подтверждения')
+    username = forms.CharField(
+        max_length=50,
+        required=True,
+        label='Имя пользователя',
+        widget=forms.TextInput(attrs={'placeholder': 'Введите имя пользователя'}),
+    )
 
     class Meta:
         model = User
@@ -19,8 +37,9 @@ class UserRegisterForm(UserCreationForm):
         labels = {
             'username': 'Имя пользователя',
             'email': 'Email',
-            'password1': 'Пароль',
-            'password2': 'Подтверждение пароля',
+        }
+        widgets = {
+            'email': forms.EmailInput(attrs={'placeholder': 'Eg. mail@mail.com'}),
         }
 
 
