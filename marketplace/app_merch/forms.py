@@ -138,10 +138,6 @@ class OrderDeliveryDataForm(forms.Form):
             city = self.delivery_data.get("city")[0] if self.delivery_data else ""
             address = self.delivery_data.get("address")[0] if self.delivery_data else ""
 
-<<<<<<< HEAD
-            self.fields["city"].initial = city
-            self.fields["address"].initial = address
-=======
             self.fields['city'].initial = city
             self.fields['address'].initial = address
 

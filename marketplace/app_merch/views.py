@@ -14,7 +14,7 @@ from mptt.querysets import TreeQuerySet
 from . import review_service
 from .discount_service import DiscountService
 from .forms import (OrderDeliveryDataForm, OrderUserDataForm, PurchaseForm,
-                    ReviewForm)
+                    ReviewForm, PaymentForm)
 from .models import Banner, Category, Discount, Offer, Product, Review, Tag
 from .viewed_products import watched_products_service
 from app_basket.cart import CartService
@@ -47,7 +47,6 @@ class IndexView(ListView):
         return context
 
 
-<<<<<<< HEAD
 class CategoryView(ListView):
     """Вью класс получения активных категорий товаров."""
 
