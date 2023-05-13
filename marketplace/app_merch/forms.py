@@ -43,25 +43,24 @@ class OrderUserDataForm(forms.Form):
         label="ФИО",
         error_messages={"required": 'Поле "ФИО" обязательно для заполнения'},
     )
-    phone = forms.CharField(
-        required=True,
-        widget=forms.TextInput(
-            attrs={"class": "form-input", "placeholder": "+7(___) ___-____"}
-        ),
-        label="Телефон",
+    phone = forms.CharField(required=True, widget=forms.TextInput(
+        attrs={
+            'class': 'form-input',
+            'placeholder': '+7(___) ___-____'
+        }),
+        label='Телефон',
         error_messages={
-            "invalid": "Введите корректный Телефон",
-            "required": 'Поле "Телефон" обязательно для заполнения',
-        },
+            'invalid': 'Введите корректный Телефон',
+            'required': 'Поле "Телефон" обязательно для заполнения'
+        }
     )
-    mail = forms.EmailField(
-        required=True,
-        widget=forms.TextInput(attrs={"class": "form-input"}),
-        label="E-mail",
+    mail = forms.EmailField(required=True, widget=forms.TextInput(
+        attrs={'class': 'form-input'}),
+        label='E-mail',
         error_messages={
-            "invalid": "Введите корректный E-mail",
-            "required": 'Поле "E-mail" обязательно для заполнения',
-        },
+            'invalid': 'Введите корректный E-mail',
+            'required': 'Поле "E-mail" обязательно для заполнения'
+        }
     )
 
     def clean_phone(self):
@@ -103,23 +102,25 @@ class OrderUserDataForm(forms.Form):
 class OrderDeliveryDataForm(forms.Form):
     """Форма для второго шага оформления заказа."""
 
-    city = forms.CharField(
-        max_length=100,
-        required=True,
-        widget=forms.TextInput(
-            attrs={"class": "form-input", "data-validate": "require"}
-        ),
-        label="Город",
-        error_messages={"required": 'Поле "Город" обязательно для заполнения'},
+    city = forms.CharField(max_length=100, required=True, widget=forms.TextInput(
+        attrs={
+            'class': 'form-input',
+            'data-validate': 'require'
+        }),
+        label='Город',
+        error_messages={
+            'required': 'Поле "Город" обязательно для заполнения'
+        }
     )
-    address = forms.CharField(
-        max_length=500,
-        required=True,
-        widget=forms.Textarea(
-            attrs={"class": "form-textarea", "data-validate": "require"}
-        ),
-        label="Адрес",
-        error_messages={"required": 'Поле "Адрес" обязательно для заполнения'},
+    address = forms.CharField(max_length=500, required=True, widget=forms.Textarea(
+        attrs={
+            'class': 'form-textarea',
+            'data-validate': 'require'
+        }),
+        label='Адрес',
+        error_messages={
+            'required': 'Поле "Адрес" обязательно для заполнения'
+        }
     )
 
     def __init__(self, *args, **kwargs):
@@ -137,5 +138,23 @@ class OrderDeliveryDataForm(forms.Form):
             city = self.delivery_data.get("city")[0] if self.delivery_data else ""
             address = self.delivery_data.get("address")[0] if self.delivery_data else ""
 
-            self.fields["city"].initial = city
-            self.fields["address"].initial = address
+            self.fields['city'].initial = city
+            self.fields['address'].initial = address
+
+
+class PaymentForm(forms.Form):
+    """ Форма ввода номера карты для оплаты заказа. """
+
+    numerol = forms.CharField(max_length=9, required=True, widget=forms.TextInput(
+        attrs={
+            'class': 'form-input Payment-bill',
+            'data-validate': 'require pay',
+            'placeholder': '9999 9999',
+            'data-mask': '9999 9999'
+        }),
+        label='Номер счёта',
+        error_messages={
+            'required': 'Это поле обязательно для заполнения.',
+            'invalid': 'Номер карты состоит из 8 цифр.'
+        }
+    )

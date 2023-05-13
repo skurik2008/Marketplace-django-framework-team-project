@@ -48,11 +48,11 @@ class CartService:
             request.session[CART_ID] = str(cart.pk)
 
         else:
-            cart = models.Cart.objects.create(
-                buyer=Buyer.objects.create(
+            cart = models.Cart.objects.get_or_create(
+                buyer=Buyer.objects.get_or_create(
                     profile=Profile.objects.get(user=request.user)
-                )
-            )
+                )[0]
+            )[0]
         return cart
 
     def add_offer(self, offer, quantity):

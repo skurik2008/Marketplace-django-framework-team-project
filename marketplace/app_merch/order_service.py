@@ -1,6 +1,18 @@
-from app_users.models import (Buyer, DeliveryType, Order, Payment, PaymentType,
-                              Profile)
+from datetime import datetime
+
 from django.db import transaction
+from django.db.models import QuerySet
+
+from app_basket.models import Cart
+from app_users.models import (
+    Profile,
+    Buyer,
+    Order,
+    DeliveryType,
+    PaymentType,
+    Payment,
+    OrderItem
+)
 
 
 class OrderCreation:
@@ -12,7 +24,11 @@ class OrderCreation:
 
         with transaction.atomic():
             buyer = Buyer.objects.get_or_create(profile=profile)
-            Order.objects.get_or_create(buyer=buyer[0], payment_status="not_paid")
+            Order.objects.get_or_create(
+                buyer=buyer[0],
+                payment_status="not_paid",
+                order_status='awaiting_payment'
+            )
 
     @staticmethod
     def add_delivery_data_to_order(
@@ -75,4 +91,36 @@ class OrderCreation:
     def _get_not_paid_order(buyer: Buyer) -> Order:
         """Метод получения не оплаченного заказа, если такого нет, то создаётся новый."""
 
-        return Order.objects.get_or_create(buyer=buyer, payment_status="not_paid")[0]
+        return Order.objects.get_or_create(buyer=buyer, payment_status='not_paid')[0]
+
+    @staticmethod
+    def complete_order(order: Order, cart_items: QuerySet, status: str, cart: Cart = None) -> None:
+        """ Метод подтверждения заказа пользователя. """
+
+        with transaction.atomic():
+            OrderCreation._change_order_statuses(order=order, status=status)
+            OrderCreation._add_items_to_order(order=order, cart_items=cart_items)
+            Cart.objects.get(pk=cart.pk).delete()
+
+    @staticmethod
+    def _change_order_statuses(order: Order, status: str) -> None:
+        """ Метод смены статусов заказа. """
+
+        with transaction.atomic():
+            if status == 'success':
+                order.payment_status = 'paid'
+                order.order_status = 'is_delivering'
+                order.departure_date = datetime.now().date()
+
+            order.save()
+
+    @staticmethod
+    def _add_items_to_order(order: Order, cart_items: QuerySet) -> None:
+        """ Метод добавления товаров в заказ. """
+
+        for i_item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                offer=i_item.offer,
+                quantity=i_item.quantity
+            )
