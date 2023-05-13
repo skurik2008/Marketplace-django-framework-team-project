@@ -23,6 +23,7 @@ from .forms import PurchaseForm, ReviewForm
 from .models import Banner, Category, Discount, Offer, Product, Review, Tag
 from app_basket.cart import CartService
 from app_users.models import DeliveryType, PaymentType
+from .viewed_products import watched_products_service
 
 
 class IndexView(ListView):
@@ -237,6 +238,10 @@ class ProductDetailView(DetailView):
     model = Product
     template_name = 'products/product_detail.html'
     context_object_name = 'product'
+
+    def get(self, request, *args, **kwargs):
+        watched_products_service.add_product(request=request, product=self.get_object())
+        return super(ProductDetailView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

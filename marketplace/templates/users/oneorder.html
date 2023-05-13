@@ -54,6 +54,18 @@
                                             </div>
                                         </div>
                                         <div class="Order-info">
+                                            <div class="Order-infoType">Дата отправки заказа:
+                                            </div>
+                                            <div class="Order-infoContent">{{ order.departure_date|date:"d.m.Y" }}
+                                            </div>
+                                        </div>
+                                        <div class="Order-info">
+                                            <div class="Order-infoType">Город:
+                                            </div>
+                                            <div class="Order-infoContent">{{ order.buyer.profile.address }}
+                                            </div>
+                                        </div>
+                                        <div class="Order-info">
                                             <div class="Order-infoType">Адрес:
                                             </div>
                                             <div class="Order-infoContent">{{ order.buyer.profile.address }}
@@ -66,9 +78,21 @@
                                             </div>
                                         </div>
                                         <div class="Order-info Order-info_status">
-                                            <div class="Order-infoType">Статус:
+                                            <div class="Order-infoType">Статус оплаты:
                                             </div>
                                             <div class="Order-infoContent">{{ order.get_payment_status_display }}
+                                            </div>
+                                        </div>
+                                        <div class="Order-info Order-info_status">
+                                            <div class="Order-infoType">Статус доставки:
+                                            </div>
+                                            <div class="Order-infoContent">{{ order.get_order_status_display }}
+                                            </div>
+                                        </div>
+                                        <div class="Order-info">
+                                            <div class="Order-infoType">Дата доставки:
+                                            </div>
+                                            <div class="Order-infoContent">{{ order.departure_date|date:"d.m.Y" }}
                                             </div>
                                         </div>
                                     </div>
@@ -100,8 +124,10 @@
                                         <strong class="Cart-title">Итого:<span class="Cart-price">{{ order_cost }}руб.</span>
                                         </strong>
                                     </div>
+                                    {% if order.payment_status == 'not_paid' %}
                                     <div class="Cart-block"><a class="btn btn_primary btn_lg" href="#">Оплатить</a>
                                     </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>

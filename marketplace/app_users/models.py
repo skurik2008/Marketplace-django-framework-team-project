@@ -153,6 +153,7 @@ class Order(models.Model):
     }
 
     ORDER_STATUS_CHOISES = {
+        ('awaiting_payment', 'Ожидает оплаты'),
         ('is_delivering', 'Доставляется'),
         ('delivered', 'Доставлен'),
     }
