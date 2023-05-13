@@ -1,12 +1,12 @@
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.models import User
-from django.db.models import Min, F
-from django.shortcuts import render
+from django.db.models import Min, F, Sum
+from django.shortcuts import render, redirect
 from sql_util.aggregates import SubquerySum
 from app_merch.models import Offer
 from app_settings.models import SiteSettings
 from app_users.forms import UserLoginForm, UserPasswordResetForm, UserRegisterForm, UserSetPasswordForm, UserUpdateForm, \
-    ProfileUpdateForm, UpdatePasswordForm
+    ProfileUpdateForm, UpdatePasswordForm, AvatarUpdateForm
 from app_users.models import Seller, Order, OrderItem
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LoginView, LogoutView,
@@ -16,9 +16,10 @@ from django.contrib.auth.views import (LoginView, LogoutView,
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, UpdateView, ListView
+from django.views.generic import CreateView, DetailView, ListView
 from .models import Profile, Buyer
 from app_basket.models import Cart, CartItem
+from app_merch.viewed_products import watched_products_service
 
 
 class CustomLoginView(LoginView):
@@ -106,11 +107,10 @@ class SellerView(DetailView):
 
         if not top_seller_products_cache_time:
             top_seller_products_cache_time = 1
-
         context['offers'] = cache.get_or_set(
             f"Seller {kwargs.get('pk')} top products",
             Offer.objects.filter(seller=self.get_object()).annotate(
-                sales=SubquerySum('order_items__quantity')
+                sales=Sum('order_items__quantity')
             ).order_by('-sales')[:10],
             top_seller_products_cache_time * 60 * 60
         )
@@ -132,9 +132,10 @@ class AccountView(LoginRequiredMixin, DetailView):
             context['last_order_cost'] = sum(item.offer.price * item.quantity
                                              for item in OrderItem.objects.filter(order=last_order)
                                              )
-        context['last_views'] = self.request.user.profile.buyer.views.all()[:3].annotate(
-            min_price=Min("offers__price")
+        watched_products = watched_products_service.get_watched_products(user=self.request.user, count=3).annotate(
+            min_price=Min('product__offers__price')
         )
+        context['watched_products'] = watched_products
         return context
 
 
@@ -150,21 +151,32 @@ class ProfileEditView(LoginRequiredMixin, DetailView):
         context["profile_form"] = ProfileUpdateForm(instance=self.request.user.profile)
         context["user_form"] = UserUpdateForm(instance=self.request.user)
         context["password_form"] = UpdatePasswordForm(self.request.user)
+        context["avatar_form"] = AvatarUpdateForm()
         return context
 
     def post(self, request, *args, **kwargs):
         user_form = UserUpdateForm(request.POST, instance=request.user)
-        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
-        password_form = UpdatePasswordForm(request.user, request.POST)
-        if user_form.is_valid() and profile_form.is_valid() and password_form.is_valid():
+        profile_form = ProfileUpdateForm(request.POST, instance=request.user.profile)
+        if not request.POST["new_password1"] == request.POST["new_password1"] == '':
+            password_form = UpdatePasswordForm(request.user, request.POST)
+        else:
+            password_form = UpdatePasswordForm(request.user)
+        if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
-            profile_form.save()
-            password_form.save()
-            return render(request, 'users/profile.html')
+            profile = profile_form.save()
+            avatar_form = AvatarUpdateForm(request.POST, request.FILES)
+            if avatar_form.is_valid():
+                avatar = avatar_form.save()
+                profile.avatar = avatar
+                profile.save()
+            if password_form.is_valid():
+                user = password_form.save()
+                auth_login(request, user)
+            return redirect('app_users:profile_edit', kwargs.get('username'))
         context = {
             "user_form": user_form,
             "profile_form": profile_form,
-            "password_form": password_form
+            "password_form": UpdatePasswordForm(request.user)
         }
         return render(request, 'users/profile.html', context)
 
@@ -178,7 +190,7 @@ class OrdersHistoryView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = super(OrdersHistoryView, self).get_queryset()
         queryset = queryset.filter(buyer=self.request.user.profile.buyer).annotate(
-            price=F("order_items__offer__price") * F("order_items__quantity")
+            price=Sum(F("order_items__offer__price") * F("order_items__quantity"))
         )
         return queryset
 
@@ -189,3 +201,27 @@ class ViewsHistoryView(LoginRequiredMixin, DetailView):
     template_name = "users/historyview.html"
     slug_url_kwarg = 'username'
     slug_field = 'username'
+
+    def get_context_data(self, **kwargs):
+        context = super(ViewsHistoryView, self).get_context_data(**kwargs)
+        watched_products = watched_products_service.get_watched_products(user=self.request.user).annotate(
+            min_price=Min('product__offers__price')
+        )
+        context['watched_products'] = watched_products
+        return context
+
+
+class OrderDetailView(LoginRequiredMixin, DetailView):
+    model = Order
+    context_object_name = "order"
+    template_name = "users/oneorder.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(OrderDetailView, self).get_context_data(**kwargs)
+        context["order_items"] = OrderItem.objects.filter(order=self.get_object()).annotate(
+            price=F("offer__price") * F("quantity")
+        )
+        context["order_cost"] = sum(item.offer.price * item.quantity
+                                    for item in OrderItem.objects.filter(order=self.get_object())
+                                    )
+        return context

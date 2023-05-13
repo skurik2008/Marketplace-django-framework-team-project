@@ -4,7 +4,8 @@ from django.urls import path
 from .views import (CustomLoginView, CustomLogoutView,
                     CustomPasswordResetConfirmView,
                     CustomPasswordResetDoneView, CustomPasswordResetView,
-                    CustomRegisterView, SellerView, AccountView, ProfileEditView, OrdersHistoryView, ViewsHistoryView)
+                    CustomRegisterView, SellerView, AccountView, ProfileEditView, OrdersHistoryView, ViewsHistoryView,
+                    OrderDetailView)
 
 app_name = 'app_users'
 
@@ -19,5 +20,6 @@ urlpatterns = [
     path('profile/<slug:username>/', AccountView.as_view(), name='account'),
     path('profile/<slug:username>/edit/', ProfileEditView.as_view(), name='profile_edit'),
     path('my/orders/', OrdersHistoryView.as_view(), name='orders_history'),
+    path('my/orders/<int:pk>/', OrderDetailView.as_view(), name='order_detail'),
     path('profile/<slug:username>/views/', ViewsHistoryView.as_view(), name='views_history'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

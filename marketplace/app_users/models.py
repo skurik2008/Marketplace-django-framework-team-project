@@ -152,6 +152,7 @@ class Order(models.Model):
     }
 
     ORDER_STATUS_CHOISES = {
+        ('awaiting_payment', 'Ожидает оплаты'),
         ('is_delivering', 'Доставляется'),
         ('delivered', 'Доставлен'),
     }
@@ -173,6 +174,9 @@ class Order(models.Model):
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
+
+    def __str__(self):
+        return f"Заказ {self.id} от {self.order_date}"
 
 
 class OrderItem(models.Model):

@@ -1,11 +1,18 @@
 from django import forms
 from django.contrib.auth import password_validation
-from django.contrib.auth.forms import (AuthenticationForm, PasswordResetForm,
-                                       SetPasswordForm, UserChangeForm,
-                                       UserCreationForm)
 from django.contrib.auth.models import User
 from django.forms.widgets import FileInput
 
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    PasswordResetForm,
+    SetPasswordForm,
+    UserCreationForm,
+    UserChangeForm
+)
+from django.contrib.auth.models import User
+from django.forms.widgets import FileInput
+from app_merch.models import Image
 from .models import Profile
 
 
@@ -83,28 +90,31 @@ class UserSetPasswordForm(SetPasswordForm):
 class UserUpdateForm(UserChangeForm):
     class Meta:
         model = User
-        fields = ('email', )
+        fields = ('email',)
+        widgets = {
+            'email': forms.TextInput(attrs={"class": "form-input", "id": "mail", "name": "mail",
+                                            "data-validate": "require"
+                                            }
+                                     ),
+        }
 
 
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ('full_name', 'phone_number',  'avatar', )
+        fields = ('full_name', 'phone_number', )
         widgets = {
             "phone_number": forms.TextInput(attrs={"class": "form-input", "id": "phone", "name": "phone"}),
             "full_name": forms.TextInput(attrs={"class": "form-input", "id": "name", "name": "name",
                                                 "data-validate": "require"
                                                 }
                                          ),
-            "avatar": forms.ClearableFileInput(attrs={"class": "Profile-file form-input", "id": "avatar",
-                                                      "name": "avatar", "data-validate": "onlyImgAvatar"
-                                                      }
-                                               ),
         }
 
 
 class UpdatePasswordForm(SetPasswordForm):
     new_password1 = forms.CharField(
+        required=False,
         widget=forms.PasswordInput(attrs={"class": "form-input", "id": "password", "name": "password",
                                           "placeholder": "Тут можно изменить пароль"
                                           }
@@ -112,9 +122,45 @@ class UpdatePasswordForm(SetPasswordForm):
         strip=False,
     )
     new_password2 = forms.CharField(
+        required=False,
         strip=False,
         widget=forms.PasswordInput(attrs={"class": "form-input", "id": "passwordReply", "name": "passwordReply",
                                           "placeholder": "Введите пароль повторно"
                                           }
                                    ),
     )
+
+
+class AvatarUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Image
+        fields = '__all__'
+        widgets = {
+            'file': forms.ClearableFileInput(
+                        attrs={"class": "Profile-file form-input",
+                               "id": "avatar",
+                               "name": "avatar",
+                               "data-validate": "onlyImgAvatar"
+                               }
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(AvatarUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['title'].required = False
+
+    def clean_file(self):
+        file = self.cleaned_data.get('file', False)
+        if file:
+            if file.size > 2 * 1024 * 1024:
+                raise forms.ValidationError("Размер файла не должен превышать 2 МБ")
+            return file
+        else:
+            raise forms.ValidationError("Не удалось загрузить файл")
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.file.title = f"Аватар {self.request.user.username}"
+        if commit:
+            instance.save()
+        return instance

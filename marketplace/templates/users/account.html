@@ -32,16 +32,12 @@
                         <div class="Account-group">
                             <div class="Account-column">
                                 <div class="Account-avatar">
-                                    {% if user.profile.avatar %}
-                                        <img src="{% static user.profile.avatar.image.file %}" alt="profile.png" />
-                                    {% else %}
-                                        <img src="{% static "assets/img/icons/profile.png" %}" alt="profile.png" />
-                                    {% endif %}
+                                    <img src="/{% firstof user.profile.avatar.file 'assets/img/icons/profile.png' %}" alt="profile.png" />
                                 </div>
                             </div>
                             <div class="Account-column">
                                 <div class="Account-name">{{ user.profile.full_name }}
-                                </div><a class="Account-editLink" href="#">Редактировать профиль</a>
+                                </div><a class="Account-editLink" href="{% url "app_users:profile_edit" user.username %}">Редактировать профиль</a>
                             </div>
                         </div>
                         <header class="Section-header">
@@ -54,7 +50,7 @@
                                     <div class="Order Order_anons">
                                         <div class="Order-personal">
                                             <div class="row">
-                                                <div class="row-block"><a class="Order-title" href="#">Заказ&#32;<span class="Order-numberOrder">№{{ last_order.pk }}</span>&#32;от&#32;<span class="Order-dateOrder">{{ last_order.order_date|date:"d.m.Y" }}</span></a>
+                                                <div class="row-block"><a class="Order-title" href="{% url "app_users:order_detail" last_order.id %}">Заказ&#32;<span class="Order-numberOrder">№{{ last_order.pk }}</span>&#32;от&#32;<span class="Order-dateOrder">{{ last_order.order_date|date:"d.m.Y" }}</span></a>
                                                     <div class="Account-editLink"><a href="{% url "app_users:orders_history" %}">История заказов</a>
                                                     </div>
                                                 </div>
@@ -104,15 +100,15 @@
                         </header>
                         <div class="Account-group">
                             <div class="Cards">
-                                {% for product in last_views %}
-                                <div class="Card"><a class="Card-picture" href="{% url 'pages:product-detail' product.pk %}"><img src="/{% firstof product.icon.file 'static/assets/img/content/home/card.jpg' %}" alt="card.jpg" /></a>
+                                {% for item in watched_products %}
+                                <div class="Card"><a class="Card-picture" href="{% url 'pages:product-detail' item.product.pk %}"><img src="/{% firstof item.product.icon.file 'static/assets/img/content/home/card.jpg' %}" alt="card.jpg" /></a>
                                     <div class="Card-content">
-                                        <strong class="Card-title"><a href="{% url 'pages:product-detail' product.pk %}">{{ product.title }}</a>
+                                        <strong class="Card-title"><a href="{% url 'pages:product-detail' item.product.pk %}">{{ item.product.title }}</a>
                                         </strong>
                                         <div class="Card-description">
-                                            <div class="Card-cost"><span class="Card-price">от {{ product.min_price }} руб.</span>
+                                            <div class="Card-cost"><span class="Card-price">от {{ item.min_price }} руб.</span>
                                             </div>
-                                            <div class="Card-category">{{ product.category.title }}
+                                            <div class="Card-category">{{ item.product.category.title }}
                                             </div>
                                             <div class="Card-hover"><a class="Card-btn" href="#"><img src="{% static 'assets/img/icons/card/cart.svg' %}" alt="cart.svg" /></a>
                                             </div>

@@ -3,11 +3,9 @@ from app_users.models import DeliveryType, PaymentType, Seller
 from django.core.cache import cache
 from django.db.models import Avg, Count, Max, Min, QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
 from django.views.generic import DetailView, ListView, View
 from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
-
 from . import review_service
 from .discount_service import DiscountService
 from .forms import PurchaseForm, ReviewForm
@@ -15,6 +13,8 @@ from .models import Banner, Category, Discount, Offer, Product, Review, Tag
 from app_basket.cart import CartService
 from .order_service import OrderCreation
 from .forms import OrderUserDataForm, OrderDeliveryDataForm
+from app_users.models import DeliveryType, PaymentType
+from .viewed_products import watched_products_service
 
 
 class IndexView(ListView):
@@ -255,6 +255,10 @@ class ProductDetailView(DetailView):
     model = Product
     template_name = 'products/product_detail.html'
     context_object_name = 'product'
+
+    def get(self, request, *args, **kwargs):
+        watched_products_service.add_product(request=request, product=self.get_object())
+        return super(ProductDetailView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
