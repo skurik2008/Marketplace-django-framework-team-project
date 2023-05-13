@@ -1,7 +1,7 @@
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.models import User
 from django.db.models import Min, F
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from sql_util.aggregates import SubquerySum
 from app_merch.models import Offer
 from app_settings.models import SiteSettings
@@ -16,7 +16,7 @@ from django.contrib.auth.views import (LoginView, LogoutView,
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, UpdateView, ListView
+from django.views.generic import CreateView, DetailView, ListView
 from .models import Profile, Buyer
 from app_basket.models import Cart, CartItem
 
@@ -155,16 +155,21 @@ class ProfileEditView(LoginRequiredMixin, DetailView):
     def post(self, request, *args, **kwargs):
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
-        password_form = UpdatePasswordForm(request.user, request.POST)
-        if user_form.is_valid() and profile_form.is_valid() and password_form.is_valid():
+        if not request.POST["new_password1"] == request.POST["new_password1"] == '':
+            password_form = UpdatePasswordForm(request.user, request.POST)
+        else:
+            password_form = UpdatePasswordForm(request.user)
+        if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
-            password_form.save()
-            return render(request, 'users/profile.html')
+            if password_form.is_valid():
+                user = password_form.save()
+                auth_login(request, user)
+            return redirect('app_users:profile_edit', kwargs.get('username'))
         context = {
             "user_form": user_form,
             "profile_form": profile_form,
-            "password_form": password_form
+            "password_form": UpdatePasswordForm(request.user)
         }
         return render(request, 'users/profile.html', context)
 
