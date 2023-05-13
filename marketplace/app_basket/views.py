@@ -36,4 +36,5 @@ def remove_from_cart(request):
     """
     cartitem_id_delete = request.GET.get("cartitem_id")
     CartService(request).delete_cartitem(cartitem_id=cartitem_id_delete)
-    return HttpResponseRedirect(redirect_to=request.META.get("HTTP_REFERER"))
+    request.session.pop('user_data', None)
+    return HttpResponseRedirect(redirect_to=request.META.get('HTTP_REFERER'))

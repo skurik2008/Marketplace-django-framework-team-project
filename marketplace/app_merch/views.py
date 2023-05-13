@@ -1,9 +1,12 @@
-from app_basket.cart import CartService
+from django.contrib.auth.mixins import LoginRequiredMixin
 from app_settings.models import SiteSettings
-from app_users.models import DeliveryType, PaymentType, Seller
+from app_users.models import DeliveryType, PaymentType, Seller, Order
 from django.core.cache import cache
 from django.db.models import Avg, Count, Max, Min, QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
+
+from django.urls import reverse, reverse_lazy
+
 from django.views.generic import DetailView, ListView, View
 from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
@@ -13,8 +16,12 @@ from .discount_service import DiscountService
 from .forms import (OrderDeliveryDataForm, OrderUserDataForm, PurchaseForm,
                     ReviewForm)
 from .models import Banner, Category, Discount, Offer, Product, Review, Tag
-from .order_service import OrderCreation
 from .viewed_products import watched_products_service
+from app_basket.cart import CartService
+from app_basket.models import Cart
+from .order_service import OrderCreation
+from .payment_service import is_active_orders
+from .tasks import send_request_to_payment_service
 
 
 class IndexView(ListView):
@@ -40,6 +47,7 @@ class IndexView(ListView):
         return context
 
 
+<<<<<<< HEAD
 class CategoryView(ListView):
     """Вью класс получения активных категорий товаров."""
 
@@ -502,3 +510,43 @@ class DiscountDetailView(DetailView):
     model = Discount
     template_name = "discounts/discount_detail.html"
     context_object_name = "discount"
+
+    @staticmethod
+    def post(*args, **kwargs):
+        return redirect('pages:payment-view')
+
+
+class PaymentView(LoginRequiredMixin, View):
+    """ View для проведения оплаты заказа. """
+
+    login_url = reverse_lazy('app_users:login')
+
+    @is_active_orders
+    def get(self, *args, **kwargs):
+        return render(self.request, 'orders/payment.html', context={'form': PaymentForm})
+
+    def post(self, *args, **kwargs):
+        form = PaymentForm(self.request.POST)
+        cart = Cart.objects.get(buyer=self.request.user.profile.buyer)
+        order = Order.objects.get(buyer=self.request.user.profile.buyer, payment_status='not_paid')
+        amount = CartService(self.request).get_total_price_cart()
+
+        if form.is_valid():
+            result = send_request_to_payment_service.delay(
+                username=self.request.user.username,
+                order_id=order.pk,
+                card_number=form.cleaned_data['numerol'],
+                amount=amount
+            ).get()
+
+            self.request.session['last_order_status'] = result
+
+            if result['status'] == 'success':
+                OrderCreation.complete_order(
+                    order=order,
+                    cart=cart,
+                    cart_items=CartService(self.request).get_cart_item_list()
+                )
+
+            return render(self.request, 'orders/payment_progress.html')
+        return render(self.request, 'orders/payment.html', context={'form': form})
