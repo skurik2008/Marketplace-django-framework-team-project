@@ -498,6 +498,10 @@ class OrderPurchaseView(View):
         context = {"cart_items": CartService(self.request).get_cart_item_list()}
         return render(self.request, "orders/order_purchase.html", context=context)
 
+    @staticmethod
+    def post(*args, **kwargs):
+        return redirect('pages:payment-view')
+
 
 class DiscountListView(ListView):
     model = Discount
@@ -526,9 +530,9 @@ class PaymentView(LoginRequiredMixin, View):
 
     def post(self, *args, **kwargs):
         form = PaymentForm(self.request.POST)
-        cart = Cart.objects.get(buyer=self.request.user.profile.buyer)
+        cart = Cart.objects.filter(buyer=self.request.user.profile.buyer).first()
         order = Order.objects.get(buyer=self.request.user.profile.buyer, payment_status='not_paid')
-        amount = CartService(self.request).get_total_price_cart()
+        amount = CartService(self.request).get_total_price_cart() if cart else order.total_price(order)
 
         if form.is_valid():
             result = send_request_to_payment_service.delay(
@@ -538,14 +542,15 @@ class PaymentView(LoginRequiredMixin, View):
                 amount=amount
             ).get()
 
-            self.request.session['last_order_status'] = result
+            self.request.session['pay_result'] = result
+            self.request.session['order_id'] = order.pk
 
-            if result['status'] == 'success':
-                OrderCreation.complete_order(
-                    order=order,
-                    cart=cart,
-                    cart_items=CartService(self.request).get_cart_item_list()
-                )
+            OrderCreation.complete_order(
+                order=order,
+                cart=cart,
+                cart_items=CartService(self.request).get_cart_item_list(),
+                status=result['status']
+            )
 
             return render(self.request, 'orders/payment_progress.html')
         return render(self.request, 'orders/payment.html', context={'form': form})

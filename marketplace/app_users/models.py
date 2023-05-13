@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
+from django.db.models import Sum, F
 
 User._meta.get_field("email")._unique = False
 
@@ -253,6 +254,12 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Заказ {self.id} от {self.order_date}"
+
+    @staticmethod
+    def total_price(order):
+        return order.annotate(
+            price=Sum(F("order_items__offer__price") * F("order_items__quantity"))
+        )
 
 
 class OrderItem(models.Model):

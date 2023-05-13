@@ -37,7 +37,7 @@
 
     <script>
         setTimeout(function() {
-            window.location.href = "{% url 'app_users:account' request.user.username %}";
+            window.location.href = "{% url 'app_users:order_detail' request.session.order_id %}";
         }, 5000);
     </script>
 

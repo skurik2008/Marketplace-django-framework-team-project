@@ -24,7 +24,11 @@ class OrderCreation:
 
         with transaction.atomic():
             buyer = Buyer.objects.get_or_create(profile=profile)
-            Order.objects.get_or_create(buyer=buyer[0], payment_status="not_paid")
+            Order.objects.get_or_create(
+                buyer=buyer[0],
+                payment_status="not_paid",
+                order_status='awaiting_payment'
+            )
 
     @staticmethod
     def add_delivery_data_to_order(
@@ -90,22 +94,23 @@ class OrderCreation:
         return Order.objects.get_or_create(buyer=buyer, payment_status='not_paid')[0]
 
     @staticmethod
-    def complete_order(order: Order, cart: Cart, cart_items: QuerySet) -> None:
+    def complete_order(order: Order, cart_items: QuerySet, status: str, cart: Cart = None) -> None:
         """ Метод подтверждения заказа пользователя. """
 
         with transaction.atomic():
-            OrderCreation._change_order_statuses(order=order)
+            OrderCreation._change_order_statuses(order=order, status=status)
             OrderCreation._add_items_to_order(order=order, cart_items=cart_items)
             Cart.objects.get(pk=cart.pk).delete()
 
     @staticmethod
-    def _change_order_statuses(order: Order) -> None:
+    def _change_order_statuses(order: Order, status: str) -> None:
         """ Метод смены статусов заказа. """
 
         with transaction.atomic():
-            order.payment_status = 'paid'
-            order.order_status = 'is_delivering'
-            order.departure_date = datetime.now().date()
+            if status == 'success':
+                order.payment_status = 'paid'
+                order.order_status = 'is_delivering'
+                order.departure_date = datetime.now().date()
 
             order.save()
 

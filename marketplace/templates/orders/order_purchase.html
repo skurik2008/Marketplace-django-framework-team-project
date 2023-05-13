@@ -67,7 +67,7 @@
                     <div class="Cart-product">
                         <div class="Cart-block Cart-block_row">
                             <div class="Cart-block Cart-block_pict"><a class="Cart-pict" href="#"><img class="Cart-img"
-                                                                                                       src="/{{ item.offer.product.icon.file }}"
+                                                                                                       src="/{% firstof item.offer.product.icon.file 'static/assets/img/content/home/no-pic.png' %}"
                                                                                                        alt="card.jpg"/></a>
                             </div>
                             <div class="Cart-block Cart-block_info"><a class="Cart-title" href="{% url 'pages:product-detail' item.offer.product.pk %}">{{ item.offer.product.title }}</a>
