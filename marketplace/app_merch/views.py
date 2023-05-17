@@ -38,10 +38,19 @@ class IndexView(ListView):
         if not banners_cache_time:
             banners_cache_time = 10
 
+        banners = Banner.objects.filter(is_active=True).order_by('?')[:3]
+        semi_banners = Banner.objects.filter(is_active=True)[:3]
+
         context["banners"] = cache.get_or_set(
             "Banners",
-            Banner.objects.filter(is_active=True).order_by("?")[:3],
+            banners,
             banners_cache_time * 60,
+        )
+
+        context["semi_banners"] = cache.get_or_set(
+            "Semi_banners",
+            semi_banners,
+            banners_cache_time * 60
         )
 
         return context
