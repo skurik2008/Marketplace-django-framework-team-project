@@ -81,7 +81,6 @@ class CustomPasswordResetDoneView(PasswordResetDoneView):
 
 class CustomRegisterView(CreateView):
     model = Profile
-    form_class = UserRegisterForm
     template_name = "users/register.html"
     success_url = reverse_lazy("pages:index-page")
 
@@ -95,6 +94,9 @@ class CustomRegisterView(CreateView):
             avatar=form.cleaned_data.get("avatar"),
         )
         return super().form_valid(form)
+
+    def get_form(self, form_class=None):
+        return UserRegisterForm(request=self.request)
 
 
 class SellerView(DetailView):
