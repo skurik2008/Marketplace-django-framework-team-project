@@ -11,19 +11,6 @@ from .models import Profile
 
 
 class UserRegisterForm(UserCreationForm):
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request", None)
-        super().__init__(*args, **kwargs)
-
-        if self.request:
-            user_data = self.request.session.get('user_register_data')
-            if user_data:
-                self.fields['full_name'].initial = user_data['name'][0]
-                self.fields['phone_number'].initial = user_data['phone'][0]
-                self.fields['email'].initial = user_data['mail'][0]
-                self.fields['password1'].initial = user_data['password'][0]
-                self.fields['password2'].initial = user_data['passwordReply'][0]
-
     full_name = forms.CharField(
         max_length=150,
         required=True,
