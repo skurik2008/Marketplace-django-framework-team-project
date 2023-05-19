@@ -5,7 +5,7 @@
     "fields": {
         "name": "MEGANO",
         "active": true,
-        "title": "MEGANO MARKETPLACE",
+        "title": "ADMIN PANEL",
         "title_color": "#0063D1",
         "title_visible": true,
         "logo": "/static/assets/img/logo_footer.png",
