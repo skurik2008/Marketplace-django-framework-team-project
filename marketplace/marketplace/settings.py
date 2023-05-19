@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "admin_interface",
+    "colorfield",
     "clearcache",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -46,6 +48,9 @@ INSTALLED_APPS = [
     "django_mptt_admin",
     "mathfilters",
 ]
+
+X_FRAME_OPTIONS = "SAMEORIGIN"
+SILENCED_SYSTEM_CHECKS = ["security.W019"]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
