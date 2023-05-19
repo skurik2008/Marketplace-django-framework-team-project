@@ -14,25 +14,25 @@ class UserRegisterForm(UserCreationForm):
     full_name = forms.CharField(
         max_length=150,
         required=True,
-        label="Полное имя",
+        label="",
         widget=forms.TextInput(attrs={"placeholder": "Имя пользователя"}),
     )
     phone_number = forms.CharField(
         max_length=50,
         required=True,
-        label="Номер телефона",
+        label="",
         widget=forms.TextInput(attrs={"placeholder": "Eg. +79991234567 "}),
     )
     address = forms.CharField(
         max_length=255,
         required=True,
-        label="Адрес",
+        label="",
         widget=forms.TextInput(attrs={"placeholder": "Введите адрес"}),
     )
-    avatar = forms.FileField(widget=FileInput, required=False, label="Аватар")
+    avatar = forms.FileField(widget=FileInput(attrs={'hidden': '1'}), required=False, label="Аватар")
 
     password1 = forms.CharField(
-        label="Пароль",
+        label="",
         strip=False,
         widget=forms.PasswordInput(
             attrs={
@@ -44,7 +44,7 @@ class UserRegisterForm(UserCreationForm):
         help_text="Пароль должен содержать не менее 8 символов и быть сложным",
     )
     password2 = forms.CharField(
-        label="Подтверждение пароля",
+        label="",
         widget=forms.PasswordInput(
             attrs={
                 "autocomplete": "new-password",
@@ -57,8 +57,8 @@ class UserRegisterForm(UserCreationForm):
     username = forms.CharField(
         max_length=50,
         required=True,
-        label="Имя пользователя",
-        widget=forms.TextInput(attrs={"placeholder": "Введите имя пользователя"}),
+        label="",
+        widget=forms.TextInput(attrs={"placeholder": "Введите логин"}),
     )
 
     class Meta:
@@ -75,7 +75,7 @@ class UserRegisterForm(UserCreationForm):
         ]
         labels = {
             "username": "Имя пользователя",
-            "email": "Email",
+            "email": "",
         }
         widgets = {
             "email": forms.EmailInput(attrs={"placeholder": "Eg. mail@mail.com"}),
@@ -83,9 +83,12 @@ class UserRegisterForm(UserCreationForm):
 
 
 class UserLoginForm(AuthenticationForm):
-    username = forms.CharField(max_length=254, required=True, label="Имя пользователя")
+    username = forms.CharField(
+        max_length=254, required=True, label="",
+        widget=forms.TextInput(attrs={'placeholder': 'Username'})
+    )
     password = forms.CharField(
-        widget=forms.PasswordInput, required=True, label="Пароль"
+        widget=forms.PasswordInput(attrs={'placeholder': '********'}), required=True, label=""
     )
 
     class Meta:
