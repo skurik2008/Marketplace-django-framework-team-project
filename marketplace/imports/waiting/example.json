@@ -1,0 +1,12 @@
+[
+  {
+    "title": "string",
+    "description": "string",
+    "category_id": 1,
+    "characters": {
+      "string_1": "string",
+      "string_2": 1,
+      "string_3": true
+    }
+  }
+]

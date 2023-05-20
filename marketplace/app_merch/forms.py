@@ -158,3 +158,14 @@ class PaymentForm(forms.Form):
             'invalid': 'Номер карты состоит из 8 цифр.'
         }
     )
+
+
+class ProductImportForm(forms.Form):
+    """ Форма загрузки csv файла импорта товаров. """
+
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'placeholder': 'E-mail'}), label=''
+    )
+    json_file = forms.FileField(
+        label='', widget=forms.ClearableFileInput(attrs={"multiple": True})
+    )
