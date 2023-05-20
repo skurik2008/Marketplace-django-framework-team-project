@@ -221,9 +221,9 @@ class AvatarUpdateForm(forms.ModelForm):
         else:
             raise forms.ValidationError("Не удалось загрузить файл")
 
-    def save(self, commit=True):
+    def save(self, username, commit=True):
         instance = super().save(commit=False)
-        instance.file.title = f"Аватар {self.request.user.username}"
+        instance.file.title = f"Аватар {username}"
         if commit:
             instance.save()
         return instance

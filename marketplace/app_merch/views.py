@@ -1,16 +1,15 @@
+import requests
 from django.contrib.auth.mixins import LoginRequiredMixin
 from app_settings.models import SiteSettings
 from app_users.models import DeliveryType, PaymentType, Seller, Order
 from django.core.cache import cache
-from django.db.models import Avg, Count, Max, Min, QuerySet
+from django.db.models import Count, Max, Min, QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
-
-from django.urls import reverse, reverse_lazy
-
-from django.views.generic import DetailView, ListView, View
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, ListView, View, TemplateView
 from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
-
+from .comparison_service import comparison_service
 from . import review_service
 from .discount_service import DiscountService
 from .forms import (OrderDeliveryDataForm, OrderUserDataForm, PurchaseForm,
@@ -563,3 +562,16 @@ class PaymentView(LoginRequiredMixin, View):
 
             return render(self.request, 'orders/payment_progress.html')
         return render(self.request, 'orders/payment.html', context={'form': form})
+
+
+class ComparisonView(TemplateView):
+    template_name = 'products/comparison.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        comparison_list = comparison_service.get_comparison_list(request=self.request)
+        context['comparison_list'] = comparison_list
+        return context
+
+    def post(self):
+        pass
