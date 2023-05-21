@@ -33,7 +33,7 @@ class Command(BaseCommand):
             filepath = os.path.join(settings.BASE_DIR, 'imports', 'waiting', file)
             res = make_an_products_importation.delay(filepath=filepath).get()
             self.stdout.write(
-                self.style.SUCCESS(f"Successfully imported {file}")
+                self.style.SUCCESS(f"SUCCESSFULLY imported: {file}")
             ) if res else self.stderr.write(
-                self.style.ERROR(f"Failed to import {file}")
+                self.style.ERROR(f"FAILED to import: {file}")
             )
