@@ -28,3 +28,13 @@ def make_an_products_importation(
     """
     result = ImportProductsService().import_products(filepath=filepath)
     return result
+
+
+@app.task
+def send_log_file_to_email(dst_email: str) -> bool:
+    """
+    Задача, которая будет добавлена в очередь на выполнение.
+    Вызывает метод, отправляющий лог файл на переданный E-mail.
+    """
+    result = ImportProductsService().send_log(dst_email)
+    return result

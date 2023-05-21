@@ -1,12 +1,15 @@
 from pymongo import MongoClient
 from pymongo.collection import Collection
+
 from schemas import PaymentInformation
+
+
+CONNECTION_STRING: str = "mongodb://user:pass@mongodb"
 
 
 def get_database():
     """Функция получения клиента MongoDB"""
 
-    CONNECTION_STRING: str = "mongodb://user:pass@mongodb"
     client = MongoClient(CONNECTION_STRING)
     return client["user_payments"]
 

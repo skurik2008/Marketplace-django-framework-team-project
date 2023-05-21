@@ -3,8 +3,11 @@ import logging
 import os
 import shutil
 
+import mimetypes
+from django.core.mail import EmailMessage
 from marketplace.settings import BASE_DIR
 from .models import Product
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -81,4 +84,32 @@ class ImportProductsService:
             return True
         except Exception as e:
             logger.error(f'ERROR: {e}')
+            return False
+
+    @staticmethod
+    def send_log(dst_email: str):
+        """ Метод отправки файла с логом на E-mail. """
+
+        try:
+            with open(os.path.join(BASE_DIR, 'imports', 'results.log'), 'r') as log_f:
+                content = log_f.read()
+
+            email = EmailMessage(
+                subject="Результат импортирования товаров.",
+                body="Ваши товары были импортированы! Пожалуйста, проверьте лог файл.",
+                from_email=settings.EMAIL_HOST_USER,
+                to=[dst_email]
+            )
+            email.attach(
+                filename="results.log",
+                content=content,
+                mimetype=mimetypes.guess_type(
+                    os.path.join(BASE_DIR, 'imports', 'results.log')
+                )
+            )
+            email.send()
+            return True
+
+        except Exception as e:
+            logger.error(f'Error while sending E-mail: {e}')
             return False

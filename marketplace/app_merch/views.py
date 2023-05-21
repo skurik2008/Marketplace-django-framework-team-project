@@ -27,7 +27,7 @@ from app_basket.cart import CartService
 from app_basket.models import Cart
 from .order_service import OrderCreation
 from .payment_service import is_active_orders
-from .tasks import send_request_to_payment_service, make_an_products_importation
+from .tasks import send_request_to_payment_service, make_an_products_importation, send_log_file_to_email
 
 
 class IndexView(ListView):
@@ -583,10 +583,10 @@ def import_products(request):
             for file in json_files:
                 filepath = os.path.join(BASE_DIR, 'imports', 'waiting', str(file))
                 result = make_an_products_importation.delay(filepath=filepath).get()
-                if result:
-                    context['success'] = 'True'
-                else:
-                    context['success'] = 'False'
+                context['success'] = 'True' if result else 'False'
+
+            result = send_log_file_to_email.delay(dst_email=request.POST.get('email')).get()
+            context['email_sent'] = 'True' if result else 'False'
 
         return render(request, 'products/import-products.html', context)
     else:
