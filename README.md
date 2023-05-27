@@ -26,3 +26,12 @@ python manage.py runserver
 ```
 
 **Инструкция по запуску сервиса оплаты находится в директории <code>app_payment/README.md</code>**
+
+
+## Красивая админ-панель
+
+Чтобы изменить дизайн админ-панели, необходимо загрузить фикстуру с темой командой:
+
+```bash
+python manage.py loaddata fixtures/admin_interface_theme_megano.json
+```

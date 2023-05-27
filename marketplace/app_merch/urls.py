@@ -5,7 +5,7 @@ from django.urls import path
 from .views import (AllDiscountView, CatalogView, DiscountDetailView,
                     DiscountListView, IndexView, OrderDeliveryView,
                     OrderPaymentView, OrderPurchaseView, OrderUserDataView,
-                    ProductDetailView, ProductPurchaseView, PaymentView)
+                    ProductDetailView, ProductPurchaseView, PaymentView, import_products)
 
 app_name = "pages"
 
@@ -22,4 +22,5 @@ urlpatterns = [
     path('order/send-payment/', PaymentView.as_view(), name='payment-view'),
     path("discounts/", DiscountListView.as_view(), name="discount_list"),
     path("discounts/<int:pk>/", DiscountDetailView.as_view(), name="discount_detail"),
+    path("import-products/", import_products, name='import_page'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

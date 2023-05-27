@@ -112,6 +112,7 @@ class Product(models.Model):
     )
     media = models.ManyToManyField(Image, verbose_name="медиафайлы продукта")
     characters = models.JSONField(verbose_name="характеристики")
+    is_active = models.BooleanField(default=False, verbose_name='активность')
 
     class Meta:
         verbose_name = "Продукт"
