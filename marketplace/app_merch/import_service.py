@@ -103,9 +103,6 @@ class ImportProductsService:
             email.attach(
                 filename="results.log",
                 content=content,
-                mimetype=mimetypes.guess_type(
-                    os.path.join(BASE_DIR, 'imports', 'results.log')
-                )
             )
             email.send()
             return True

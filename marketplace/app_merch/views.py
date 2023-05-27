@@ -161,7 +161,10 @@ class CatalogView(ListView):
         Получение списка товаров по фильтру и сортировке.
         Список кешируется на 1 день.
         """
-        queryset: QuerySet = Product.objects.filter(offers__is_active=True)
+
+        # TODO: Proverka na cache
+
+        queryset: QuerySet = Product.objects.filter(is_active=True, offers__is_active=True)
 
         time_to_cache: int = SiteSettings.load().time_to_cache
         if not time_to_cache:

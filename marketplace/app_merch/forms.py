@@ -167,5 +167,5 @@ class ProductImportForm(forms.Form):
         widget=forms.EmailInput(attrs={'placeholder': 'E-mail'}), label=''
     )
     json_file = forms.FileField(
-        label='', widget=forms.ClearableFileInput(attrs={"multiple": True})
+        label='', widget=forms.ClearableFileInput(attrs={"multiple": True, "class": "Import-form-file-input"})
     )
