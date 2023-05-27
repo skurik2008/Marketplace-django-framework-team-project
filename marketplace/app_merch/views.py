@@ -569,9 +569,33 @@ class ComparisonView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        comparison_list = comparison_service.get_comparison_list(request=self.request)
+        # self.request.session['comparison_list'] = [1, 5]
+        comparison_list: QuerySet = comparison_service.get_comparison_list(request=self.request)
         context['comparison_list'] = comparison_list
+        if comparison_list:
+            characters_list = []
+            for product in comparison_list:
+                characters_list.append(product.characters)
+            for main_character_key, main_character_value in characters_list[0].items():
+                for character_key, character_value in main_character_value.items():
+                    if all([product_characters[main_character_key][character_key] == characters_list[0][main_character_key][character_key]
+                            for product_characters in characters_list]
+                           ):
+                        for product_characters in characters_list:
+                            product_characters[main_character_key][character_key] = {
+                                "value": product_characters[main_character_key][character_key],
+                                "class": "comparis"
+                            }
+                    else:
+                        for product_characters in characters_list:
+                            product_characters[main_character_key][character_key] = {
+                                "value": product_characters[main_character_key][character_key],
+                                "class": ""
+                            }
         return context
 
-    def post(self):
-        pass
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('product', False):
+            product = Product.objects.get(id=request.POST.get('product'))
+            comparison_service.remove_from_comparison_list(request=request, product=product)
+        return redirect(request.path_info)
