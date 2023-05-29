@@ -1,22 +1,19 @@
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from .comparison_service import comparison_service
 from .import_service import ImportProductsService
 from app_settings.models import SiteSettings
 from app_users.models import DeliveryType, PaymentType, Seller, Order
 from django.core.cache import cache
-from django.db.models import Avg, Count, Max, Min, QuerySet
+from django.db.models import Count, Max, Min, QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
-
 import os
 from marketplace.settings import BASE_DIR
-
 from django.urls import reverse, reverse_lazy
-
-from django.views.generic import DetailView, ListView, View
+from django.views.generic import DetailView, ListView, View, TemplateView
 from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
-
 from . import review_service
 from .discount_service import DiscountService
 from .forms import (OrderDeliveryDataForm, OrderUserDataForm, PurchaseForm,
@@ -572,6 +569,43 @@ class PaymentView(LoginRequiredMixin, View):
 
             return render(self.request, 'orders/payment_progress.html')
         return render(self.request, 'orders/payment.html', context={'form': form})
+
+
+class ComparisonView(TemplateView):
+    template_name = 'products/comparison.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        comparison_list: QuerySet = comparison_service.get_comparison_list(request=self.request)
+        context['comparison_list'] = comparison_list
+        if comparison_list:
+            characters_list = []
+            for product in comparison_list:
+                characters_list.append(product.characters)
+            for main_character_key, main_character_value in characters_list[0].items():
+                for character_key, character_value in main_character_value.items():
+                    if all([product_characters[main_character_key][character_key] == characters_list[0][main_character_key][character_key]
+                            for product_characters in characters_list]
+                           ):
+                        for product_characters in characters_list:
+                            product_characters[main_character_key][character_key] = {
+                                "value": product_characters[main_character_key][character_key],
+                                "class": "comparis"
+                            }
+                    else:
+                        for product_characters in characters_list:
+                            product_characters[main_character_key][character_key] = {
+                                "value": product_characters[main_character_key][character_key],
+                                "class": ""
+                            }
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('product', False):
+            product = Product.objects.get(id=request.POST.get('product'))
+            comparison_service.remove_from_comparison_list(request=request, product=product)
+        return redirect(request.path_info)
+
 
 
 @staff_member_required
