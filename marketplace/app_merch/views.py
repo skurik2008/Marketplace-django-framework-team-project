@@ -1,23 +1,19 @@
-import requests
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from .comparison_service import comparison_service
 from .import_service import ImportProductsService
 from app_settings.models import SiteSettings
 from app_users.models import DeliveryType, PaymentType, Seller, Order
 from django.core.cache import cache
 from django.db.models import Count, Max, Min, QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
-
 import os
 from marketplace.settings import BASE_DIR
-
 from django.urls import reverse, reverse_lazy
-
-from django.views.generic import DetailView, ListView, View
+from django.views.generic import DetailView, ListView, View, TemplateView
 from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
-
 from . import review_service
 from .discount_service import DiscountService
 from .forms import (OrderDeliveryDataForm, OrderUserDataForm, PurchaseForm,
