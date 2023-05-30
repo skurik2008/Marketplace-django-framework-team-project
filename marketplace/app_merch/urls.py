@@ -5,8 +5,8 @@ from django.urls import path
 from .views import (AllDiscountView, CatalogView, DiscountDetailView,
                     DiscountListView, IndexView, OrderDeliveryView,
                     OrderPaymentView, OrderPurchaseView, OrderUserDataView,
-                    ProductDetailView, ProductPurchaseView, PaymentView, ComparisonView)
-                    ProductDetailView, ProductPurchaseView, PaymentView, import_products)
+                    ProductDetailView, ProductPurchaseView, PaymentView, ComparisonView,
+                    import_products)
 
 app_name = "pages"
 
