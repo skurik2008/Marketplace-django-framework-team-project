@@ -3,8 +3,8 @@
 from decimal import Decimal
 
 from app_users.models import Buyer, Profile
+from app_merch.models import Offer
 from django.db.models import F
-
 from . import models
 
 
@@ -78,41 +78,24 @@ class CartService:
         else:
             raise ItemDoesNotExist
 
-    def change_quantity(self, offer, quantity):
+    def change_quantity(self, cartitem_id, quantity):
         """
         Меняем количество товара в корзине
         """
-        cart_item = models.CartItem.object.filter(cart=self.cart, offer=offer).first()
-        if cart_item:
-            if quantity == 0:
-                cart_item.delete()
-            else:
-                cart_item.quantity = quantity
-                cart_item.save()
-        else:
-            raise ItemDoesNotExist
+        cart_item = models.CartItem.objects.filter(id=cartitem_id).first()
+        cart_item.quantity = quantity
+        cart_item.save()
 
     def get_cart_item_list(self):
         """
-        Получаем список товаров в корзине. Каждый объект товара аннотируем полем с общей стоимостью (с учетом количества)
+        Получаем список товаров в корзине. Каждый объект товара аннотируем полем с количеством этого товара в корзине и id этого товара в корзине
         """
-        return models.CartItem.objects.filter(cart=self.cart).annotate(
-            total_price=F("offer__price") * F("quantity")
-        )
+        offers_from_cart = Offer.objects.filter(cart_item__cart=self.cart).annotate(amount=F('cart_item__quantity'), pk=F('cart_item__id'))
+
+        return offers_from_cart
 
     def get_cart_item_quantity(self):
         """
         Получаем общее количество товара в корзине
         """
         return models.CartItem.objects.filter(cart=self.cart).count()
-
-    def get_total_price_cart(self):
-        """
-        Получаем общую стоимость корзины
-        """
-        return Decimal(
-            sum(
-                cartitem.offer.price * cartitem.quantity
-                for cartitem in models.CartItem.objects.filter(cart=self.cart)
-            )
-        )

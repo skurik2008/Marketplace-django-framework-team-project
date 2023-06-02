@@ -192,6 +192,9 @@ class SetOfProducts(models.Model):
         verbose_name = "Набор товаров"
         verbose_name_plural = "Наборы товаров"
 
+    def product_group(self):
+        return ', '.join([group.name for group in self.product_groups.all()])
+
     def __str__(self):
         return self.name
 
@@ -208,15 +211,17 @@ class Discount(models.Model):
         db_index=True,
         verbose_name="продукт",
         null=True,
+        blank=True,
     )
-    set_of_products = models.ForeignKey(
-        SetOfProducts,
-        on_delete=models.PROTECT,
-        related_name="discounts",
-        db_index=True,
-        verbose_name="набор товаров",
-        null=True,
-    )
+    # set_of_products = models.ForeignKey(
+    #     SetOfProducts,
+    #     on_delete=models.PROTECT,
+    #     related_name="discounts",
+    #     db_index=True,
+    #     verbose_name="набор товаров",
+    #     null=True,
+    #     blank=True
+    # )
     is_percent = models.BooleanField(verbose_name="в процентах")
     size = models.PositiveIntegerField(verbose_name="размер")
     start_date = models.DateTimeField(verbose_name="дата начала")
@@ -243,27 +248,24 @@ class SetDiscount(models.Model):
     """
     Модель скидок на наборы товаров.
     """
+    set_of_products = models.ForeignKey(
+        SetOfProducts, on_delete=models.PROTECT,
+        related_name='set_discounts', db_index=True, verbose_name='Наборы товаров', null=True)
 
-    product_groups = models.ManyToManyField(
-        ProductGroup,
-        related_name="set_discounts",
-        db_index=True,
-        verbose_name="группы товаров",
-    )
-    discount = models.ForeignKey(
-        Discount,
-        on_delete=models.PROTECT,
-        related_name="set_discounts",
-        db_index=True,
-        verbose_name="скидка",
-    )
+    is_percent = models.BooleanField(verbose_name="в процентах", default=False)
+    size = models.PositiveIntegerField(verbose_name="размер", null=True)
+    start_date = models.DateTimeField(verbose_name="дата начала", null=True, blank=True)
+    end_date = models.DateTimeField(verbose_name="дата окончания", null=True, blank=True)
+    description = models.TextField(max_length=1000, verbose_name="описание", null=True)
+    is_active = models.BooleanField(default=True, verbose_name="актуальность")
+    is_priority = models.BooleanField(default=False, verbose_name="приоритет")
 
     class Meta:
         verbose_name = "Скидка на набор"
         verbose_name_plural = "Скидки на наборы"
 
     def __str__(self):
-        return f"{self.discount.size}"
+        return f"Скидка {self.size} на набор {self.set_of_products}"
 
 
 class CartDiscount(models.Model):

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
-# from app_merch.models import Offer
 from app_users.models import Buyer
 from django.db import models
+
 
 
 class Cart(models.Model):
@@ -28,12 +28,6 @@ class Cart(models.Model):
             return f"Cart {self.buyer.profile.user.username}"
         else:
             return f"Cart anonymususer"
-
-    def get_total_price(self):
-        """
-        Возвращает общую стоимость товаров в корзине.
-        """
-        return sum(item.get_total_price() for item in self.cart_item.all())
 
     def get_total_quantity(self):
         """
