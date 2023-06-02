@@ -59,10 +59,7 @@
                                             <tr>
                                                 <td><a href="{% url 'app_users:seller_detail' offer.seller.pk %}">
                                                     {{ offer.seller.title }}</a></td>
-<!--                                                {% if offer.product.discounts and offer.product.discounts.is_percent-->
-<!--                                                and offer.product.discounts|yesno:"1,0" == "1" %}-->
-<!--                                                    <td>${{ price_with_discount|floatformat:2 }}</td>-->
-                                                {% if offer.product.discounts %}
+                                                {% if offer.product.discounts.is_active %}
                                                 <td><del style="color: grey;">${{ offer.price|floatformat:2 }}</del></td>
                                                     <td>${{ price_with_discount|floatformat:2 }}</td>
                                                 {% else %}
@@ -113,22 +110,6 @@
 
                                 <div class="clearfix">
                                 </div>
-<!--                                <div class="table">-->
-<!--                                    <table>-->
-<!--                                        <tr>-->
-<!--                                            <th>Характеристика-->
-<!--                                            </th>-->
-<!--                                            <th>Значение-->
-<!--                                            </th>-->
-<!--                                        </tr>-->
-<!--                                        <tr>-->
-<!--                                            <td>Тип устройства-->
-<!--                                            </td>-->
-<!--                                            <td>Ноутбук-->
-<!--                                            </td>-->
-<!--                                        </tr>-->
-<!--                                    </table>-->
-<!--                                </div>-->
                             </div>
                             <div class="Tabs-block" id="sellers">
                                 <div class="Categories Categories_product">
