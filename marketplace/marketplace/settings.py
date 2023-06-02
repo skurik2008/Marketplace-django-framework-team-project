@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "mptt",
     "django_mptt_admin",
     "mathfilters",
+    "inflect",
 ]
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
