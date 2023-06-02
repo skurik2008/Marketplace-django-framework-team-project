@@ -3,7 +3,7 @@ from django.template.defaultfilters import truncatechars
 from django_mptt_admin.admin import DjangoMpttAdmin
 
 from .models import (Banner, Category, Discount, Image, Offer, Product,
-                     SetOfProducts, Tag)
+                     SetOfProducts, ProductGroup, Tag, SetDiscount, CartDiscount)
 
 
 @admin.register(Image)
@@ -48,6 +48,15 @@ class SetOfProductsAdmin(admin.ModelAdmin):
         "name",
     ]
     list_display = [
+        "name", 'product_group'
+    ]
+
+@admin.register(ProductGroup)
+class ProductGroupAdmin(admin.ModelAdmin):
+    search_fields = [
+        "name",
+    ]
+    list_display = [
         "name",
     ]
 
@@ -72,7 +81,7 @@ class OfferAdmin(admin.ModelAdmin):
 
 @admin.register(Discount)
 class DiscountAdmin(admin.ModelAdmin):
-    list_display = ["product", "start_date", "end_date", "short_description"]
+    list_display = ["id", "product",  "start_date", "end_date", "short_description"]
     list_filter = [
         "is_active",
     ]
@@ -83,9 +92,15 @@ class DiscountAdmin(admin.ModelAdmin):
         return obj.description
 
 
-# @admin.register(GroupDiscount)
-# class GroupDiscountAdmin(admin.ModelAdmin):
-#     list_display = ['min_items', ]
+@admin.register(SetDiscount)
+class SetDiscountAdmin(admin.ModelAdmin):
+    list_display = ["id", "set_of_products", 'size', "is_percent", 'start_date', "end_date", "is_active" ]
+    list_filter = ["is_active"]
+
+@admin.register(CartDiscount)
+class CartDiscountAdmin(admin.ModelAdmin):
+    list_display = ["id", "cart", 'min_order_sum', "min_quantity", "is_percent", "discount", 'start_date', "end_date", "description", "is_active" ]
+    list_filter = ["is_active"]
 
 
 @admin.register(Banner)
