@@ -129,7 +129,9 @@
                                     </div>
                                     <div class="Card-category">{{ product.category__title }}
                                     </div>
-                                    <div class="Card-hover"><a class="Card-btn" href="#"><img src="{% static 'assets/img/icons/card/cart.svg' %}" alt="cart.svg" /></a>
+                                    <div class="Card-hover">
+                                        <a class="Card-btn" href="{% url 'pages:product-detail' product.pk %}"><img src="{% static 'assets/img/icons/card/cart.svg' %}" alt="cart.svg" /></a>
+                                        <a class="Card-btn" href="#"><img src="{% static 'assets/img/icons/card/change.svg' %}" alt="change.svg" /></a>
                                     </div>
                                 </div>
                             </div>

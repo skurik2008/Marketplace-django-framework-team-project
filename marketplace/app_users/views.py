@@ -196,7 +196,7 @@ class ProfileEditView(LoginRequiredMixin, DetailView):
             profile = profile_form.save()
             avatar_form = AvatarUpdateForm(request.POST, request.FILES)
             if avatar_form.is_valid():
-                avatar = avatar_form.save()
+                avatar = avatar_form.save(username=request.user.username)
                 profile.avatar = avatar
                 profile.save()
             if password_form.is_valid():

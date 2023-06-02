@@ -15,19 +15,19 @@ class UserRegisterForm(UserCreationForm):
         max_length=150,
         required=True,
         label="",
-        widget=forms.TextInput(attrs={"placeholder": "Имя пользователя"}),
+        widget=forms.TextInput(attrs={"placeholder": "ФИО"}),
     )
     phone_number = forms.CharField(
         max_length=50,
         required=True,
         label="",
-        widget=forms.TextInput(attrs={"placeholder": "Eg. +79991234567 "}),
+        widget=forms.TextInput(attrs={"placeholder": "Телефон"}),
     )
     address = forms.CharField(
         max_length=255,
         required=True,
         label="",
-        widget=forms.TextInput(attrs={"placeholder": "Введите адрес"}),
+        widget=forms.TextInput(attrs={"placeholder": "Адрес"}),
     )
     avatar = forms.FileField(widget=FileInput(attrs={'hidden': '1'}), required=False, label="Аватар")
 
@@ -37,7 +37,7 @@ class UserRegisterForm(UserCreationForm):
         widget=forms.PasswordInput(
             attrs={
                 "autocomplete": "new-password",
-                "placeholder": "Введите пароль",
+                "placeholder": "Пароль",
                 "minlength": 8,
             }
         ),
@@ -48,7 +48,7 @@ class UserRegisterForm(UserCreationForm):
         widget=forms.PasswordInput(
             attrs={
                 "autocomplete": "new-password",
-                "placeholder": "Подтвердите пароль",
+                "placeholder": "Подтверждение пароля",
                 "minlength": 8,
             }
         ),
@@ -58,7 +58,7 @@ class UserRegisterForm(UserCreationForm):
         max_length=50,
         required=True,
         label="",
-        widget=forms.TextInput(attrs={"placeholder": "Введите логин"}),
+        widget=forms.TextInput(attrs={"placeholder": "Логин"}),
     )
 
     class Meta:
@@ -78,7 +78,7 @@ class UserRegisterForm(UserCreationForm):
             "email": "",
         }
         widgets = {
-            "email": forms.EmailInput(attrs={"placeholder": "Eg. mail@mail.com"}),
+            "email": forms.EmailInput(attrs={"placeholder": "E-mail"}),
         }
 
 
@@ -221,9 +221,9 @@ class AvatarUpdateForm(forms.ModelForm):
         else:
             raise forms.ValidationError("Не удалось загрузить файл")
 
-    def save(self, commit=True):
+    def save(self, username, commit=True):
         instance = super().save(commit=False)
-        instance.file.title = f"Аватар {self.request.user.username}"
+        instance.file.title = f"Аватар {username}"
         if commit:
             instance.save()
         return instance
