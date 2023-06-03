@@ -74,7 +74,7 @@ class OfferAdmin(admin.ModelAdmin):
 class DiscountAdmin(admin.ModelAdmin):
     list_display = ["product", "start_date", "end_date", "short_description"]
     list_filter = [
-        "is_active",
+        "end_date",
     ]
 
     def short_description(self, obj):

@@ -39,14 +39,10 @@ class DiscountService:
                 is_active=True,
                 product=None,
                 set_of_products__isnull=False,
-                start_date__lte=current_time,
-                end_date__gte=current_time,
             )
             discounts = Discount.objects.filter(
                 product=offer.product,
                 is_active=True,
-                start_date__lte=current_time,
-                end_date__gte=current_time,
             )
             if discounts.exists():
                 discount = discounts.first()
