@@ -77,7 +77,7 @@
                         </div>
                         {% endif %}
                         <a class="CartBlock-block" href="/cart"><img class="CartBlock-img" src="{% static 'assets/img/icons/cart.svg'%}" alt="cart.svg" /><span class="CartBlock-amount">{{cart.get_cart_item_quantity}}</span></a>
-                        <div class="CartBlock-block"><span class="CartBlock-price">{{ cart.get_total_price_cart }}₽</span></div>
+                        <div class="CartBlock-block"><span class="CartBlock-price">{{ price_after_discount|floatformat:2 }}₽</span></div>
                     </div>
                 </div>
                 <div class="row-block Header-trigger"><a class="menuTrigger" href="#navigate">
