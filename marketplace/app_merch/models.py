@@ -1,9 +1,11 @@
+from django.utils import timezone
 from app_basket.models import Cart
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
 from django.urls import reverse
 from mptt.models import MPTTModel, TreeForeignKey
+from pydantic.error_wrappers import ValidationError
 
 
 class Image(models.Model):
@@ -225,8 +227,8 @@ class Discount(models.Model):
     # )
     is_percent = models.BooleanField(verbose_name="в процентах")
     size = models.PositiveIntegerField(verbose_name="размер")
-    start_date = models.DateTimeField(verbose_name="дата начала")
-    end_date = models.DateTimeField(verbose_name="дата окончания")
+    start_date = models.DateTimeField(verbose_name="дата начала", null=True, blank=True,)
+    end_date = models.DateTimeField(verbose_name="дата окончания", null=True, blank=True,)
     description = models.TextField(max_length=1000, verbose_name="описание")
     is_active = models.BooleanField(default=True, verbose_name="актуальность")
     is_priority = models.BooleanField(default=False, verbose_name="приоритет")
@@ -238,11 +240,13 @@ class Discount(models.Model):
     def __str__(self):
         return f"{self.size}"
 
-    # def discounted_price(self):
-    #     return self.offer.price * self.size / 100
-    #
-    # def sell_price(self):
-    #     return self.offer.price - self.size
+    def save(self, *args, **kwargs):
+        current_time = timezone.now()
+        if self.start_date and self.end_date and self.start_date > self.end_date:
+            raise ValidationError("Дата начала не может быть больше даты окончания")
+        if self.end_date and self.end_date <= timezone.now():
+            self.is_active = False
+        super().save(*args, **kwargs)
 
 
 class SetDiscount(models.Model):
@@ -344,12 +348,12 @@ class Review(models.Model):
     )
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE, related_name="reviews")
     rating = models.PositiveIntegerField(
-        verbose_name="Рейтинг", help_text="Введите рейтинг от 1 до 5"
+        verbose_name="Рейтинг", help_text="Введите рейтинг от 1 до 5", default=1,
     )
     text = models.TextField(
-        verbose_name="Текст отзыва", help_text="Введите текст отзыва"
+        verbose_name="Текст отзыва",
     )
-    created_at = models.DateField(
+    created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Дата создания",
         help_text="Дата создания отзыва",
@@ -380,3 +384,5 @@ class WatchedProduct(models.Model):
 
     class Meta:
         ordering = ["view_date"]
+
+

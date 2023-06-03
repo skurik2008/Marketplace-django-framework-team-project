@@ -120,10 +120,17 @@
                     </div>
                     <div class="Cards">
                         {% for product_info in product_info_list %}
-                        <div class="Card"><a class="Card-picture" href="{% url 'pages:product-detail' product_info.product.pk %}"><img src="{{ product_info.icon_url }}" alt="card.jpg" /></a>
+                        <div class="Card" style="position: relative;">
+                            <a class="Card-picture" href="{% url 'pages:product-detail' product_info.product.pk %}">
+                                  <img src="{{ product_info.icon_url }}"  alt="card.jpg" />
+                                  <img src="{% static 'assets/img/icons/departments/1.png' %}"
+                                       alt="icon"
+                                       style="position: absolute; top: 0; left: 0; width: 60px; height: 60px; " />
+                            </a>
                             <div class="Card-content">
                                 <strong class="Card-title"><a href="{% url 'pages:product-detail' product_info.product.pk %}">{{ product_info.product.title }}</a>
                                 </strong>
+                                <small>Отзывы: {{ product_info.review_count }}</small>
                                 <div class="Card-description">
                                     <div class="Card-cost"><span class="Card-price"> <del style="color: red;">${{ product_info.average_price|floatformat:2 }} </del></span>
                                         <span class="Card-price"> ${{ product_info.average_with_discount|floatformat:2 }} </span></div>
@@ -162,4 +169,5 @@
             </div>
         </div>
     </div>
+
 {% endblock %}
