@@ -129,10 +129,10 @@
                                 <div class="Card-description">
                                     <div class="Card-cost">
                                         {% if product.discounts %}
-                                            <span class="Card-price"><del style="color: #df3349">${% avg_price product.pk %}</del></span>
-                                            <span class="Card-price">${% avg_discount_price product.pk %}</span>
+                                            <span class="Card-price"><del style="color: #df3349">{% avg_price product.pk %}</del></span>
+                                            <span class="Card-price">{% avg_discount_price product.pk %}</span>
                                         {% else %}
-                                             <span class="Card-price">${{ product.min_price }}</span>
+                                             <span class="Card-price">{{ product.min_price }}</span>
                                         {% endif %}
                                     </div>
                                     <div class="Card-category">{{ product.category__title }}

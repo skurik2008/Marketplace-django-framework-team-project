@@ -502,7 +502,11 @@ class OrderPurchaseView(View):
 
     def get(self, *args, **kwargs):
         self.request.session["step"] = 4
-        context = {"cart_items": CartService(self.request).get_cart_item_list()}
+        cart = CartService(self.request)
+        context = {
+            "cart_items": cart.get_cart_item_list(),
+            "total_price": DiscountService().get_total_price_cart(cart=cart.cart.pk)
+        }
         return render(self.request, "orders/order_purchase.html", context=context)
 
     @staticmethod
@@ -592,7 +596,7 @@ class PaymentView(LoginRequiredMixin, View):
         form = PaymentForm(self.request.POST)
         cart = Cart.objects.filter(buyer=self.request.user.profile.buyer).first()
         order = Order.objects.get(buyer=self.request.user.profile.buyer, payment_status='not_paid')
-        amount = CartService(self.request).get_total_price_cart() if cart else order.total_price(order)
+        amount = DiscountService().get_total_price_cart(cart=cart) if cart else order.total_price(order)
 
         if form.is_valid():
             result = send_request_to_payment_service.delay(

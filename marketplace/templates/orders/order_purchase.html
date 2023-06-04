@@ -1,5 +1,6 @@
 {% extends 'orders/order_base.html' %}
 {% load static %}
+{% load product_discount_tags %}
 
 {% block order_step %}
     <form method="post" class="form">
@@ -67,20 +68,29 @@
                     <div class="Cart-product">
                         <div class="Cart-block Cart-block_row">
                             <div class="Cart-block Cart-block_pict"><a class="Cart-pict" href="#"><img class="Cart-img"
-                                                                                                       src="/{% firstof item.offer.product.icon.file 'static/assets/img/content/home/no-pic.png' %}"
+                                                                                                       src="/{% firstof item.product.icon.file 'static/assets/img/content/home/no-pic.png' %}"
                                                                                                        alt="card.jpg"/></a>
                             </div>
-                            <div class="Cart-block Cart-block_info"><a class="Cart-title" href="{% url 'pages:product-detail' item.offer.product.pk %}">{{ item.offer.product.title }}</a>
-                                <div class="Cart-desc">{{ item.offer.product.description }}
+                            <div class="Cart-block Cart-block_info"><a class="Cart-title" href="{% url 'pages:product-detail' item.product.pk %}">{{ item.product.title }}</a>
+                                <div class="Cart-desc">{{ item.product.description }}
                                 </div>
                             </div>
+                            {% if item.product.discounts %}
                             <div class="Cart-block Cart-block_price">
-                                <div class="Cart-price">{{ item.offer.price }}
+                                <div class="Cart-price"><del style="color: #df3349">{{ item.price }}</del>
+                                </div>
+                                <div class="Cart-price">{% avg_discount_price item.product %}
                                 </div>
                             </div>
+                            {% else %}
+                            <div class="Cart-block Cart-block_price">
+                                <div class="Cart-price">{{ item.price }}
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                         <div class="Cart-block Cart-block_row">
-                            <div class="Cart-block Cart-block_amount">{{ item.quantity }}
+                            <div class="Cart-block Cart-block_amount">{{ item.amount }}
                             </div>
                         </div>
                     </div>
@@ -88,7 +98,7 @@
                     <div class="Cart-total">
                         <div class="Cart-block Cart-block_total">
                             <strong class="Cart-title">Итого:
-                            </strong><span class="Cart-price">{{ cart.get_total_price_cart }}</span>
+                            </strong><span class="Cart-price">{{ total_price }}</span>
                         </div>
                         <div class="Cart-block">
                             <button class="btn btn_primary btn_lg" type="submit">Оплатить

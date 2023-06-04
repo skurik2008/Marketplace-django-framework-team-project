@@ -90,7 +90,7 @@ class CartService:
         """
         Получаем список товаров в корзине. Каждый объект товара аннотируем полем с количеством этого товара в корзине и id этого товара в корзине
         """
-        offers_from_cart = Offer.objects.filter(cart_item__cart=self.cart).annotate(amount=F('cart_item__quantity'), pk=F('cart_item__id'))
+        offers_from_cart = Offer.objects.filter(cart_item__cart=self.cart).annotate(amount=F('cart_item__quantity'))
 
         return offers_from_cart
 
