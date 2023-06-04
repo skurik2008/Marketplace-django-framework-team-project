@@ -1,5 +1,6 @@
 from functools import wraps
 from typing import Callable
+from typing import Union
 
 import requests
 from django.shortcuts import redirect
@@ -10,7 +11,7 @@ from marketplace.settings import PURCHASE_URL
 
 def pay_for_the_order(
     username: str, order_id: int, card_number: str, amount: float
-) -> dict | str:
+) -> Union[dict, str]:
     """
     Функция отправки запроса на оплату заказа.
     В ответе получаем JSON со статусом оплаты.

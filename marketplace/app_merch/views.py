@@ -201,7 +201,7 @@ class CatalogView(ListView):
             queryset: QuerySet = queryset.filter(tags__pk=tag)
 
         queryset = queryset.values(
-            "pk", "category__title", "icon__file", "title"
+            "pk", "category__title", "icon__file", "title", "discounts"
         ).annotate(min_price=Min("offers__price"))
 
         if price_sort in ("-min_price", "min_price"):
@@ -260,8 +260,22 @@ class CatalogView(ListView):
             self.request.session["min_price"] = str(min_price)
             self.request.session["max_price"] = str(max_price)
         else:
-            min_price = self.request.session.get("min_price", min_price)
-            max_price = self.request.session.get("max_price", min_price)
+            session_min_price = self.request.session.get("min_price", min_price)
+            session_max_price = self.request.session.get("max_price", min_price)
+
+            if str(min_price) > session_min_price:
+                min_price = session_min_price
+
+            if str(max_price) < session_max_price:
+                max_price = session_max_price
+
+            if session_min_price == "None" and session_max_price == "None":
+                min_price = self.object_list.aggregate(Min("offers__price"))[
+                    "offers__price__min"
+                ]
+                max_price = self.object_list.aggregate(Max("offers__price"))[
+                    "offers__price__max"
+                ]
 
         if price_range:
             curr_min_price, curr_max_price = (
@@ -554,17 +568,18 @@ class PaymentView(LoginRequiredMixin, View):
                 username=self.request.user.username,
                 order_id=order.pk,
                 card_number=form.cleaned_data['numerol'],
-                amount=amount
+                amount=str(amount)
             ).get()
 
             self.request.session['pay_result'] = result
             self.request.session['order_id'] = order.pk
+            result_status = result['status'] if isinstance(result, dict) else result
 
             OrderCreation.complete_order(
                 order=order,
                 cart=cart,
                 cart_items=CartService(self.request).get_cart_item_list(),
-                status=result['status']
+                status=result_status
             )
 
             return render(self.request, 'orders/payment_progress.html')
@@ -605,7 +620,6 @@ class ComparisonView(TemplateView):
             product = Product.objects.get(id=request.POST.get('product'))
             comparison_service.remove_from_comparison_list(request=request, product=product)
         return redirect(request.path_info)
-
 
 
 @staff_member_required

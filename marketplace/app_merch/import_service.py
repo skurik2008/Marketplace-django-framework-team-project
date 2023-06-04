@@ -3,17 +3,17 @@ import logging
 import os
 import shutil
 
-import mimetypes
+from django.conf import settings
 from django.core.mail import EmailMessage
+
 from marketplace.settings import BASE_DIR
 from .models import Product
-from django.conf import settings
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.INFO,
     filename=os.path.join(BASE_DIR, 'imports', 'results.log'),
-    format="%(asctime)s - %(message)s"
+    format="%(asctime)s - %(message)s",
 )
 
 
