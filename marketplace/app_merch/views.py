@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -16,7 +18,7 @@ from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
 from . import review_service
 from .discount_service import DiscountService
-from .forms import (OrderDeliveryDataForm, OrderUserDataForm, PurchaseForm,
+from .forms import (OrderDeliveryDataForm, OrderUserDataForm,
                     ReviewForm, PaymentForm, ProductImportForm)
 from .models import Banner, Category, Discount, Offer, Product, Review, Tag
 from .viewed_products import watched_products_service
@@ -89,16 +91,20 @@ class AllDiscountView(ListView):
         time_to_cache = SiteSettings.load().time_to_cache
         if not time_to_cache:
             time_to_cache = 1
+        current_time = timezone.now()
 
         return cache.get_or_set(
             f"Discounts",
-            Product.objects.filter(discounts__is_active=True),
+            Product.objects.filter(discounts__is_active=True,
+                                   discounts__start_date__lte=current_time,
+                                   discounts__end_date__gte=current_time,),
             time_to_cache * 60 * 60 * 24,
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        current_time = timezone.now()
         products = Product.objects.filter(discounts__is_active=True)
         discount_service = DiscountService()
         product_info_list = []
@@ -122,8 +128,11 @@ class AllDiscountView(ListView):
                 "average_price": average_price,
                 "average_with_discount": average_with_discount,
             }
+            review_count = review_service.review_count(product)
+            product_info['review_count'] = review_count
             product_info_list.append(product_info)
         context["product_info_list"] = product_info_list
+
         return context
 
 
@@ -326,6 +335,7 @@ class ProductDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         product = self.get_object()
         context["icon_url"] = product.icon.file.url if product.icon else None
+        context["media"] = product.media.all()
 
         offers = Offer.objects.filter(product=self.object)
 
@@ -379,38 +389,6 @@ class ProductDetailView(DetailView):
         """логика для добавления отзыва к товару"""
         product = self.get_object()
         return review_service.new_review(request, product)
-
-
-# def add_product_review(request):
-#     """ Вью для добавления отзыва к товару """
-#     if request.method == 'POST':
-#         review_service.new_review(request)
-
-
-class ProductPurchaseView(FormView):
-    template_name = "products/offer_purchase.html"
-    form_class = PurchaseForm
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["offer"] = get_object_or_404(Offer, pk=self.kwargs["pk"])
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        offer = get_object_or_404(Offer, pk=self.kwargs["pk"])
-        context["product"] = offer.product
-        context["seller"] = offer.seller
-        context["price"] = offer.price
-        context["icon_url"] = (
-            offer.product.icon.file.url if offer.product.icon else None
-        )
-        return context
-
-    def form_valid(self, form):
-        # Обработка успешной отправки формы
-        # Здесь можно добавить логику для создания заказа и т. д.
-        return super().form_valid(form)
 
 
 class OrderUserDataView(View):
@@ -537,11 +515,64 @@ class DiscountListView(ListView):
     template_name = "discounts/list_discounts.html"
     context_object_name = "discounts"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        current_datetime = timezone.now()
+        context["current_datetime"] = current_datetime
+        products = Product.objects.filter(discounts__is_active=True)
+        discount_service = DiscountService()
+        product_info_list = []
+        for product in products:
+            icon_url = product.icon.file.url if product.icon else None
+            product_info = {
+                "product": product,
+                "icon_url": icon_url,
+            }
+            product_info_list.append(product_info)
+        context["product_info_list"] = product_info_list
+
+        return context
+
 
 class DiscountDetailView(DetailView):
     model = Discount
     template_name = "discounts/discount_detail.html"
     context_object_name = "discount"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        discount = self.get_object()
+        context["icon_url"] = discount.product.icon.file.url if discount.product.icon else None
+        product = discount.product
+        context["media"] = product.media.all()
+
+        offers = Offer.objects.filter(product=product)
+        discount_service = DiscountService()
+
+        (
+            offers_with_discount,
+            offers_without_discount,
+        ) = discount_service.get_offers_with_and_without_discount(offers)
+
+        average_with_discount = discount_service.calculate_average_with_discount(
+            offers_with_discount, offers_without_discount
+        )
+
+        average_price = discount_service.calculate_average_price(offers)
+        context["average_price"] = average_price
+        context["average_with_discount"] = average_with_discount
+
+        price_difference = discount_service.calculate_price_difference(
+            average_price, average_with_discount
+        )
+        percentage_difference = discount_service.calculate_percentage_difference(
+            price_difference, average_price
+        )
+
+        print(average_price, average_with_discount, percentage_difference)
+        context["percentage_difference"] = percentage_difference
+
+        return context
 
     @staticmethod
     def post(*args, **kwargs):
