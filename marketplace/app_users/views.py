@@ -43,7 +43,7 @@ class CustomLoginView(LoginView):
                     profile=Profile.objects.get(user__username=username)
                 )
             )
-        else:
+        if cart_username:
             cartitems_anonymoususer = CartItem.objects.filter(cart=int(cart_id))
             cartitems_username = CartItem.objects.filter(cart=cart_username.id)
             cartitems_username_offer_ids_list = [

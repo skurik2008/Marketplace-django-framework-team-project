@@ -284,6 +284,7 @@ class CartDiscount(models.Model):
         related_name="discounts",
         db_index=True,
         verbose_name="корзина",
+        unique=True
     )
     min_order_sum = models.PositiveIntegerField(
         verbose_name="минимальная сумма заказа", null=True, blank=True
