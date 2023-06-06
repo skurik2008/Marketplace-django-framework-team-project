@@ -20,7 +20,7 @@
                         </div>
                       </div>
                       <div class="row-block">
-                        <div class="Slider-img"><img src="/{% firstof banner.file.filee 'static/assets/img/content/home/slider.png' %}" width="735" height="454" alt="bnr_img"/>
+                        <div class="Slider-img"><img src="/{% firstof banner.file.file 'static/assets/img/content/home/slider.png' %}" width="735" height="454" alt="bnr_img"/>
                         </div>
                       </div>
                     </div>
@@ -44,11 +44,11 @@
                             <div class="BannersHomeBlock-block">
                                 <strong class="BannersHomeBlock-title">{{ banner.title }}
                                 </strong>
-                                <div class="BannersHomeBlock-content">{{ banner.description|truncatechars:5 }}<span class="BannersHomeBlock-price">{{ banner.primary_text }}</span>
+                                <div class="BannersHomeBlock-content">{{ banner.description|truncatechars:5 }}<span class="BannersHomeBlock-price"> {{ banner.primary_text }}</span>
                                 </div>
                             </div>
                             <div class="BannersHomeBlock-block">
-                                <div class="BannersHomeBlock-img"><img src="/{% firstof banner.file.filee 'static/assets/img/content/home/videoca.png' %}" alt="videoca.png" />
+                                <div class="BannersHomeBlock-img"><img src="/{% firstof banner.file.file 'static/assets/img/content/home/videoca.png' %}" alt="videoca.png" />
                                 </div>
                             </div>
                         </div>
