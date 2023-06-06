@@ -6,6 +6,13 @@
         <div class="Middle">
             <div class="wrap">
                 <div class="Product">
+                {% if not match %}
+                    <div style="text-align: center; margin-top: 60px; margin-bottom: 60px">
+                        <strong class="Cart-title">В сравнении товары из разных категорий.<br>
+                            Их нельзя сравнить
+                        </strong>
+                    </div>
+                {% endif %}
                     <div class="ProductCard">
                         {% for product in comparison_list %}
                             <div class="ProductCard-desc">
@@ -21,30 +28,35 @@
                                         <div class="Tabs-wrap">
                                             <div class="Tabs-block" id="description">
                                                 <div class="table">
-                                                    <table>
-                                                        <tr>
-                                                            <th class="hed">Характеристика</th>
-                                                            <th class="hed">Значение</th>
-                                                        </tr>
-                                                        {% for params, values in product.characters.items %}
-                                                        <tr>
-                                                            <td style="background: #d7d7d7"><b>{{ params }}</b></td>
-                                                            <td style="background: #d7d7d7"></td>
-                                                        </tr>
-                                                            {% for name, value in values.items %}
+
+                                                        <table>
                                                             <tr>
-                                                                <td class={{ value.class }}>{{ name }}</td>
-                                                                <td class={{ value.class }}>{{ value.value }}</td>
+                                                                <th class="hed">Характеристика</th>
+                                                                <th class="hed">Значение</th>
                                                             </tr>
-                                                            {% endfor %}
-                                                        {% endfor %}
-                                                    </table>
+                                                            <tr>
+                                                                <td class="">Цена (руб.)</td>
+                                                                <td class="">{{ product.best_offer.price }}</td>
+                                                            </tr>
+                                                            {% if match %}
+                                                                {% for params, values in product.characters.items %}
+                                                                <tr>
+                                                                    <td style="background: #d7d7d7"><b>{{ params }}</b></td>
+                                                                    <td style="background: #d7d7d7"></td>
+                                                                </tr>
+                                                                    {% for name, value in values.items %}
+                                                                    <tr>
+                                                                        <td class={{ value.class }}>{{ name }}</td>
+                                                                        <td class={{ value.class }}>{{ value.value }}</td>
+                                                                    </tr>
+                                                                    {% endfor %}
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </table>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
-
                                 </div>
                                 <div class="ProductCard-info">
                                     <div class="ProductCard-cost">
@@ -54,21 +66,16 @@
                                 </div>
                                 <div class="ProductCard-cart">
                                     <div class="ProductCard-cartElement">
-                                        <a class="btn btn_primary" href="cart.html">
+                                        <a class="btn btn_primary" href="{% url 'app_basket:add_to_cart'%}?offer_id={{ product.offers.first.pk }}">
                                             <img class="btn-icon" src="{% static 'assets/img/icons/card/cart_white.svg' %}" alt="cart_white.svg" />
                                             <span class="btn-content">Добавить в корзину</span>
                                         </a>
                                     </div>
                                     <div class="ProductCard-cartElement">
-                                        <form id="remove_from_comparison_list" action="" method="post">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="product" value="{{ product.id }}">
-                                            <a class="btn btn_primary"
-                                               onclick="document.getElementById('remove_from_comparison_list').submit();return false;">
-                                                <img class="btn-icon" src="{% static 'assets/img/icons/card/change_white.svg' %}" alt="change_white.svg" />
-                                                <span class="btn-content">Удалить из сравнения</span>
-                                            </a>
-                                        </form>
+                                        <a class="btn btn_primary" href="{% url 'pages:remove_from_comparison_list'%}?product={{ product.pk }}">
+                                            <img class="btn-icon" src="{% static 'assets/img/icons/card/change_white.svg' %}" alt="change_white.svg" />
+                                            <span class="btn-content">Удалить из сравнения</span>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -78,6 +85,14 @@
                 </div>
             </div>
     {% else %}
+        <div style="text-align: center; padding-top: 60px">
+            <div class="ProductCard-cartElement">
+                <a class="btn btn_primary" href="{% url 'pages:clear_comparison_list'%}">
+                    <img class="btn-icon" src="{% static 'assets/img/icons/card/change_white.svg' %}" alt="change_white.svg" />
+                    <span class="btn-content">Очистить сравнение</span>
+                </a>
+            </div>
+        </div>
         <div style="text-align: center; margin-top: 60px">
             <strong class="Cart-title">В сравнении добавлено {{ comparison_list|length }} товар(ов).<br>
                 Для отображения списка сравнения должно быть выбрано 2 и более продуктов.

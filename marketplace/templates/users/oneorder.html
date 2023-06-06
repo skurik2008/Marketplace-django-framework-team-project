@@ -62,13 +62,13 @@
                                         <div class="Order-info">
                                             <div class="Order-infoType">Город:
                                             </div>
-                                            <div class="Order-infoContent">{{ order.buyer.profile.address }}
+                                            <div class="Order-infoContent">{{ order.address.city }}
                                             </div>
                                         </div>
                                         <div class="Order-info">
                                             <div class="Order-infoType">Адрес:
                                             </div>
-                                            <div class="Order-infoContent">{{ order.buyer.profile.address }}
+                                            <div class="Order-infoContent">{{ order.address.address }}
                                             </div>
                                         </div>
                                         <div class="Order-info Order-info_pay">
@@ -92,7 +92,7 @@
                                         <div class="Order-info">
                                             <div class="Order-infoType">Дата доставки:
                                             </div>
-                                            <div class="Order-infoContent">{{ order.departure_date|date:"d.m.Y" }}
+                                            <div class="Order-infoContent">{{ order.delivery_date|date:"d.m.Y" }}
                                             </div>
                                         </div>
                                     </div>
