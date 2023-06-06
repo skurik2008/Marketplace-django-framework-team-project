@@ -2,10 +2,10 @@ from app_basket.models import Cart, CartItem
 from app_merch.models import Offer
 from app_merch.viewed_products import watched_products_service
 from app_settings.models import SiteSettings
-from app_users.forms import (AvatarUpdateForm, ProfileUpdateForm,
-                             UpdatePasswordForm, UserLoginForm,
-                             UserPasswordResetForm, UserRegisterForm,
-                             UserSetPasswordForm, UserUpdateForm)
+from .forms import (AvatarUpdateForm, ProfileUpdateForm,
+                    UpdatePasswordForm, UserLoginForm,
+                    UserPasswordResetForm, UserRegisterForm,
+                    UserSetPasswordForm, UserUpdateForm)
 from app_users.models import Order, OrderItem, Seller
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -13,15 +13,22 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import (LoginView, LogoutView,
                                        PasswordResetConfirmView,
                                        PasswordResetDoneView,
-                                       PasswordResetView)
+                                       PasswordResetView, PasswordResetCompleteView)
 from django.core.cache import cache
 from django.db.models import F, Min, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, DetailView, ListView
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_text
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.contrib.auth import views as auth_views
+from django.contrib import messages
 from sql_util.aggregates import SubquerySum
-
+from django.contrib.sites.shortcuts import get_current_site
 from .models import Buyer, Profile
 
 
@@ -65,8 +72,32 @@ class CustomLogoutView(LogoutView):
 class CustomPasswordResetView(PasswordResetView):
     form_class = UserPasswordResetForm
     template_name = "users/password_reset.html"
-    email_template_name = "password_reset_email.html"
+    email_template_name = "users/password_reset_email.html"
     success_url = reverse_lazy("app_users:password_reset_done")
+
+    def form_valid(self, form):
+        email = form.cleaned_data['email']
+        user = User.objects.filter(email=email).first()
+        if user is not None:
+            current_site = get_current_site(self.request)
+            subject = 'Password Reset Requested'
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            reset_url = self.request.build_absolute_uri(
+                reverse('app_users:password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+            )
+            message = render_to_string('users/password_reset_email.html', {
+                'user': user,
+                'domain': current_site.domain,
+                'reset_url': reset_url,
+            })
+            send_mail(subject, message, 'your_email@mail.ru', [email])
+
+        return super().form_valid(form)
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = "users/password_reset_done.html"
 
 
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
@@ -75,8 +106,8 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     success_url = reverse_lazy("app_users:password_reset_complete")
 
 
-class CustomPasswordResetDoneView(PasswordResetDoneView):
-    template_name = "users/password_reset_done.html"
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'users/password_reset_complete.html'
 
 
 class CustomRegisterView(CreateView):

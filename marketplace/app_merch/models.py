@@ -346,7 +346,7 @@ class Review(models.Model):
     )
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE, related_name="reviews")
     rating = models.PositiveIntegerField(
-        verbose_name="Рейтинг", help_text="Введите рейтинг от 1 до 5", default=1,
+        verbose_name="Рейтинг", help_text="Введите рейтинг от 1 до 5",
     )
     text = models.TextField(
         verbose_name="Текст отзыва",

@@ -105,7 +105,7 @@ class AllDiscountView(ListView):
         context = super().get_context_data(**kwargs)
 
         current_time = timezone.now()
-        products = Product.objects.filter(discounts__is_active=True)
+        products = Product.objects.filter(discounts__is_active=True).order_by('-discounts__is_priority')
         discount_service = DiscountService()
         product_info_list = []
         for product in products:
@@ -523,8 +523,8 @@ class DiscountListView(ListView):
         context = super().get_context_data(**kwargs)
         current_datetime = timezone.now()
         context["current_datetime"] = current_datetime
-        products = Product.objects.filter(discounts__is_active=True)
-        discount_service = DiscountService()
+        products = Product.objects.filter(discounts__is_active=True).order_by('-discounts__is_priority')
+        # discount_service = DiscountService()
         product_info_list = []
         for product in products:
             icon_url = product.icon.file.url if product.icon else None
