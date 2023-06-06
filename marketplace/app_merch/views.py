@@ -105,7 +105,7 @@ class AllDiscountView(ListView):
         context = super().get_context_data(**kwargs)
 
         current_time = timezone.now()
-        products = Product.objects.filter(discounts__is_active=True)
+        products = Product.objects.filter(discounts__is_active=True).order_by('-discounts__is_priority')
         discount_service = DiscountService()
         product_info_list = []
         for product in products:
@@ -210,7 +210,7 @@ class CatalogView(ListView):
             queryset: QuerySet = queryset.filter(tags__pk=tag)
 
         queryset = queryset.values(
-            "pk", "category__title", "icon__file", "title"
+            "pk", "category__title", "icon__file", "title", "discounts"
         ).annotate(min_price=Min("offers__price"))
 
         if price_sort in ("-min_price", "min_price"):
@@ -269,8 +269,22 @@ class CatalogView(ListView):
             self.request.session["min_price"] = str(min_price)
             self.request.session["max_price"] = str(max_price)
         else:
-            min_price = self.request.session.get("min_price", min_price)
-            max_price = self.request.session.get("max_price", min_price)
+            session_min_price = self.request.session.get("min_price", min_price)
+            session_max_price = self.request.session.get("max_price", min_price)
+
+            if str(min_price) > session_min_price:
+                min_price = session_min_price
+
+            if str(max_price) < session_max_price:
+                max_price = session_max_price
+
+            if session_min_price == "None" and session_max_price == "None":
+                min_price = self.object_list.aggregate(Min("offers__price"))[
+                    "offers__price__min"
+                ]
+                max_price = self.object_list.aggregate(Max("offers__price"))[
+                    "offers__price__max"
+                ]
 
         if price_range:
             curr_min_price, curr_max_price = (
@@ -488,7 +502,11 @@ class OrderPurchaseView(View):
 
     def get(self, *args, **kwargs):
         self.request.session["step"] = 4
-        context = {"cart_items": CartService(self.request).get_cart_item_list()}
+        cart = CartService(self.request)
+        context = {
+            "cart_items": cart.get_cart_item_list(),
+            "total_price": DiscountService().get_total_price_cart(cart=cart.cart.pk)
+        }
         return render(self.request, "orders/order_purchase.html", context=context)
 
     @staticmethod
@@ -505,8 +523,8 @@ class DiscountListView(ListView):
         context = super().get_context_data(**kwargs)
         current_datetime = timezone.now()
         context["current_datetime"] = current_datetime
-        products = Product.objects.filter(discounts__is_active=True)
-        discount_service = DiscountService()
+        products = Product.objects.filter(discounts__is_active=True).order_by('-discounts__is_priority')
+        # discount_service = DiscountService()
         product_info_list = []
         for product in products:
             icon_url = product.icon.file.url if product.icon else None
@@ -578,24 +596,25 @@ class PaymentView(LoginRequiredMixin, View):
         form = PaymentForm(self.request.POST)
         cart = Cart.objects.filter(buyer=self.request.user.profile.buyer).first()
         order = Order.objects.get(buyer=self.request.user.profile.buyer, payment_status='not_paid')
-        amount = CartService(self.request).get_total_price_cart() if cart else order.total_price(order)
+        amount = DiscountService().get_total_price_cart(cart=cart) if cart else order.total_price(order)
 
         if form.is_valid():
             result = send_request_to_payment_service.delay(
                 username=self.request.user.username,
                 order_id=order.pk,
                 card_number=form.cleaned_data['numerol'],
-                amount=amount
+                amount=str(amount)
             ).get()
 
             self.request.session['pay_result'] = result
             self.request.session['order_id'] = order.pk
+            result_status = result['status'] if isinstance(result, dict) else result
 
             OrderCreation.complete_order(
                 order=order,
                 cart=cart,
                 cart_items=CartService(self.request).get_cart_item_list(),
-                status=result['status']
+                status=result_status
             )
 
             return render(self.request, 'orders/payment_progress.html')
@@ -636,7 +655,6 @@ class ComparisonView(TemplateView):
             product = Product.objects.get(id=request.POST.get('product'))
             comparison_service.remove_from_comparison_list(request=request, product=product)
         return redirect(request.path_info)
-
 
 
 @staff_member_required

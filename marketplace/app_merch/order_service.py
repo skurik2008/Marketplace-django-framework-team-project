@@ -121,6 +121,6 @@ class OrderCreation:
         for i_item in cart_items:
             OrderItem.objects.create(
                 order=order,
-                offer=i_item.offer,
-                quantity=i_item.quantity
+                offer=i_item,
+                quantity=i_item.amount
             )

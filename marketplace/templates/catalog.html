@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
+{% load product_discount_tags %}
 {% load static %}
 {% load query_transformer_tags %}
+
 {% block content %}
         <div class="Middle Middle_top">
         <div class="Section Section_column Section_columnLeft">
@@ -125,7 +127,13 @@
                                 <strong class="Card-title"><a href="{% url 'pages:product-detail' product.pk %}">{{ product.title }}</a>
                                 </strong>
                                 <div class="Card-description">
-                                    <div class="Card-cost"><span class="Card-price">${{ product.min_price }}</span>
+                                    <div class="Card-cost">
+                                        {% if product.discounts %}
+                                            <span class="Card-price"><del style="color: #df3349">{% avg_price product.pk %}</del></span>
+                                            <span class="Card-price">{% avg_discount_price product.pk %}</span>
+                                        {% else %}
+                                             <span class="Card-price">{{ product.min_price }}</span>
+                                        {% endif %}
                                     </div>
                                     <div class="Card-category">{{ product.category__title }}
                                     </div>

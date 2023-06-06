@@ -2,7 +2,7 @@
 {% load pluralize_reviews %}
 {% load product_tags %}
 
-{% block title %}<title> GoodsDetail </title>{% endblock %}
+{% block title %}GoodsDetail{% endblock %}
 
 {% block content %}
 
@@ -37,7 +37,7 @@
                                                 <del style="color: grey;"> ${{ average_price|floatformat:2 }}</del>
                                                 ${{ average_with_discount|floatformat:2 }}
                                             {% else %}
-                                                {{ average_with_discount|floatformat:2 }}
+                                                ${{ average_with_discount|floatformat:2 }}
                                             {% endif%}
                                         </div>
                                     </div>
@@ -57,8 +57,10 @@
                                     <tbody>
                                         {% for offer, price_with_discount in offers_combined %}
                                             <tr>
-                                                <td><a href="{% url 'app_users:seller_detail' offer.seller.pk %}">
-                                                    {{ offer.seller.title }}</a></td>
+                                                <td>
+                                                    <a href="{% url 'app_users:seller_detail' offer.seller.pk %}">
+                                                    {{ offer.seller.title }}</a>
+                                                </td>
                                                 {% if offer.product.discounts.is_active %}
                                                 <td><del style="color: grey;">${{ offer.price|floatformat:2 }}</del></td>
                                                     <td>${{ price_with_discount|floatformat:2 }}</td>
@@ -104,9 +106,9 @@
                                 <h2>{{ product.title }}
                                 </h2>
                                 <p>{{ product.description }}</p>
-                                {% if icon_url %}
-                                    <img class="pict pict_right" src="{{ icon_url }}" alt="{{ object.title }}" />
-                                {% endif %}
+<!--                                {% if icon_url %}-->
+<!--                                    <img class="pict pict_right" src="{{ icon_url }}" alt="{{ object.title }}" />-->
+<!--                                {% endif %}-->
 
                                 <div class="clearfix">
                                 </div>
@@ -117,9 +119,14 @@
                             </div>
                             <div class="Tabs-block" id="addit">
                                 <div class="Product-props">
-                                    {% for key, value in product.characters.items %}
+                                    {% for key, values in product.characters.items %}
                                     <div class="Product-prop">
-                                        <strong>{{ key }}</strong><span>{{ value }}</span>
+                                        <strong>{{ key }}</strong>
+                                        <div>
+                                            {% for key_value, value in values.items %}
+                                            <strong>{{ key_value }}: </strong><span>{{ value }}</span><br />
+                                            {% endfor %}
+                                        </div>
                                     </div>
                                     {% endfor %}
                                 </div>
@@ -197,7 +204,8 @@
                                         <div class="form-group">{% csrf_token %}
 <!--                                            <textarea class="form-textarea" name="review" id="review" placeholder="Отзыв"></textarea>-->
                                             <label for="seller">Продавец:</label>
-                                            <select name="seller" id="seller">
+                                            <select name="seller" id="seller" required>
+                                                <option value="" selected disabled>---</option>
                                               {% for seller in sellers %}
                                                 <option value="{{ seller.id }}">{{ seller.title }}</option>
                                               {% endfor %}
