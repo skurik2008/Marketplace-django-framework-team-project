@@ -218,14 +218,14 @@ class Discount(models.Model):
         verbose_name="продукт",
         null=True, blank=True,
     )
-    set_of_products = models.ForeignKey(
-        SetOfProducts,
-        on_delete=models.PROTECT,
-        related_name="discounts",
-        db_index=True,
-        verbose_name="набор товаров",
-        null=True, blank=True,
-    )
+    # set_of_products = models.ForeignKey(
+    #     SetOfProducts,
+    #     on_delete=models.PROTECT,
+    #     related_name="discounts",
+    #     db_index=True,
+    #     verbose_name="набор товаров",
+    #     null=True, blank=True,
+    # )
     is_percent = models.BooleanField(verbose_name="в процентах")
     size = models.PositiveIntegerField(verbose_name="размер")
     start_date = models.DateTimeField(verbose_name="дата начала", null=True, blank=True,)
@@ -285,6 +285,7 @@ class CartDiscount(models.Model):
         related_name="discounts",
         db_index=True,
         verbose_name="корзина",
+        unique=True
     )
     min_order_sum = models.PositiveIntegerField(
         verbose_name="минимальная сумма заказа", null=True, blank=True

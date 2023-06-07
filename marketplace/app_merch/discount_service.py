@@ -6,7 +6,7 @@ from typing import List
 from django.db.models import Avg, Count, Max, Q
 from django.utils import timezone
 
-from .models import Discount, Offer, Product, SetDiscount, SetOfProducts
+from .models import Discount, Offer, Product, SetDiscount, SetOfProducts, ProductGroup
 from django.db.models import F
 
 
@@ -98,7 +98,7 @@ class DiscountService:
         offers_from_cart_with_discount, offers_from_cart_without_discount = self.get_offers_with_and_without_discount(offers_from_cart)
         combined_offers_from_cart = offers_from_cart_with_discount + offers_from_cart_without_discount
         cart_data = [{a: b for a, b in zip(['id', 'offer', 'price', 'quantity', 'total_price'],
-                                   [item[0].pk, item[0], item[1], item[0].amount, item[0].amount * item[1]])}
+                                   [item[0].item_pk, item[0], item[1], item[0].amount, item[0].amount * item[1]])}
              for item in combined_offers_from_cart]
         return cart_data
 
@@ -107,7 +107,7 @@ class DiscountService:
         Получаем общую стоимость корзины с учетом скидок на продукты
         """
         offers_from_cart = Offer.objects.filter(cart_item__cart=cart).annotate(amount=F('cart_item__quantity'),
-                                                                                   pk=F('cart_item__id'))
+                                                                                    item_pk=F('cart_item__id'))
         data_from_cart = self.get_data_from_cart(offers_from_cart)
         summ = Decimal(sum((item['total_price'] for item in data_from_cart))).quantize(Decimal('1.00'))
 
@@ -119,22 +119,23 @@ class DiscountService:
         """
         # получаем список наборов продуктов, которые есть в корзине
         sets_of_products_in_cart = SetOfProducts.objects.filter(product_groups__products__in=Product.objects.filter(offers__cart_item__cart=cart).distinct()).distinct()
-
         # создаем лист данных, куда будем записывать данные по продуктовым наборам в виде {продуктовый набор: сумма скидки}
         set_and_discount = {}
         for set in sets_of_products_in_cart:
-            # для каждого продуктового набора находим товары в корзине из первой группы продуктов, входящей в этот продуктовый набор
-            first_group = cart.cart_item.all().filter(offer__product=Product.objects.filter(product_groups__set_of_products=set)[0])
-
-            # и из второй группы продуктов, входящей в этот продуктовый набор
-            second_group = cart.cart_item.all().filter(offer__product=Product.objects.filter(product_groups__set_of_products=set)[1])
-
+            # для каждого продуктового набора определяем группы продуктов
+            groups_in_set_of_products = ProductGroup.objects.filter(set_of_products=set)
+            # находим продукты, участвующие в группах
+            products_in_group = (Product.objects.filter(product_groups=group) for group in groups_in_set_of_products)
+            # находим товары из корзины для двух групп
+            cart_items_in_group = [cart.cart_item.all().filter(offer__product__in=products) for products in products_in_group]
+            # разделяем товары из корзины по двум группам
+            first_group, second_group = cart_items_in_group[0], cart_items_in_group[1]
             if first_group.exists() and second_group.exists():
                 # если в корзине есть товары из двух групп продуктов, входящих в продуктовый набор, значит он представлен в корзине полноценно
                 # и высчитываем сумму скидки
                 # для этого по товарам из полноценного продуктового набора получаем данные из корзины и по ним высчитываем их общую стоимость
                 data_from_cart = self.get_data_from_cart(Offer.objects.filter(cart_item__in=first_group|second_group).annotate(amount=F('cart_item__quantity'),
-                                                                                   pk=F('cart_item__id')))
+                                                                                   item_pk=F('cart_item__id')))
                 summ = Decimal(sum((item['total_price'] for item in data_from_cart))).quantize(Decimal('1.00'))
                 # получаем объект скидки на наш продуктовый набор при условии его активности и действующих сроков
                 current_time = timezone.now()
@@ -145,14 +146,13 @@ class DiscountService:
                     if set_discount.is_percent:
                         summ_discount = summ * discount_size / 100
                     else:
-                        summ_discount = summ - discount_size
-                    # записывем данные в лист данных в виде {продуктовый набор: сумма скидки}
+                        summ_discount = Decimal(discount_size)
+                    # записываем данные в лист данных в виде {продуктовый набор: сумма скидки}
                     set_and_discount.setdefault(set, summ_discount.quantize(Decimal("1.00")))
         # если в корзине оказались полноценные продуктовые наборы с действующими скидками
         if set_and_discount:
             # путем сортировки находим самый "тяжелый" по сумме скидки продуктовый набор
             set_info = tuple(sorted(set_and_discount.items(), key=lambda item: item[1], reverse=True))[0]
-            set_info = list(set_info)
             # возвращаем инфу по продуктовому набору и стоимость всей корзины с учетом этой скидки
             return set_info, self.get_total_price_cart(cart) - set_info[1]
         else:
