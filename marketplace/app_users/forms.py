@@ -1,16 +1,13 @@
 import re
-
 from django.core.exceptions import ValidationError
-
 from app_merch.models import Image
 from django import forms
-from django.contrib.auth import password_validation
+from django.contrib.auth import login as auth_login
 from django.contrib.auth.forms import (AuthenticationForm, PasswordResetForm,
                                        SetPasswordForm, UserChangeForm,
                                        UserCreationForm)
 from django.contrib.auth.models import User
 from django.forms.widgets import FileInput
-
 from .models import Profile
 
 
@@ -132,61 +129,51 @@ class UserSetPasswordForm(SetPasswordForm):
         }
 
 
-class UserUpdateForm(UserChangeForm):
-    class Meta:
-        model = User
-        fields = ("email",)
-        widgets = {
-            "email": forms.TextInput(
-                attrs={
-                    "class": "form-input",
-                    "id": "mail",
-                    "name": "mail",
-                    "data-validate": "require",
-                }
-            ),
-        }
-
-
-class ProfileUpdateForm(forms.ModelForm):
-    class Meta:
-        model = Profile
-        fields = (
-            "full_name",
-            "phone_number",
+class UserDataUpdateForm(SetPasswordForm):
+    avatar = forms.FileField(
+        required=False,
+        widget=forms.ClearableFileInput(
+            attrs={
+                "class": "Profile-file form-input",
+                "id": "avatar",
+                "name": "avatar",
+                "data-validate": "onlyImgAvatar",
+            }
         )
-        widgets = {
-            "phone_number": forms.TextInput(
-                attrs={"class": "form-input", "id": "phone", "name": "phone", 'placeholder': '+7(___) ___-____'}
-            ),
-            "full_name": forms.TextInput(
+    )
+    full_name = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(
                 attrs={
                     "class": "form-input",
                     "id": "name",
                     "name": "name",
                     "data-validate": "require",
                 }
+            )
+    )
+    phone = forms.CharField(
+        widget=forms.TextInput(
+                attrs={"class": "form-input", "id": "phone", "name": "phone", 'placeholder': '+7 (___) ___-____'}
             ),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super(ProfileUpdateForm, self).__init__( *args, **kwargs)
-
-    def clean_phone(self):
-        phone = self.cleaned_data.get("phone_number")
-        if not re.findall(r"^(\(\d{3}\)\s?\d{3}-\d{4})$", phone):
-            raise ValidationError("Номер телефона должен иметь формат (000) 000-0000")
-        return
-
-
-class UpdatePasswordForm(SetPasswordForm):
+    )
+    mail = forms.EmailField(
+        widget=forms.TextInput(
+                attrs={
+                    "class": "form-input",
+                    "id": "mail",
+                    "name": "mail",
+                    "data-validate": "require",
+                }
+            )
+    )
     new_password1 = forms.CharField(
         required=False,
         widget=forms.PasswordInput(
             attrs={
                 "class": "form-input",
-                "id": "password",
-                "name": "password",
+                "id": "new_password1",
+                "name": "new_password1",
                 "placeholder": "Тут можно изменить пароль",
             }
         ),
@@ -198,46 +185,53 @@ class UpdatePasswordForm(SetPasswordForm):
         widget=forms.PasswordInput(
             attrs={
                 "class": "form-input",
-                "id": "passwordReply",
-                "name": "passwordReply",
+                "id": "new_password2",
+                "name": "new_password2",
                 "placeholder": "Введите пароль повторно",
             }
         ),
     )
 
-
-class AvatarUpdateForm(forms.ModelForm):
-    class Meta:
-        model = Image
-        fields = "__all__"
-        widgets = {
-            "file": forms.ClearableFileInput(
-                attrs={
-                    "class": "Profile-file form-input",
-                    "id": "avatar",
-                    "name": "avatar",
-                    "data-validate": "onlyImgAvatar",
-                }
-            ),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super(AvatarUpdateForm, self).__init__(*args, **kwargs)
-        self.fields["file"].required = False
-        self.fields["title"].required = False
-
-    def clean_file(self):
-        file = self.cleaned_data.get("file", False)
+    def clean_avatar(self):
+        file = self.cleaned_data.get("avatar", False)
         if file:
             if file.size > 2 * 1024 * 1024:
                 raise forms.ValidationError("Размер файла не должен превышать 2 МБ")
             return file
-        else:
-            raise forms.ValidationError("Не удалось загрузить файл")
+        return
 
-    def save(self, username, commit=True):
-        instance = super().save(commit=False)
-        instance.file.title = f"Аватар {username}"
-        if commit:
-            instance.save()
-        return instance
+    def clean_phone(self):
+        phone = self.cleaned_data.get("phone")
+        if not re.findall(r'^(\+7\s?\(\d{3}\)\s?\d{3}-\d{4})$', phone):
+            raise ValidationError("Номер телефона должен иметь формат +7 (000) 000-0000")
+        return re.sub(r'\D', '', phone)[1:]
+
+    def clean_new_password2(self):
+        password1 = self.cleaned_data.get('new_password1')
+        password2 = self.cleaned_data.get('new_password2')
+        if password1 and password2:
+            return super(UserDataUpdateForm, self).clean_new_password2()
+
+    def __init__(self, user, *args, **kwargs):
+        super(UserDataUpdateForm, self).__init__(user, *args, **kwargs)
+        self.fields["full_name"].initial = self.user.profile.full_name
+        phone_number = self.user.profile.phone_number
+        self.fields["phone"].initial = f"+7 ({phone_number[:3]}) {phone_number[3:6]}-{phone_number[6:]}"
+        self.fields["mail"].initial = self.user.email
+
+    def save(self, *args, commit=True, **kwargs):
+        user = kwargs.get("request").user
+        profile = user.profile
+        avatar = profile.avatar
+        user.email = self.cleaned_data["mail"]
+        user.save()
+        if self.cleaned_data["avatar"]:
+            avatar.file = self.cleaned_data["avatar"]
+            avatar.title = f"{user.username}'s profile image: {self.cleaned_data['avatar'].name}"
+            avatar.save()
+            profile.avatar = avatar
+        profile.full_name = self.cleaned_data["full_name"]
+        profile.phone_number = self.cleaned_data["phone"]
+        profile.save()
+        user = super(UserDataUpdateForm, self).save(commit=True)
+        auth_login(kwargs.get("request"), user)

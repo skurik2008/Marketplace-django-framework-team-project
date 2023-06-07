@@ -39,42 +39,42 @@
                                         <div class="Profile-avatar Profile-avatar_noimg">
                                             <label class="Profile-fileLabel" for="avatar"><img src="{% static 'assets/img/icons/upload.png' %}" alt="#.png" />Загрузить фото
                                             </label>
-                                            {{ avatar_form.file.errors }}
-                                            {{ avatar_form.file }}
+                                            {{ user_data_form.avatar.errors }}
+                                            {{ user_data_form.avatar }}
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label" for="name">ФИО
                                         </label>
-                                        {{ profile_form.full_name.errors }}
-                                        {{ profile_form.full_name }}
+                                        {{ user_data_form.full_name.errors }}
+                                        {{ user_data_form.full_name }}
                                     </div>
                                 </div>
                                 <div class="row-block">
                                     <div class="form-group">
                                         <label class="form-label" for="phone">Телефон
                                         </label>
-                                        {{ profile_form.phone_number.errors }}
-                                        {{ profile_form.phone_number }}
+                                        {{ user_data_form.phone }}
+                                        {{ user_data_form.phone.errors }}
 
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label" for="mail">E-mail
                                         </label>
-                                        {{ user_form.email.errors }}
-                                        {{ user_form.email }}
+                                        {{ user_data_form.mail.errors }}
+                                        {{ user_data_form.mail }}
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label" for="password">Пароль
+                                        <label class="form-label" for="new_password1">Пароль
                                         </label>
-                                        {{ password_form.new_password1.errors }}
-                                        {{ password_form.new_password1 }}
+                                        {{ user_data_form.new_password1.errors }}
+                                        {{ user_data_form.new_password1 }}
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label" for="passwordReply">Подтверждение пароля
+                                        <label class="form-label" for="new_password2">Подтверждение пароля
                                         </label>
-                                        {{ password_form.new_password2.errors }}
-                                        {{ password_form.new_password2 }}
+                                        {{ user_data_form.new_password2.errors }}
+                                        {{ user_data_form.new_password2 }}
                                     </div>
                                     <div class="form-group">
                                         <div class="Profile-btn">

@@ -2,10 +2,8 @@ from app_basket.models import Cart, CartItem
 from app_merch.models import Offer
 from app_merch.viewed_products import watched_products_service
 from app_settings.models import SiteSettings
-from .forms import (AvatarUpdateForm, ProfileUpdateForm,
-                    UpdatePasswordForm, UserLoginForm,
-                    UserPasswordResetForm, UserRegisterForm,
-                    UserSetPasswordForm, UserUpdateForm)
+from .forms import (UserLoginForm, UserPasswordResetForm, UserRegisterForm,
+                    UserSetPasswordForm, UserDataUpdateForm)
 from app_users.models import Order, OrderItem, Seller
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -20,14 +18,11 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, DetailView, ListView
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_text
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from django.contrib.auth import views as auth_views
-from django.contrib import messages
-from sql_util.aggregates import SubquerySum
 from django.contrib.sites.shortcuts import get_current_site
 from .models import Buyer, Profile
 
@@ -209,35 +204,16 @@ class ProfileEditView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ProfileEditView, self).get_context_data(**kwargs)
-        context["profile_form"] = ProfileUpdateForm(instance=self.request.user.profile)
-        context["user_form"] = UserUpdateForm(instance=self.request.user)
-        context["password_form"] = UpdatePasswordForm(self.request.user)
-        context["avatar_form"] = AvatarUpdateForm()
+        context["user_data_form"] = UserDataUpdateForm(user=self.request.user)
         return context
 
     def post(self, request, *args, **kwargs):
-        user_form = UserUpdateForm(request.POST, instance=request.user)
-        profile_form = ProfileUpdateForm(request.POST, instance=request.user.profile)
-        if not request.POST["new_password1"] == request.POST["new_password1"] == "":
-            password_form = UpdatePasswordForm(request.user, request.POST)
-        else:
-            password_form = UpdatePasswordForm(request.user)
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile = profile_form.save()
-            avatar_form = AvatarUpdateForm(request.POST, request.FILES)
-            if avatar_form.is_valid():
-                avatar = avatar_form.save(username=request.user.username)
-                profile.avatar = avatar
-                profile.save()
-            if password_form.is_valid():
-                user = password_form.save()
-                auth_login(request, user)
+        user_data_form = UserDataUpdateForm(request.user, request.POST, request.FILES)
+        if user_data_form.is_valid():
+            user_data_form.save(request=request)
             return redirect("app_users:profile_edit", kwargs.get("username"))
         context = {
-            "user_form": user_form,
-            "profile_form": profile_form,
-            "password_form": UpdatePasswordForm(request.user),
+            "user_data_form": user_data_form,
         }
         return render(request, "users/profile.html", context)
 
