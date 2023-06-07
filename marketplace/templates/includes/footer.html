@@ -14,7 +14,7 @@
                         </li>
                         <li class="menu-item"><a class="menu-link" href="{% url 'pages:comparison' %}">Сравнение</a>
                         </li>
-                        <li class="menu-item"><a class="menu-link" href="{% url "app_users:account" request.user.username %}">Профиль</a>
+                        <li class="menu-item"><a class="menu-link" href="{% url 'app_users:account' request.user.is_authenticated %}">Профиль</a>
                         </li>
 
                     </ul>
