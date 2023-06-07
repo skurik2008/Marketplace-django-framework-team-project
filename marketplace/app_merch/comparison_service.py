@@ -29,5 +29,9 @@ class ComparisonService:
     def get_comparison_list_count(self, request):
         return self.get_comparison_list(request=request).count()
 
+    @staticmethod
+    def clear_comparison_list(request):
+        del request.session['comparison_list']
+
 
 comparison_service = ComparisonService()

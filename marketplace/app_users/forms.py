@@ -1,3 +1,7 @@
+import re
+
+from django.core.exceptions import ValidationError
+
 from app_merch.models import Image
 from django import forms
 from django.contrib.auth import password_validation
@@ -153,7 +157,7 @@ class ProfileUpdateForm(forms.ModelForm):
         )
         widgets = {
             "phone_number": forms.TextInput(
-                attrs={"class": "form-input", "id": "phone", "name": "phone"}
+                attrs={"class": "form-input", "id": "phone", "name": "phone", 'placeholder': '+7(___) ___-____'}
             ),
             "full_name": forms.TextInput(
                 attrs={
@@ -164,6 +168,15 @@ class ProfileUpdateForm(forms.ModelForm):
                 }
             ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(ProfileUpdateForm, self).__init__( *args, **kwargs)
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get("phone_number")
+        if not re.findall(r"^(\(\d{3}\)\s?\d{3}-\d{4})$", phone):
+            raise ValidationError("Номер телефона должен иметь формат (000) 000-0000")
+        return
 
 
 class UpdatePasswordForm(SetPasswordForm):
@@ -210,6 +223,7 @@ class AvatarUpdateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(AvatarUpdateForm, self).__init__(*args, **kwargs)
+        self.fields["file"].required = False
         self.fields["title"].required = False
 
     def clean_file(self):

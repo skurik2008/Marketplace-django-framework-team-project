@@ -6,7 +6,7 @@ from .views import (AllDiscountView, CatalogView, DiscountDetailView,
                     DiscountListView, IndexView, OrderDeliveryView,
                     OrderPaymentView, OrderPurchaseView, OrderUserDataView,
                     ProductDetailView, PaymentView, ComparisonView,
-                    import_products)
+                    import_products, add_to_comparison_list, remove_from_comparison_list, clear_comparison_list)
 
 app_name = "pages"
 
@@ -24,4 +24,7 @@ urlpatterns = [
     path("discounts/<int:pk>/", DiscountDetailView.as_view(), name="discount_detail"),
     path("comparison/", ComparisonView.as_view(), name="comparison"),
     path("import-products/", import_products, name='import_page'),
+    path("add_to_comparison_list/", add_to_comparison_list, name='add_to_comparison_list'),
+    path("remove_from_comparison_list/", remove_from_comparison_list, name='remove_from_comparison_list'),
+    path("clear_comparison_list/", clear_comparison_list, name='clear_comparison_list'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

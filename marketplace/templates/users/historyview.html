@@ -40,7 +40,13 @@
                                         </div>
                                         <div class="Card-category">{{ item.product.category.title }}
                                         </div>
-                                        <div class="Card-hover"><a class="Card-btn" href="#"><img src="{% static 'assets/img/icons/card/cart.svg' %}" alt="cart.svg" /></a>
+                                        <div class="Card-hover">
+                                            <a class="Card-btn" href="{% url 'app_basket:add_to_cart'%}?offer_id={{ item.product.offers.first.pk }}">
+                                                <img src="{% static 'assets/img/icons/card/cart.svg' %}" alt="cart.svg" />
+                                            </a>
+                                            <a class="Card-btn" href="{% url 'pages:add_to_comparison_list'%}?product={{ item.product.pk }}">
+                                                <img src="{% static 'assets/img/icons/card/change.svg' %}" alt="change.svg" />
+                                            </a>
                                         </div>
                                     </div>
                                 </div>

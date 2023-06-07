@@ -629,25 +629,29 @@ class ComparisonView(TemplateView):
         comparison_list: QuerySet = comparison_service.get_comparison_list(request=self.request)
         context['comparison_list'] = comparison_list
         if comparison_list:
-            characters_list = []
-            for product in comparison_list:
-                characters_list.append(product.characters)
-            for main_character_key, main_character_value in characters_list[0].items():
-                for character_key, character_value in main_character_value.items():
-                    if all([product_characters[main_character_key][character_key] == characters_list[0][main_character_key][character_key]
-                            for product_characters in characters_list]
-                           ):
-                        for product_characters in characters_list:
-                            product_characters[main_character_key][character_key] = {
-                                "value": product_characters[main_character_key][character_key],
-                                "class": "comparis"
-                            }
-                    else:
-                        for product_characters in characters_list:
-                            product_characters[main_character_key][character_key] = {
-                                "value": product_characters[main_character_key][character_key],
-                                "class": ""
-                            }
+            if all([product.category_id == comparison_list.first().category_id for product in comparison_list]):
+                context["match"] = True
+                characters_list = []
+                for product in comparison_list:
+                    characters_list.append(product.characters)
+                for main_character_key, main_character_value in characters_list[0].items():
+                    for character_key, character_value in main_character_value.items():
+                        if all([product_characters[main_character_key][character_key] == characters_list[0][main_character_key][character_key]
+                                for product_characters in characters_list]
+                               ):
+                            for product_characters in characters_list:
+                                product_characters[main_character_key][character_key] = {
+                                    "value": product_characters[main_character_key][character_key],
+                                    "class": "comparis"
+                                }
+                        else:
+                            for product_characters in characters_list:
+                                product_characters[main_character_key][character_key] = {
+                                    "value": product_characters[main_character_key][character_key],
+                                    "class": ""
+                                }
+            else:
+                context["match"] = False
         return context
 
     def post(self, request, *args, **kwargs):
@@ -678,3 +682,20 @@ def import_products(request):
     else:
         form = ProductImportForm()
         return render(request, 'products/import-products.html', {'form': form})
+
+
+def add_to_comparison_list(request, *args, **kwargs):
+    product = Product.objects.get(id=request.GET.get('product'))
+    comparison_service.add_to_comparison_list(request=request, product=product)
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+def remove_from_comparison_list(request, *args, **kwargs):
+    product = Product.objects.get(id=request.GET.get('product'))
+    comparison_service.remove_from_comparison_list(request=request, product=product)
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+def clear_comparison_list(request, *args, **kwargs):
+    comparison_service.clear_comparison_list(request)
+    return redirect(request.META.get('HTTP_REFERER'))
