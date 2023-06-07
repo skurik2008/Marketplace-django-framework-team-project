@@ -1,7 +1,7 @@
 from django import template
 
 from app_merch.discount_service import DiscountService
-from app_merch.models import Offer
+from app_merch.models import Offer, Discount
 
 register = template.Library()
 discount_service = DiscountService()
@@ -27,3 +27,11 @@ def get_avg_price_of_product(product_id: int) -> float:
 
     offers = Offer.objects.filter(product=product_id).all()
     return round(discount_service.calculate_average_price(offers=offers), 2)
+
+
+@register.simple_tag(name='is_discounted')
+def product_for_active_discount(product_id: int) -> bool:
+    """ Проверка продукта на наличие активной скидки. """
+
+    discounts = Discount.objects.filter(is_active=True, product_id=product_id, size__gt=0)
+    return True if discounts else False
