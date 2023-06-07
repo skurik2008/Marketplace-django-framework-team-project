@@ -168,9 +168,10 @@ class CatalogView(ListView):
         Список кешируется на 1 день.
         """
 
-        # TODO: Proverka na cache
-
-        queryset: QuerySet = Product.objects.filter(is_active=True, offers__is_active=True)
+        if cache.get('products'):
+            queryset = cache.get('products')
+        else:
+            queryset: QuerySet = Product.objects.filter(is_active=True, offers__is_active=True)
 
         time_to_cache: int = SiteSettings.load().time_to_cache
         if not time_to_cache:
@@ -231,6 +232,7 @@ class CatalogView(ListView):
             else:
                 queryset: QuerySet = queryset.order_by("offers__total_views")
 
+        cache.set('products', queryset, time_to_cache * 60 * 60 * 24)
         return queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
