@@ -39,17 +39,17 @@
         <div class="Section">
             <div class="wrap">
                 <div class="BannersHome">
-                    {% for banner in semi_banners %}
-                    <a class="BannersHomeBlock" href="{{ banner.link }}">
+                    {% for category in categories %}
+                    <a class="BannersHomeBlock" href="{% url "pages:catalog-view" %}?cat={{ category.slug }}">
                         <div class="BannersHomeBlock-row">
                             <div class="BannersHomeBlock-block">
-                                <strong class="BannersHomeBlock-title">{{ banner.title }}
+                                <strong class="BannersHomeBlock-title">{{ category.title }}
                                 </strong>
-                                <div class="BannersHomeBlock-content">{{ banner.description|truncatechars:5 }}<span class="BannersHomeBlock-price"> {{ banner.primary_text }}</span>
+                                <div class="BannersHomeBlock-content"> от <span class="BannersHomeBlock-price"> {{ category.min_price }} руб.</span>
                                 </div>
                             </div>
                             <div class="BannersHomeBlock-block">
-                                <div class="BannersHomeBlock-img"><img src="/{% firstof banner.file.file 'static/assets/img/content/home/videoca.png' %}" alt="videoca.png" />
+                                <div class="BannersHomeBlock-img"><img src="/{% firstof category.products.first.icon.file 'static/assets/img/content/home/videoca.png' %}" alt="videoca.png" />
                                 </div>
                             </div>
                         </div>
@@ -59,4 +59,130 @@
             </div>
         </div>
     </div>
+            <div class="Section Section_column Section_columnLeft Section_columnDesktop">
+            <div class="wrap">
+                <div class="Section-column">
+                    <div class="Section-columnSection Section-columnSection_mark">
+                      <header class="Section-columnHeader">
+                        <strong class="Section-columnTitle">ОГРАНИЧЕННЫЕ ПРЕДЛОЖЕНИЯ
+                        </strong>
+                      </header>
+                      <div class="Card"><a class="Card-picture" href="{% url "pages:product-detail" limited_edition.product.pk %}"><img src=/{% firstof limited_edition.product.icon.file "assets/img/content/home/card.jpg"%} alt="card.jpg"/></a>
+                        <div class="Card-content">
+                          <strong class="Card-title"><a href="{% url "pages:product-detail" limited_edition.product.pk %}">{{ limited_edition.product.title }}</a>
+                          </strong>
+                          <div class="Card-description">
+                            <div class="Card-cost"><span class="Card-priceOld">{{ limited_edition.price }} руб.</span><span class="Card-price">{{ limited_edition.sale }} руб.</span>
+                            </div>
+                            <div class="Card-category">{{ limited_edition.product.category.title }}
+                            </div>
+                          </div>
+                          <div class="CountDown" data-date="{{ limited_edition_date }}">
+                            <div class="CountDown-block">
+                              <div class="CountDown-wrap">
+                                <div class="CountDown-days">
+                                </div><span class="CountDown-label">days</span>
+                              </div>
+                            </div>
+                            <div class="CountDown-block">
+                              <div class="CountDown-wrap">
+                                <div class="CountDown-hours">
+                                </div><span class="CountDown-label">hours</span>
+                              </div>
+                            </div>
+                            <div class="CountDown-block">
+                              <div class="CountDown-wrap">
+                                <div class="CountDown-minutes">
+                                </div><span class="CountDown-label">mins</span>
+                              </div>
+                            </div>
+                            <div class="CountDown-block">
+                              <div class="CountDown-wrap">
+                                <div class="CountDown-secs">
+                                </div><span class="CountDown-label">secs</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <div class="Section-content">
+                    <header class="Section-header">
+                        <h2 class="Section-title">Популярные товары
+                        </h2>
+                    </header>
+                    <div class="Cards">
+                        {% for offer in top_products %}
+                        <div class="Card"><a class="Card-picture" href="{% url "pages:product-detail" offer.product.pk %}"><img src=/{% firstof offer.product.icon.file "assets/img/content/home/card.jpg"%} alt="card.jpg" /></a>
+                            <div class="Card-content">
+                                <strong class="Card-title"><a href="{% url "pages:product-detail" offer.product.pk %}">{{ offer.product.title }}</a>
+                                </strong>
+                                <div class="Card-description">
+                                    <div class="Card-cost"><span class="Card-price">{{ offer.price }} руб.</span>
+                                    </div>
+                                    <div class="Card-category">{{ offer.product.category.title }}
+                                    </div>
+                                    <div class="Card-hover">
+                                        <a class="Card-btn" href="{% url 'app_basket:add_to_cart'%}?offer_id={{ offer.pk }}">
+                                            <img src="{% static 'assets/img/icons/card/cart.svg' %}" alt="cart.svg" />
+                                        </a>
+                                        <a class="Card-btn" href="{% url 'pages:add_to_comparison_list'%}?product={{ offer.product.pk }}">
+                                            <img src="{% static 'assets/img/icons/card/change.svg' %}" alt="change.svg" />
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="Section Section_column Section_columnRight">
+            <div class="wrap">
+                <div class="Section-content">
+                    <div class="Slider Slider_carousel">
+                        <header class="Section-header Section-header_close">
+                            <h2 class="Section-title">Ограниченный тираж
+                            </h2>
+                            <div class="Section-control">
+                                <div class="Slider-navigate">
+                                </div>
+                            </div>
+                        </header>
+                        <div class="Slider-box Cards">
+                            {% for offer in limited_edition_list %}
+                            <div class="Slider-item">
+                                <div class="Slider-content">
+                                    <div class="Card"><a class="Card-picture" href="{% url "pages:product-detail" offer.product.pk %}"><img src=/{% firstof offer.product.icon.file "assets/img/content/home/card.jpg"%} alt="card.jpg" /></a>
+                                        <div class="Card-content">
+                                            <strong class="Card-title"><a href="{% url "pages:product-detail" offer.product.pk %}">{{ offer.product.title }}</a>
+                                            </strong>
+                                            <div class="Card-description">
+                                                <div class="Card-cost"><span class="Card-price">{{ offer.price }} руб.</span>
+                                                </div>
+                                                <div class="Card-category">{{ offer.product.category.title }}
+                                                </div>
+                                                <div class="Card-hover">
+                                                    <a class="Card-btn" href="{% url 'app_basket:add_to_cart'%}?offer_id={{ offer.pk }}">
+                                                        <img src="{% static 'assets/img/icons/card/cart.svg' %}" alt="cart.svg" />
+                                                    </a>
+                                                    <a class="Card-btn" href="{% url 'pages:add_to_comparison_list'%}?product={{ offer.product.pk }}">
+                                                        <img src="{% static 'assets/img/icons/card/change.svg' %}" alt="change.svg" />
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

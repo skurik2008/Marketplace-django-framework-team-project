@@ -174,6 +174,7 @@ class Offer(models.Model):
     total_views = models.PositiveIntegerField(
         default=0, verbose_name="количество просмотров"
     )
+    limited_edition = models.BooleanField(default=False, verbose_name='ограниченный тираж')
 
     class Meta:
         verbose_name = "Предложение"
