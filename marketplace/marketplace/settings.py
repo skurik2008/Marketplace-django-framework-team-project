@@ -61,11 +61,30 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    'django.middleware.locale.LocaleMiddleware',
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
 ]
+
+LANGUAGE_CODE = 'ru-ru'
+
+TIME_ZONE = 'UTC'
+
+USE_I18N = True
+
+USE_L10N = True
+
+USE_TZ = True
+
+LANGUAGES = [
+   ('ru', 'Русский'),
+   ('en', 'English')
+]
+
+LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
 
 ROOT_URLCONF = "marketplace.urls"
 
