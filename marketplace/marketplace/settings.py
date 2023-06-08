@@ -60,8 +60,8 @@ SILENCED_SYSTEM_CHECKS = ["security.W019"]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
     'django.middleware.locale.LocaleMiddleware',
+    "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -142,15 +142,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
-
-TIME_ZONE = "UTC"
-
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = True
+# LANGUAGE_CODE = "en-us"
+#
+# TIME_ZONE = "UTC"
+#
+# USE_I18N = True
+#
+# USE_L10N = True
+#
+# USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -182,14 +182,6 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 # восстановление пароля
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.mail.ru'
-# EMAIL_PORT = 465
-# EMAIL_USE_SSL = True
-# EMAIL_HOST_USER = 'kuiate.m@mail.ru'
-# EMAIL_HOST_PASSWORD = ''
-# DEFAULT_FROM_EMAIL = 'kuiate.m@mail.ru'
-
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
