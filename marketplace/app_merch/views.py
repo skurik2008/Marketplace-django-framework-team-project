@@ -1,20 +1,19 @@
-from django.utils import timezone
+import datetime
+from decimal import Decimal
 
-from django.contrib import messages
+from django.utils import timezone
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .comparison_service import comparison_service
-from .import_service import ImportProductsService
 from app_settings.models import SiteSettings
 from app_users.models import DeliveryType, PaymentType, Seller, Order
 from django.core.cache import cache
-from django.db.models import Count, Max, Min, QuerySet
-from django.shortcuts import get_object_or_404, redirect, render
+from django.db.models import Count, Max, Min, QuerySet, Sum
+from django.shortcuts import  redirect, render
 import os
 from marketplace.settings import BASE_DIR
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, View, TemplateView
-from django.views.generic.edit import FormView
 from mptt.querysets import TreeQuerySet
 from . import review_service
 from .discount_service import DiscountService
@@ -44,7 +43,9 @@ class IndexView(ListView):
             banners_cache_time = 10
 
         banners = Banner.objects.filter(is_active=True).order_by('?')[:3]
-        semi_banners = Banner.objects.filter(is_active=True)[:3]
+        categories = Category.objects.filter(children__isnull=True).order_by('?')[:3].annotate(
+            min_price=Min('products__offers__price'),
+        )
 
         context["banners"] = cache.get_or_set(
             "Banners",
@@ -52,12 +53,46 @@ class IndexView(ListView):
             banners_cache_time * 60,
         )
 
-        context["semi_banners"] = cache.get_or_set(
-            "Semi_banners",
-            semi_banners,
+        context["categories"] = cache.get_or_set(
+            "categories",
+            categories,
             banners_cache_time * 60
         )
 
+        context['top_products'] = Offer.objects.annotate(sales=Sum("order_items__quantity")).order_by("-sales")[:8]
+
+        limited_edition_data = cache.get("limited_edition")
+        offer = Offer.objects.filter(limited_edition=True).order_by('?').first()
+        limited_edition_date = (
+                datetime.datetime.today().replace(hour=0, minute=0) + datetime.timedelta(days=2)
+        ).strftime("%d.%m.%Y %H:%M")
+
+        if limited_edition_data:
+            if datetime.datetime.strptime(limited_edition_data["date"], "%d.%m.%Y %H:%M") < datetime.datetime.now():
+                cache.set(
+                    "limited_edition",
+                    {"offer_id": offer.pk, "date": limited_edition_date, },
+                    60 * 60 * 24
+                )
+                offer.sale = Decimal(offer.price) * Decimal("0.5")
+                context["limited_edition"] = offer
+                context["limited_edition_date"] = limited_edition_date
+            else:
+                offer = Offer.objects.get(pk=limited_edition_data["offer_id"])
+                offer.sale = Decimal(offer.price) * Decimal("0.5")
+                context["limited_edition"] = offer
+                context["limited_edition_date"] = limited_edition_data["date"]
+        else:
+            cache.set(
+                "limited_edition",
+                {"offer_id": offer.pk, "date": limited_edition_date, },
+                60 * 60 * 24
+            )
+            offer.sale = Decimal(offer.price) * Decimal("0.5")
+            context["limited_edition"] = offer
+            context["limited_edition_date"] = limited_edition_date
+        context["limited_edition_list"] = Offer.objects.filter(limited_edition=True). \
+            exclude(pk=context["limited_edition"].pk)[:16]
         return context
 
 
@@ -168,14 +203,15 @@ class CatalogView(ListView):
         Список кешируется на 1 день.
         """
 
+        time_to_cache: int = SiteSettings.load().time_to_cache
+        if not time_to_cache:
+            time_to_cache = 1
+
         if cache.get('products'):
             queryset = cache.get('products')
         else:
             queryset: QuerySet = Product.objects.filter(is_active=True, offers__is_active=True)
-
-        time_to_cache: int = SiteSettings.load().time_to_cache
-        if not time_to_cache:
-            time_to_cache = 1
+            cache.set('products', queryset, time_to_cache * 60 * 60 * 24)
 
         price_range: str = self.request.GET.get("price")
         title: str = self.request.GET.get("title")
@@ -193,7 +229,7 @@ class CatalogView(ListView):
             category: Category = Category.objects.get(slug=slug)
             sub_categories: TreeQuerySet = category.get_descendants(include_self=True)
 
-            queryset: QuerySet = queryset.select_related("category").filter(
+            queryset: QuerySet = queryset.filter(
                 category__in=sub_categories
             )
         if price_range:
@@ -232,7 +268,6 @@ class CatalogView(ListView):
             else:
                 queryset: QuerySet = queryset.order_by("offers__total_views")
 
-        cache.set('products', queryset, time_to_cache * 60 * 60 * 24)
         return queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
