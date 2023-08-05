@@ -66,7 +66,6 @@ class IndexView(ListView):
         limited_edition_date = (
                 datetime.datetime.today().replace(hour=0, minute=0) + datetime.timedelta(days=2)
         ).strftime("%d.%m.%Y %H:%M")
-
         if limited_edition_data:
             if datetime.datetime.strptime(limited_edition_data["date"], "%d.%m.%Y %H:%M") < datetime.datetime.now():
                 cache.set(
@@ -79,20 +78,36 @@ class IndexView(ListView):
                 context["limited_edition_date"] = limited_edition_date
             else:
                 offer = Offer.objects.get(pk=limited_edition_data["offer_id"])
-                offer.sale = Decimal(offer.price) * Decimal("0.5")
+                discount_day = Discount.objects.filter(product=offer.product).first()
+                if discount_day:
+                    if discount_day.is_percent:
+                        offer.sale = Decimal(offer.price) - Decimal(offer.price) * discount_day.size / 100
+                    else:
+                        offer.sale = Decimal(offer.price) - discount_day.size
+                else:
+                    offer.sale = offer.price
                 context["limited_edition"] = offer
                 context["limited_edition_date"] = limited_edition_data["date"]
         else:
-            cache.set(
-                "limited_edition",
-                {"offer_id": offer.pk, "date": limited_edition_date, },
-                60 * 60 * 24
-            )
-            offer.sale = Decimal(offer.price) * Decimal("0.5")
-            context["limited_edition"] = offer
-            context["limited_edition_date"] = limited_edition_date
-        context["limited_edition_list"] = Offer.objects.filter(limited_edition=True). \
-            exclude(pk=context["limited_edition"].pk)[:16]
+            if offer:
+                cache.set(
+                    "limited_edition",
+                    {"offer_id": offer.pk, "date": limited_edition_date, },
+                    60 * 60 * 24
+                )
+                discount_day = Discount.objects.filter(product=offer.product).first()
+                if discount_day:
+                    if discount_day.is_percent:
+                        offer.sale = Decimal(offer.price) - Decimal(offer.price) * discount_day.size / 100
+                    else:
+                        offer.sale = Decimal(offer.price) - discount_day.size
+                else:
+                    offer.sale = offer.price
+                context["limited_edition"] = offer
+                context["limited_edition_date"] = limited_edition_date
+        if context.get("limited_edition"):
+            context["limited_edition_list"] = Offer.objects.filter(limited_edition=True). \
+                exclude(pk=context["limited_edition"].pk)[:16]
         return context
 
 
@@ -610,7 +625,6 @@ class DiscountDetailView(DetailView):
             price_difference, average_price
         )
 
-        print(average_price, average_with_discount, percentage_difference)
         context["percentage_difference"] = percentage_difference
 
         return context

@@ -122,12 +122,15 @@
                                 <div class="Product-props">
                                     {% for key, values in product.characters.items %}
                                     <div class="Product-prop">
-                                        <strong>{{ key }}</strong>
-                                        <div>
+
+                                        <strong>{{ key }}:</strong>
+                                        {% if not values.items %}<span>{{values}}</span>
+                                        {% else %}
+
                                             {% for key_value, value in values.items %}
-                                            <strong>{{ key_value }}: </strong><span>{{ value }}</span><br />
-                                            {% endfor %}
-                                        </div>
+                                            <strong>{{ key_value }}: </strong><span>{{ value }}</span>
+                                            {% endfor %}{% endif %}
+
                                     </div>
                                     {% endfor %}
                                 </div>

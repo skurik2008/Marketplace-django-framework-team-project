@@ -1,5 +1,5 @@
 {% extends 'base_mini.html' %}
-
+{% load i18n %}
 {% load static %}
 
 {% block main %}
@@ -54,7 +54,7 @@
                 {% csrf_token %}
                 {{ form.as_p }}
                 <label class="Json-import-file" for="id_json_file">
-                    <img src="{% static  "assets/img/icons/upload.png" %}" alt="#.png">{% trans "снова" %}Выбрать файлы
+                    <img src="{% static  "assets/img/icons/upload.png" %}" alt="#.png">Выбрать файлы
                 </label>
             <input type="submit" value='{% trans "Загрузить" %}'>
                 <a href="{% static 'import_example.json' %}" download>

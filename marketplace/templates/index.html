@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load static %}
 
 {% block content %}
         <div class="Header-slider">
@@ -45,7 +46,7 @@
                             <div class="BannersHomeBlock-block">
                                 <strong class="BannersHomeBlock-title">{{ category.title }}
                                 </strong>
-                                <div class="BannersHomeBlock-content"> от <span class="BannersHomeBlock-price"> {{ category.min_price }} руб.</span>
+                                <div class="BannersHomeBlock-content"> от <span class="BannersHomeBlock-price"> {{ category.min_price|floatformat:2 }} руб.</span>
                                 </div>
                             </div>
                             <div class="BannersHomeBlock-block">
@@ -61,10 +62,11 @@
     </div>
             <div class="Section Section_column Section_columnLeft Section_columnDesktop">
             <div class="wrap">
+                {% if limited_edition %}
                 <div class="Section-column">
                     <div class="Section-columnSection Section-columnSection_mark">
                       <header class="Section-columnHeader">
-                        <strong class="Section-columnTitle">ОГРАНИЧЕННЫЕ ПРЕДЛОЖЕНИЯ
+                        <strong class="Section-columnTitle">ПРЕДЛОЖЕНИЕ ДНЯ
                         </strong>
                       </header>
                       <div class="Card"><a class="Card-picture" href="{% url "pages:product-detail" limited_edition.product.pk %}"><img src=/{% firstof limited_edition.product.icon.file "assets/img/content/home/card.jpg"%} alt="card.jpg"/></a>
@@ -72,7 +74,7 @@
                           <strong class="Card-title"><a href="{% url "pages:product-detail" limited_edition.product.pk %}">{{ limited_edition.product.title }}</a>
                           </strong>
                           <div class="Card-description">
-                            <div class="Card-cost"><span class="Card-priceOld">{{ limited_edition.price }} руб.</span><span class="Card-price">{{ limited_edition.sale }} руб.</span>
+                            <div class="Card-cost"><span class="Card-priceOld">{{ limited_edition.price }} руб.</span><span class="Card-price" style="color:red">{{ limited_edition.sale|floatformat:2 }} руб.</span>
                             </div>
                             <div class="Card-category">{{ limited_edition.product.category.title }}
                             </div>
@@ -105,7 +107,7 @@
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </div> {% endif %}
                 </div>
                 <div class="Section-content">
                     <header class="Section-header">
@@ -114,9 +116,9 @@
                     </header>
                     <div class="Cards">
                         {% for offer in top_products %}
-                        <div class="Card"><a class="Card-picture" href="{% url "pages:product-detail" offer.product.pk %}"><img src=/{% firstof offer.product.icon.file "assets/img/content/home/card.jpg"%} alt="card.jpg" /></a>
+                        <div class="Card"><a class="Card-picture" href="{% url 'pages:product-detail' offer.product.pk %}"><img src=/{% firstof offer.product.icon.file "assets/img/content/home/card.jpg"%} alt="card.jpg" /></a>
                             <div class="Card-content">
-                                <strong class="Card-title"><a href="{% url "pages:product-detail" offer.product.pk %}">{{ offer.product.title }}</a>
+                                <strong class="Card-title"><a href="{% url 'pages:product-detail' offer.product.pk %}">{{ offer.product.title }}</a>
                                 </strong>
                                 <div class="Card-description">
                                     <div class="Card-cost"><span class="Card-price">{{ offer.price }} руб.</span>
